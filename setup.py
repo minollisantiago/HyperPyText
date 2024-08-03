@@ -17,7 +17,7 @@ setup(
     ],
     entry_points={
         'console_scripts': [
-            'hyperpytext=create_HyperPy_app:create_app',
+            'create-hyperpy-app=cli:create_app',
         ],
     },
 )
