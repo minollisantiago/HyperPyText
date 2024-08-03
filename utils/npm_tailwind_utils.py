@@ -46,7 +46,7 @@ def setup_tailwind_standalone(project_dir):
         click.echo("Downloading Tailwind CSS standalone CLI...")
         if sys.platform.startswith('win'):
             url = "https://github.com/tailwindlabs/tailwindcss/releases/latest/download/tailwindcss-windows-x64.exe"
-            output = "tailwindcss.exe"
+            output = "tailwindcss-windows-x64.exe"
         elif sys.platform.startswith('darwin'):
             url = "https://github.com/tailwindlabs/tailwindcss/releases/latest/download/tailwindcss-macos-x64"
             output = "tailwindcss"

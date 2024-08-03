@@ -1,6 +1,7 @@
 import os
 import click
 import yaml
+from pkg_resources import resource_filename
 from utils.npm_tailwind_utils import (
     check_npm, 
     check_tailwind_npm, 
@@ -13,8 +14,9 @@ from utils.npm_tailwind_utils import (
 
 @click.command()
 @click.argument('app_name')
-@click.option('--templates_dir', default='templates', help='Path to the templates directory')
-def create_app(app_name, templates_dir):
+def create_app(app_name):
+
+    templates_dir = resource_filename('hyperpytext', 'templates')
 
     # Prompt for HTML filename
     if click.confirm('Would you like to change the name of index.html?', default=False):
@@ -68,7 +70,7 @@ def create_app(app_name, templates_dir):
                 if template_file == 'api_templates.yaml':
                     for template in templates:
                         filename = template['filename'].format(app_name=app_name)
-                        content = template['content'].format(app_name=app_name, html_filename=html_filename)
+                        content = template['content'].format(app_name=app_name, html_filename=html_filename, request='{request}')
                         create_file(filename, content)
                 elif template_file == 'gitignore_template.yaml':
                     filename = templates['filename']
