@@ -15,8 +15,9 @@ setup(
         'fastapi',
         'uvicorn',
     ],
-    entry_points='''
-        [console_scripts]
-        hyperpytext=create-HyperPy-app:create_app
-    ''',
+    entry_points={
+        'console_scripts': [
+            'hyperpytext=create_HyperPy_app:create_app',
+        ],
+    },
 )
