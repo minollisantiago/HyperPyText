@@ -1,0 +1,5 @@
+filename: requirements.txt
+content: |
+  fastapi
+  uvicorn
+  Jinja2Templates
