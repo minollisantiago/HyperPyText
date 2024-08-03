@@ -4,10 +4,10 @@ setup(
     name='hyperpytext',
     version='1.0',
     description = "A tool to create HyperPy applications",
-    packages=find_packages(),
+    packages=['hyperpytext'],
     include_package_data=True,
     package_data={
-        'HyperPyText': ['templates/*.yaml'],
+        'hyperpytext': ['templates/*.yaml'],
     },
     install_requires=[
         'Click',
@@ -17,7 +17,8 @@ setup(
     ],
     entry_points={
         'console_scripts': [
-            'create-hyperpy-app=cli:create_app',
+            'create-hyperpy-app=hyperpytext.__main__:create_app',
         ],
     },
+
 )
