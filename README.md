@@ -39,10 +39,10 @@ pip install -r requirements.txt
 ```
 ## Usage
 
-Run the `app_setup.py` script to create a new application:
+Run the `create-HyperPy-app.py {app name}` script to create a new application:
 
 ```
-python app_setup.py
+python create-HyperPy-app.py {app name}
 ```
 
 You'll be prompted to enter:
