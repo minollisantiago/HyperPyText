@@ -72,3 +72,4 @@ def update_package_json(project_dir, new_scripts):
     
     with open('package.json', 'w') as f:
         json.dump(package, f, indent=2)
+

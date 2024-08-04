@@ -62,6 +62,13 @@ def create_app(app_name):
         if not check_tailwind_standalone():
             click.echo("Tailwind CSS standalone CLI is not found. It will be downloaded during app setup.")
 
+    # Setup Tailwind if selected
+    if tailwind == 'npm':
+        setup_tailwind_npm(app_dir)
+        update_package_json(app_dir, '"build-css": "tailwindcss -i ./assets/css/input.css -o ./assets/css/style.css --watch"')
+    elif tailwind == 'standalone':
+        setup_tailwind_standalone(app_dir)
+
     # Create files from templates
     for template_file in os.listdir(templates_dir):
 
@@ -72,8 +79,8 @@ def create_app(app_name):
                 templates = yaml.safe_load(file)
 
                 # Api
-                if template_file == 'api_templates.yaml':
-                    click.echo(f'Creating fastApi scafolding')
+                if template_file == 'api.yaml':
+                    click.echo(f'Created fastApi scafolding')
                     for template in templates:
                         filename = template['filename'].format(app_name=app_name)
                         content = template['content'].format(app_name=app_name, html_filename=html_filename)
@@ -81,7 +88,7 @@ def create_app(app_name):
 
                 # Index starter HTML5 template
                 if template_file == 'index.yaml':
-                    click.echo(f'Creating {html_filename}.html file')
+                    click.echo(f'Created {html_filename}.html file')
                     filename = templates['filename'].format(filename=html_filename)
                     content = templates['content'].format(title=html_filename)
                     create_file(filename, content)
@@ -93,17 +100,17 @@ def create_app(app_name):
                     ]
                 ]
                 if template_file in root_files:
-                    click.echo(f'Creating {template_file}')
+                    click.echo(f'Created {template_file}')
                     filename = templates['filename']
                     content = templates['content']
                     create_file(filename, content)
 
-    # Setup Tailwind if selected
-    if tailwind == 'npm':
-        setup_tailwind_npm(app_dir)
-        update_package_json(app_dir, '"build-css": "tailwindcss -i ./assets/css/input.css -o ./assets/css/style.css --watch"')
-    elif tailwind == 'standalone':
-        setup_tailwind_standalone(app_dir)
+                # Tailwind config update
+                if template_file == 'tailwind_config.yaml':
+                    click.echo(f'Updated tailwind.config.js')
+                    filename = templates['filename']
+                    content = templates['content']
+                    create_file(filename, content)
 
     click.echo(f"App '{app_name}' has been created successfully!")
 

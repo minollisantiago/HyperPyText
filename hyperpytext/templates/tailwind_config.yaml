@@ -1,4 +1,4 @@
-filename: tailwind.config.js
+filename: ./tailwind.config.js
 content: |
   /** @type {import('tailwindcss').Config} */
   module.exports = {
@@ -21,3 +21,4 @@ content: |
     },
     plugins: [],
   }
+
