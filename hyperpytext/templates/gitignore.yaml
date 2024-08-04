@@ -1,4 +1,4 @@
-filename: .gitignore
+filename: ./.gitignore
 content: |
   # Python
   __pycache__/
@@ -27,3 +27,4 @@ content: |
   # Tailwind CSS
   node_modules/
   package-lock.json
+

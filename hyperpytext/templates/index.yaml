@@ -1,4 +1,4 @@
-filename: "{filename}.html"
+filename: "templates/{filename}.html"
 content: |
   <!DOCTYPE html>
   <html lang="en">
@@ -23,3 +23,4 @@ content: |
     </div>
   </body>
   </html>
+

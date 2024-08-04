@@ -17,7 +17,7 @@
     @router.get("/", response_class=HTMLResponse)
     async def root(request: Request) -> HTMLResponse:
         try:
-            response_context = {'request': request}
+            response_context = {{'request': request}}
             response_ = templates.TemplateResponse('{html_filename}.html', response_context)
             return response_
         except Exception as e:

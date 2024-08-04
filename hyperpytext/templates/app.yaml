@@ -1,4 +1,4 @@
-filename: app.py
+filename: ./app.py
 content: |
   from fastapi import FastAPI
   from fastapi.staticfiles import StaticFiles
@@ -10,3 +10,4 @@ content: |
   app.mount('/templates', StaticFiles(directory='templates'), name='templates')
 
   app.include_router(router_root)
+

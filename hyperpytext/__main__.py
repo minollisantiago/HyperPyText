@@ -3,12 +3,12 @@ import click
 import yaml
 from pkg_resources import resource_filename
 from utils.npm_tailwind_utils import (
-    check_npm, 
-    check_tailwind_npm, 
+    check_npm,
+    check_tailwind_npm,
     check_tailwind_standalone,
-    npm_install_instructions, 
-    setup_tailwind_npm, 
-    setup_tailwind_standalone, 
+    npm_install_instructions,
+    setup_tailwind_npm,
+    setup_tailwind_standalone,
     update_package_json
 )
 
@@ -30,18 +30,8 @@ def create_app(app_name):
     else:
         tailwind = 'none'
 
-    # Start creating
+    # Start populating the project folder
     click.echo(f"\nCreating a new HyperPy app in {os.path.join(os.getcwd(), app_name)}")
-
-    if tailwind == 'npm':
-        if not check_npm():
-            npm_install_instructions()
-            return
-        if not check_tailwind_npm():
-            click.echo("Tailwind CSS is not installed. It will be installed during app setup.")
-    elif tailwind == 'standalone':
-        if not check_tailwind_standalone():
-            click.echo("Tailwind CSS standalone CLI is not found. It will be downloaded during app setup.")
 
     # Create main app directory
     os.makedirs(app_name, exist_ok=True)
@@ -61,33 +51,51 @@ def create_app(app_name):
     for subfolder in asset_subfolders:
         os.makedirs(os.path.join('assets', subfolder), exist_ok=True)
 
+    # Tailwind css
+    if tailwind == 'npm':
+        if not check_npm():
+            npm_install_instructions()
+            return
+        if not check_tailwind_npm():
+            click.echo("Tailwind CSS is not installed. It will be installed during app setup.")
+    elif tailwind == 'standalone':
+        if not check_tailwind_standalone():
+            click.echo("Tailwind CSS standalone CLI is not found. It will be downloaded during app setup.")
+
     # Create files from templates
     for template_file in os.listdir(templates_dir):
+
         if template_file.endswith('.yaml'):
+
             with open(os.path.join(templates_dir, template_file), 'r') as file:
+
                 templates = yaml.safe_load(file)
-                
+
+                # Api
                 if template_file == 'api_templates.yaml':
+                    click.echo(f'Creating fastApi scafolding')
                     for template in templates:
                         filename = template['filename'].format(app_name=app_name)
-                        content = template['content'].format(app_name=app_name, html_filename=html_filename, request='{request}')
+                        content = template['content'].format(app_name=app_name, html_filename=html_filename)
                         create_file(filename, content)
-                elif template_file == 'gitignore_template.yaml':
+
+                # Index starter HTML5 template
+                if template_file == 'index.yaml':
+                    click.echo(f'Creating {html_filename}.html file')
+                    filename = templates['filename'].format(filename=html_filename)
+                    content = templates['content'].format(title=html_filename)
+                    create_file(filename, content)
+
+                # Root files & tailwind input.css
+                root_files = [
+                    f'{filename}.yaml' for filename in [
+                        'app', 'init', 'gitignore', 'env', 'install_env', 'readme', 'requirements', 'input_css'
+                    ]
+                ]
+                if template_file in root_files:
+                    click.echo(f'Creating {template_file}')
                     filename = templates['filename']
                     content = templates['content']
-                    create_file(filename, content)
-                else:
-                    template = templates
-                    filename = template['filename']
-                    content = template['content']
-                    
-                    if template_file == 'html_template.yaml':
-                        filename = filename.format(filename=html_filename)
-                        content = content.format(title=html_filename)
-                    else:
-                        filename = filename.format(app_name=app_name)
-                        content = content.format(app_name=app_name)
-                    
                     create_file(filename, content)
 
     # Setup Tailwind if selected

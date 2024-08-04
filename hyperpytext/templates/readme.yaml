@@ -1,5 +1,6 @@
-filename: README.md
+filename: ./README.md
 content: |
   # {project_name}
 
   This project was created using HyperPyText.
+
