@@ -19,6 +19,5 @@ content: |
       },
       extend: {},
     },
-    plugins: [],
+    plugins: [__PLUGINS__],
   }
-

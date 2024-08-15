@@ -9,6 +9,7 @@ from utils.npm_tailwind_utils import (
     npm_install_instructions,
     setup_tailwind_npm,
     setup_tailwind_standalone,
+    update_tailwind_config,
     update_package_json
 )
 
@@ -29,6 +30,13 @@ def create_app(app_name):
         tailwind = click.prompt('Choose Tailwind CSS setup option', type=click.Choice(['npm', 'standalone']), default='npm')
     else:
         tailwind = 'none'
+
+    # Promp for Tailwind CSS plugins
+    plugins = []
+    if tailwind != 'none':
+        for plugin in ['forms', 'typography', 'container-queries']:
+            if click.confirm(f'Would you like to install the Tailwind {plugin} plugin?', default=False):
+                plugins.append(plugin)
 
     # Start populating the project folder
     click.echo(f"\nCreating a new HyperPy app in {os.path.join(os.getcwd(), app_name)}")
@@ -64,7 +72,7 @@ def create_app(app_name):
 
     # Setup Tailwind if selected
     if tailwind == 'npm':
-        setup_tailwind_npm(app_dir)
+        setup_tailwind_npm(app_dir, plugins)
         update_package_json(app_dir, '"build-css": "tailwindcss -i ./assets/css/input.css -o ./assets/css/style.css --watch"')
     elif tailwind == 'standalone':
         setup_tailwind_standalone(app_dir)
@@ -107,17 +115,21 @@ def create_app(app_name):
 
                 # Tailwind config update
                 if template_file == 'tailwind_config.yaml':
-                    click.echo(f'Updated tailwind.config.js')
-                    filename = templates['filename']
-                    content = templates['content']
-                    create_file(filename, content)
+                    if tailwind != 'none':
+                        click.echo(f'Updated tailwind.config.js')
+                        filename = templates['filename']
+                        content = templates['content']
+                        create_file(filename, content)
+                        update_tailwind_config(filename, plugins)
 
     click.echo(f"App '{app_name}' has been created successfully!")
+
 
 def create_file(filename, content=''):
     os.makedirs(os.path.dirname(filename), exist_ok=True)
     with open(filename, 'w') as f:
         f.write(content)
+
 
 if __name__ == '__main__':
     create_app()
