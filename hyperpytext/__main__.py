@@ -1,5 +1,7 @@
 import os
+from typing import DefaultDict
 import click
+from click.termui import confirm
 import yaml
 from pkg_resources import resource_filename
 from utils.npm_tailwind_utils import (
@@ -38,6 +40,12 @@ def create_app(app_name):
             if click.confirm(f'Would you like to install the Tailwind {plugin} plugin?', default=False):
                 plugins.append(plugin)
 
+    # Pompt for custom fonts
+    fonts = False
+    if check_npm() and tailwind != 'none':
+        if click.confirm(f'Would you like to install Geist fonts?', default=False):
+           fonts = True
+
     # Start populating the project folder
     click.echo(f"\nCreating a new HyperPy app in {os.path.join(os.getcwd(), app_name)}")
 
@@ -72,7 +80,7 @@ def create_app(app_name):
 
     # Setup Tailwind if selected
     if tailwind == 'npm':
-        setup_tailwind_npm(app_dir, plugins)
+        setup_tailwind_npm(app_dir, plugins, fonts)
         update_package_json(app_dir, '"build-css": "tailwindcss -i ./assets/css/input.css -o ./assets/css/style.css --watch"')
     elif tailwind == 'standalone':
         setup_tailwind_standalone(app_dir)
@@ -120,7 +128,7 @@ def create_app(app_name):
                         filename = templates['filename']
                         content = templates['content']
                         create_file(filename, content)
-                        update_tailwind_config(filename, plugins)
+                        update_tailwind_config(filename, plugins, fonts)
 
     click.echo(f"App '{app_name}' has been created successfully!")
 

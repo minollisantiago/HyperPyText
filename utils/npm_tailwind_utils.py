@@ -14,15 +14,17 @@ def check_system():
         return "linux"
 
 
-def check_npm():
+def check_npm(verbose=False):
     npm_ = "npm.cmd" if check_system() == "windows" else "npm"
     try:
         result = subprocess.run([npm_, "--version"], check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        print(f"npm version: {result.stdout.strip()}")
+        if verbose:
+            print(f"npm version: {result.stdout.strip()}")
         return True
     except subprocess.CalledProcessError as e:
-        print(f"Error running npm: {e}")
-        print(f"Stderr: {e.stderr}")
+        if verbose:
+            print(f"Error running npm: {e}")
+            print(f"Stderr: {e.stderr}")
         return False
     except FileNotFoundError:
         click.echo("npm command not found in PATH...")
@@ -66,7 +68,7 @@ def npm_install_instructions():
     click.echo("Once npm is installed, please run this script again.")
 
 
-def setup_tailwind_npm(project_dir, plugins):
+def setup_tailwind_npm(project_dir, plugins, fonts):
     os.chdir(project_dir)
     npm_ = "npm.cmd" if check_system() == "windows" else "npm"
     npx_ = "npx.cmd" if check_system() == "windows" else "npx"
@@ -80,6 +82,10 @@ def setup_tailwind_npm(project_dir, plugins):
     for plugin in plugins:
         click.echo(f"Installing Tailwind {plugin} plugin...")
         subprocess.run([npm_, "install", "-D", f"@tailwindcss/{plugin}"], check=True)
+
+    if fonts:
+        click.echo(f"Installing Geist Fonts...")
+        subprocess.run([npm_, "i", 'geist'], check=True)
 
 
 def setup_tailwind_standalone(project_dir):
@@ -98,12 +104,10 @@ def setup_tailwind_standalone(project_dir):
         else:
             click.echo("Unsupported operating system for Tailwind CSS standalone CLI.")
             return
-
         subprocess.run(["curl", "-sLO", url], check=True)
         if not sys.platform.startswith('win'):
             subprocess.run(["chmod", "+x", output], check=True)
             subprocess.run(["mv", output, "tailwindcss"], check=True)
-
     subprocess.run([f"./tailwindcss", "init"], check=True)
 
 
@@ -116,10 +120,20 @@ def update_package_json(project_dir, new_scripts):
         json.dump(package, f, indent=2)
 
 
-def update_tailwind_config(filename, plugins):
+def update_tailwind_config(filename, plugins, fonts):
     with open(filename, 'r') as f:
         config = f.read()
+    # Plugins
     plugin_imports = ''.join([f"\n\t\trequire('@tailwindcss/{plugin}')," for plugin in plugins])
     updated_config = config.replace("plugins: [__PLUGINS__],", f"plugins: [{plugin_imports}\n\t],")
+    # fonts
+    if fonts:
+        custom_fonts = [
+            "\n\t\t\t\tmono: ['GeistMono', ...defaultTheme.fontFamily.mono],",
+            "\n\t\t\t\tsans: ['GeistSans', ...defaultTheme.fontFamily.sans],",
+        ]
+        updated_config = updated_config.replace("fontFamily: {__FONTS__},", f"fontFamily: {{{''.join(custom_fonts)}\n\t\t\t}},")
+    # Update the file
     with open(filename, 'w') as f:
         f.write(updated_config)
+
