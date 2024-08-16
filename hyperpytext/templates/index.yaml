@@ -16,11 +16,10 @@ content: |
     <script>lucide.createIcons();</script>
     <title>{title}</title>
   </head>
-  <body class="content-grid place-content-center h-screen">
+  <body class="content-grid place-content-center h-screen w-screen">
     <!-- Main content -->
     <div id="main-content"
       class="full xl2:feature xl3:popout content-grid h-full xl2:rounded-md xl3:rounded-md">
     </div>
   </body>
   </html>
-
