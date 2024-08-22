@@ -5,9 +5,9 @@ content: |
   module.exports = {
     darkMode: 'selector',
     content: [
-      "./templates/**/*.html",
-      "./static/**/*.js",
-      "./**/*.py"
+      "./assets/templates/**/*.html",
+      "./assets/**/*.js",
+      "./**/*.py",
     ],
     theme: {
       screens: {

@@ -55,7 +55,7 @@ def create_app(app_name):
     os.chdir(app_dir)
 
     # Create folders
-    folders = ['api', 'config', 'db', 'logs', 'notebooks', 'templates', 'utils']
+    folders = ['api', 'config', 'db', 'logs', 'notebooks', 'components', 'utils']
     for folder in folders:
         os.makedirs(folder, exist_ok=True)
 
@@ -63,7 +63,7 @@ def create_app(app_name):
     os.makedirs(os.path.join('api', 'routers'), exist_ok=True)
 
     # Create assets subfolders
-    asset_subfolders = ['fonts', 'icons', 'images', 'svg-loaders', 'css', 'js', 'docs']
+    asset_subfolders = ['fonts', 'icons', 'images', 'svg-loaders', 'css', 'js', 'docs', 'templates']
     for subfolder in asset_subfolders:
         os.makedirs(os.path.join('assets', subfolder), exist_ok=True)
 

@@ -1,4 +1,4 @@
-filename: "templates/{filename}.html"
+filename: "assets/templates/{filename}.html"
 content: |
   <!DOCTYPE html>
   <html lang="en">
