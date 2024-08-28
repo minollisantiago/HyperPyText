@@ -14,10 +14,12 @@ from utils.npm_tailwind_utils import (
     update_package_json
 )
 from utils.npm_electron_utils import (
-    check_electron_npm,
     setup_electron_npm,
     update_package_json_for_electron
 )
+
+#TODO: Add a local port by default on .env maybe and a serve() or run() function to start the uvicorn server
+
 
 @click.command()
 @click.argument('app_name')
