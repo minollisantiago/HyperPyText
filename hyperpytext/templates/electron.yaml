@@ -1,0 +1,36 @@
+filename: ./main.js
+content: |
+  const { app, BrowserWindow } = require("electron");
+
+  function createWindow() {
+    const win = new BrowserWindow({
+      title: "{app_name}",
+      width: 1516,
+      height: 872,
+      minWidth: 1320,
+      minHeight: 872,
+      webPreferences: {
+        nodeIntegration: true,
+        contextIsolation: false
+      }
+    });
+
+    const appUrl = 'http://127.0.0.1:8000';
+    win.loadURL(appUrl);
+
+    win.setMenuBarVisibility(false);
+  }
+
+  app.whenReady().then(createWindow);
+
+  app.on('window-all-closed', () => {
+    if (process.platform !== 'darwin') {
+      app.quit();
+    }
+  });
+
+  app.on('activate', () => {
+    if (BrowserWindow.getAllWindows().length === 0) {
+      createWindow();
+    }
+  });

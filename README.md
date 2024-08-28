@@ -1,4 +1,5 @@
 # HyperPyText
+
 #### Build python and vanilla javascript apps :fire: :rocket: :fire:
 
 <br>
@@ -41,7 +42,7 @@ Built on top of:
 1. Clone the repository:
 
 ```bash
-git clone https://github.com/yourusername/hyperpytext.git 
+git clone https://github.com/yourusername/hyperpytext.git
 ```
 
 2. Navigate to the package folder:
@@ -66,9 +67,9 @@ create-hyperpy-app TestApplication
 
 You'll be prompted to enter:
 
-- The HTML file name *(defaults to index.html)*.
-- If you want Tailwind css and all its setup options: (npm or standalone installation and [plugins](https://tailwindcss.com/docs/plugins)). 
-- If you want to install [Vercel's Geist font](https://vercel.com/font) *(sans and mono versions, using npm)*.
+- The HTML file name _(defaults to index.html)_.
+- If you want Tailwind css and all its setup options: (npm or standalone installation and [plugins](https://tailwindcss.com/docs/plugins)).
+- If you want to install [Vercel's Geist font](https://vercel.com/font) _(sans and mono versions, using npm)_.
 
 ## Project Structure
 
@@ -121,21 +122,23 @@ The `input.css` file includes a content-grid class that allows you to establish 
 
 ![content-grid](./images/content-grid.PNG)
 
-You can determine where an element is placed within the horizonta hierarchy by giving it the utility class that corresponds to each hierarchy breakpoint: 
+You can determine where an element is placed within the horizonta hierarchy by giving it the utility class that corresponds to each hierarchy breakpoint:
 
 - `full`
 - `feature`
 - `popout`
 - `content`
 
-The index.html template includes these classes for the `main-content` section, you can also combine them with tailwind's [responsive breakpoints](https://tailwindcss.com/docs/theme): 
+The index.html template includes these classes for the `main-content` section, you can also combine them with tailwind's [responsive breakpoints](https://tailwindcss.com/docs/theme):
 
 ```html
 <!-- Main content -->
-<div id="main-content"
-  class="full xl2:feature xl3:popout content-grid h-full xl2:rounded-md xl3:rounded-md">
-</div>
+<div
+  id="main-content"
+  class="full xl2:feature xl3:popout content-grid h-full xl2:rounded-md xl3:rounded-md"
+></div>
 ```
+
 Inspired by [this blogpost](https://ryanmulligan.dev/blog/layout-breakouts/).
 
 ### Customization

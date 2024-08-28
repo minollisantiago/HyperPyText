@@ -4,15 +4,19 @@ import click
 from click.termui import confirm
 import yaml
 from pkg_resources import resource_filename
+from utils.npm_utils import check_npm, npm_install_instructions
 from utils.npm_tailwind_utils import (
-    check_npm,
     check_tailwind_npm,
     check_tailwind_standalone,
-    npm_install_instructions,
     setup_tailwind_npm,
     setup_tailwind_standalone,
     update_tailwind_config,
     update_package_json
+)
+from utils.npm_electron_utils import (
+    check_electron_npm,
+    setup_electron_npm,
+    update_package_json_for_electron
 )
 
 @click.command()
@@ -45,6 +49,9 @@ def create_app(app_name):
     if check_npm() and tailwind != 'none':
         if click.confirm(f'Would you like to install Geist fonts?', default=False):
            fonts = True
+
+    # Prompt for Electron
+    use_electron = click.confirm('Would you like to use Electron?', default=False)
 
     # Start populating the project folder
     click.echo(f"\nCreating a new HyperPy app in {os.path.join(os.getcwd(), app_name)}")
@@ -84,6 +91,13 @@ def create_app(app_name):
         update_package_json(app_dir, '"build-css": "tailwindcss -i ./assets/css/input.css -o ./assets/css/style.css --watch"')
     elif tailwind == 'standalone':
         setup_tailwind_standalone(app_dir)
+
+    # Setup Electron if selected
+    if use_electron:
+        click.echo("Setting up Electron...")
+        setup_electron_npm(app_dir)
+        update_package_json_for_electron(app_dir, app_name)
+        click.echo("Electron setup complete.")
 
     # Create files from templates
     for template_file in os.listdir(templates_dir):
@@ -129,6 +143,15 @@ def create_app(app_name):
                         content = templates['content']
                         create_file(filename, content)
                         update_tailwind_config(filename, plugins, fonts)
+
+                # Electron setup
+                if template_file == 'electron.yaml' and use_electron:
+                    click.echo(f'Created Electron main.js file')
+                    filename = templates['filename']
+                    content = templates['content']
+                    content = content.replace('{', '{{').replace('}', '}}')
+                    content = content.format(app_name=app_name)
+                    create_file(filename, content)
 
     click.echo(f"App '{app_name}' has been created successfully!")
 
