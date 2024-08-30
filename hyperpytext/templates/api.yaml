@@ -1,11 +1,11 @@
 - filename: api/__init__.py
   content: |
-    from .routers.{app_name}_router import router as router_root
+    from .routes.{app_name}_router import router as router_root
 
-- filename: api/routers/__init__.py
+- filename: api/routes/__init__.py
   content: |
 
-- filename: api/routers/{app_name}_router.py
+- filename: api/routes/{app_name}_router.py
   content: |
     from fastapi import APIRouter, HTTPException, Request
     from fastapi.responses import HTMLResponse
@@ -22,4 +22,3 @@
             return response_
         except Exception as e:
             raise HTTPException(status_code=500, detail=str(e))
-

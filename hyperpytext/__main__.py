@@ -68,8 +68,8 @@ def create_app(app_name):
     for folder in folders:
         os.makedirs(folder, exist_ok=True)
 
-    # Create 'routers' subfolder inside 'api'
-    os.makedirs(os.path.join('api', 'routers'), exist_ok=True)
+    # Create 'routes' subfolder inside 'api'
+    os.makedirs(os.path.join('api', 'routes'), exist_ok=True)
 
     # Create assets subfolders
     asset_subfolders = ['fonts', 'icons', 'images', 'svg-loaders', 'css', 'js', 'docs', 'templates']

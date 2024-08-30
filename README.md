@@ -78,7 +78,7 @@ The generated project will have the following structure:
 ```
 your_app_name/
 ├── api/
-│   ├── routers/
+│   ├── routes/
 │   │   ├── __init__.py
 │   │   └── your_app_name_router.py
 │   └── __init__.py
