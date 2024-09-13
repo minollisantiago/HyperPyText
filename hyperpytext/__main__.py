@@ -17,9 +17,13 @@ from utils.npm_electron_utils import (
     setup_electron_npm,
     update_package_json_for_electron
 )
+from utils.poetry_utils import (
+    check_poetry,
+    setup_environment, 
+    poetry_install_instructions
+)
 
 #TODO: Add a local port by default on .env maybe and a serve() or run() function to start the uvicorn server
-
 
 @click.command()
 @click.argument('app_name')
@@ -128,13 +132,15 @@ def create_app(app_name):
                 # Root files & tailwind input.css
                 root_files = [
                     f'{filename}.yaml' for filename in [
-                        'app', 'init', 'gitignore', 'env', 'install_env', 'readme', 'requirements', 'input_css'
+                        'app', 'init', 'gitignore', 'env', 'install_env', 'readme', 'requirements', 'input_css', 'pyproject'
                     ]
                 ]
                 if template_file in root_files:
-                    click.echo(f'Created {template_file}')
                     filename = templates['filename']
+                    click.echo(f'Created {filename}')
                     content = templates['content']
+                    if template_file == 'pyproject.yaml':
+                        content = content.format(app_name=app_name)
                     create_file(filename, content)
 
                 # Tailwind config update
@@ -156,6 +162,15 @@ def create_app(app_name):
                     create_file(filename, content)
 
     click.echo(f"App '{app_name}' has been created successfully!")
+
+    # Prompt to install environment
+    install_env = click.confirm('Would you like to install the environment now?', default=False)
+    if install_env:
+        if not check_poetry():
+            poetry_install_instructions()
+            return
+        else:
+            setup_environment()
 
 
 def create_file(filename, content=''):

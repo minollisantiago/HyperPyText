@@ -1,4 +1,0 @@
-filename: ./install_env.bat
-content: |
-  pip install -r requirements.txt
-

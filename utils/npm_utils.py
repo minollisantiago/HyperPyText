@@ -25,7 +25,8 @@ def check_npm(verbose=False):
             print(f"Stderr: {e.stderr}")
         return False
     except FileNotFoundError:
-        click.echo("npm command not found in PATH...")
+        if verbose:
+            click.echo("npm command not found in PATH...")
         return False
 
 
