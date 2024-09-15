@@ -120,15 +120,23 @@ def create_app(app_name):
 
                 # Api
                 if template_file == 'api.yaml':
-                    click.echo(f'Created fastApi scafolding')
+                    click.echo(f'Creating fastApi scafolding')
                     for template in templates:
                         filename = template['filename'].format(app_name=app_name)
                         content = template['content'].format(app_name=app_name, html_filename=html_filename)
                         create_file(filename, content)
 
+                # Database files
+                if template_file == 'db.yaml':
+                    click.echo('Creating database scafolding')
+                    for template in templates:
+                        filename = template['filename']
+                        content = template['content']
+                        create_file(filename, content)
+
                 # Index starter HTML5 template
                 if template_file == 'index.yaml':
-                    click.echo(f'Created {html_filename}.html file')
+                    click.echo(f'Creating {html_filename}.html file')
                     filename = templates['filename'].format(filename=html_filename)
                     content = templates['content'].format(title=html_filename)
                     create_file(filename, content)
@@ -137,7 +145,6 @@ def create_app(app_name):
                 root_files = [
                     f'{filename}.yaml' for filename in [
                         'app',
-                        'db'
                         'env',
                         'gitignore',
                         'init',
@@ -147,7 +154,7 @@ def create_app(app_name):
                 ]
                 if template_file in root_files:
                     filename = templates['filename']
-                    click.echo(f'Created {filename}')
+                    click.echo(f'Creating {filename}')
                     content = templates['content']
                     create_file(filename, content)
 
@@ -169,7 +176,7 @@ def create_app(app_name):
 
                 # Electron setup
                 if template_file == 'electron.yaml' and use_electron:
-                    click.echo(f'Created Electron main.js file')
+                    click.echo(f'Creating Electron main.js file')
                     filename = templates['filename']
                     content = templates['content']
                     content = content.replace('{', '{{').replace('}', '}}')
