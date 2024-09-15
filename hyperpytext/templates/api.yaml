@@ -1,11 +1,11 @@
-- filename: api/__init__.py
+- filename: ./api/__init__.py
   content: |
     from .routes.{app_name}_router import router as router_root
 
-- filename: api/routes/__init__.py
+- filename: ./api/routes/__init__.py
   content: |
 
-- filename: api/routes/{app_name}_router.py
+- filename: ./api/routes/{app_name}_router.py
   content: |
     from fastapi import APIRouter, HTTPException, Request
     from fastapi.responses import HTMLResponse

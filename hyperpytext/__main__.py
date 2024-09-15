@@ -61,6 +61,7 @@ def create_app(app_name):
 
     # Start populating the project folder
     click.echo(f"\nCreating a new HyperPy app in {os.path.join(os.getcwd(), app_name)}")
+    click.echo("This process might take a few minutes. Please be patient.")
 
     # Create main app directory
     os.makedirs(app_name, exist_ok=True)
@@ -74,6 +75,9 @@ def create_app(app_name):
 
     # Create 'routes' subfolder inside 'api'
     os.makedirs(os.path.join('api', 'routes'), exist_ok=True)
+
+    # Create 'models' subfolder inside 'db'
+    os.makedirs(os.path.join('db', 'models'), exist_ok=True)
 
     # Create assets subfolders
     asset_subfolders = ['fonts', 'icons', 'images', 'svg-loaders', 'css', 'js', 'docs', 'templates']
@@ -132,15 +136,26 @@ def create_app(app_name):
                 # Root files & tailwind input.css
                 root_files = [
                     f'{filename}.yaml' for filename in [
-                        'app', 'init', 'gitignore', 'env', 'install_env', 'readme', 'requirements', 'input_css', 'pyproject'
+                        'app',
+                        'db'
+                        'env',
+                        'gitignore',
+                        'init',
+                        'input_css',
+                        'readme',
                     ]
                 ]
                 if template_file in root_files:
                     filename = templates['filename']
                     click.echo(f'Created {filename}')
                     content = templates['content']
-                    if template_file == 'pyproject.yaml':
-                        content = content.format(app_name=app_name)
+                    create_file(filename, content)
+
+                # Poetry config update
+                if template_file == 'pyproject.yaml':
+                    filename = templates['filename']
+                    content = templates['content']
+                    content = content.format(app_name=app_name)
                     create_file(filename, content)
 
                 # Tailwind config update
