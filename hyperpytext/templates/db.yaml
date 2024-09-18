@@ -14,10 +14,11 @@
     Base = declarative_base()
 
     class SQLiteManager:
-        def __init__(self, db_name: str, base_dir: str = './db', echo: bool = False):
+        def __init__(self, db_name: str, base_dir: str = './db', echo: bool = False, readonly: bool = False):
             self.db_name = db_name
             self.base_dir = base_dir
             self.echo = echo
+            self.readonly = readonly
 
         @cached_property
         def db_path(self) -> str:
@@ -25,11 +26,33 @@
 
         @cached_property
         def db_url(self) -> str:
-            return f"sqlite:///{{self.db_path}}"
+            url = f"sqlite:///{self.db_path}"
+            if self.readonly:
+                url += "?mode=ro"
+            return url
 
         @cached_property
         def db_engine(self) -> Engine:
-            return create_engine(self.db_url, echo=self.echo)
+            engine = create_engine(self.db_url, echo=self.echo)
+
+            @event.listens_for(engine, "connect")
+            def set_sqlite_pragma(dbapi_connection, connection_record):
+                cursor = dbapi_connection.cursor()
+                cursor.execute("PRAGMA journal_mode=WAL")
+                cursor.execute("PRAGMA busy_timeout=5000")
+                cursor.execute("PRAGMA synchronous=NORMAL")
+                cursor.execute("PRAGMA cache_size=-20000")
+                cursor.execute("PRAGMA foreign_keys=ON")
+                cursor.execute("PRAGMA temp_store=MEMORY")
+                cursor.execute("PRAGMA mmap_size=30000000000")
+                cursor.close()
+
+            return engine
+
+        def reset_db_engine(self):
+            if 'db_engine' in self.__dict__:
+                self.db_engine.dispose()
+                del self.__dict__['db_engine']
 
         def create_session(self) -> Session:
             return sessionmaker(bind=self.db_engine)()

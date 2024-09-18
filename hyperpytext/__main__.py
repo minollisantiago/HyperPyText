@@ -76,8 +76,8 @@ def create_app(app_name):
     # Create 'routes' subfolder inside 'api'
     os.makedirs(os.path.join('api', 'routes'), exist_ok=True)
 
-    # Create 'models' subfolder inside 'db'
-    os.makedirs(os.path.join('db', 'models'), exist_ok=True)
+    # Create 'schemas' subfolder inside 'db'
+    os.makedirs(os.path.join('db', 'schemas'), exist_ok=True)
 
     # Create assets subfolders
     asset_subfolders = ['fonts', 'icons', 'images', 'svg-loaders', 'css', 'js', 'docs', 'templates']

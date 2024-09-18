@@ -36,6 +36,9 @@ Built on top of:
 - Asset management structure
 - Environment variable configuration
 - Git integration with .gitignore
+- SQLite database integration with SQLAlchemy
+- Optional Electron setup for desktop applications
+- Poetry for dependency management
 
 ## Installation
 
