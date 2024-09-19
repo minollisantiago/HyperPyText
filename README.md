@@ -24,6 +24,8 @@ Built on top of:
 
 - [FastApi](https://fastapi.tiangolo.com/)
 - [Jinja Templates](https://jinja.palletsprojects.com/en/3.1.x/)
+- [SQLAlchemy](https://www.sqlalchemy.org/)
+- [SQLite](https://www.sqlite.org/index.html)
 - [HTMX](https://htmx.org/)
 - [Tailwindcss](https://tailwindcss.com/)
 
@@ -38,7 +40,7 @@ Built on top of:
 - Git integration with .gitignore
 - SQLite database integration with SQLAlchemy
 - Optional Electron setup for desktop applications
-- Poetry for dependency management
+- Poetry for python dependency management
 
 ## Installation
 
