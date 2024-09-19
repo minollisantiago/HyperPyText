@@ -8,6 +8,9 @@ venv/
 env/
 .env
 
+#Cursor
+.cursorrules
+
 # Distribution / packaging
 .Python
 build/

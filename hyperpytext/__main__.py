@@ -134,6 +134,14 @@ def create_app(app_name):
                         content = template['content']
                         create_file(filename, content)
 
+                # Sqalchemy schemas
+                if template_file == 'schemas.yaml':
+                    click.echo('Creating SQLAlchemy schemas scafolding')
+                    for template in templates:
+                        filename = template['filename']
+                        content = template['content']
+                        create_file(filename, content)
+
                 # Index starter HTML5 template
                 if template_file == 'index.yaml':
                     click.echo(f'Creating {html_filename}.html file')

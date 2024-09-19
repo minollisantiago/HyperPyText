@@ -2,9 +2,6 @@
   content: |
     from .db_manager import Base, SQLiteManager
 
-- filename: db/schemas/__init__.py
-  content: |
-
 - filename: db/db_manager.py
   content: |
     import os
