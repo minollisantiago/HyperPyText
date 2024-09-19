@@ -2,6 +2,9 @@
   content: |
     from .db_manager import Base, SQLiteManager
 
+- filename: db/schemas/__init__.py
+  content: |
+
 - filename: db/db_manager.py
   content: |
     import os
@@ -65,7 +68,18 @@
             finally:
                 db.close()
 
+
         def create_tables(self):
+            """
+            Create all tables defined in the SQLAlchemy models.
+
+            This method uses the SQLAlchemy Base metadata to create all tables
+            that have been defined as models inheriting from Base. It binds
+            these tables to the current database engine.
+
+            This is typically called once when setting up the database schema.
+            If the tables already exist, SQLAlchemy will not attempt to recreate them.
+            """
             Base.metadata.create_all(bind=self.db_engine)
 
         def create_table(self, table_model: Type[Base]):
@@ -80,3 +94,4 @@
 
         def __repr__(self) -> str:
             return self.db_url
+

@@ -7,6 +7,6 @@ content: |
   app = FastAPI()
 
   app.mount('/assets', StaticFiles(directory='assets'), name='assets')
+  app.mount('/templates', StaticFiles(directory='templates'), name='templates')
 
   app.include_router(router_root)
-
