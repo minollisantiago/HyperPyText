@@ -1,0 +1,17 @@
+- filename: db/schemas/__init__.py
+  content: |
+
+- filename: db/schemas/user.py
+  content: |
+    from dataclasses import asdict, dataclass
+    from piccolo.columns import Varchar, Integer, Timestamp
+    from piccolo.table import Table
+    from datetime import datetime
+
+    class User(Table):
+        id = Integer(primary_key=True)
+        name = Varchar(length=100, unique=True, index=True)
+        email = Varchar(length=100, unique=True, index=True)
+        hashed_password = Varchar(length=100, null=True)
+        created_at = Timestamp(auto_now=True)
+        updated_at = Timestamp(auto_now_add=True)
