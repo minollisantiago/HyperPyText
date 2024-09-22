@@ -1,0 +1,36 @@
+- filename: db/schemas/__init__.py
+  content: |
+
+- filename: db/schemas/user.py
+  content: |
+    from datetime import datetime
+    from db.db_manager import Base
+    from sqlalchemy.sql import func
+    from dataclasses import dataclass, asdict
+    from sqlalchemy.orm import DeclarativeMeta
+    from sqlalchemy import Column, Integer, String, DateTime
+
+    class User(Base):
+        __tablename__ = 'users'
+
+        id = Column(Integer, primary_key=True, index=True)
+        name = Column(String, unique=True, index=True)
+        email = Column(String, unique=True, index=True)
+        hashed_password = Column(String, nullable=True)
+        created_at = Column(DateTime(timezone=True), server_default=func.now())
+        updated_at = Column(DateTime(timezone=True), onupdate=func.now())
+
+    @dataclass
+    class User_:
+        """Mirrors the User table in the database"""
+        name: str
+        email: str
+        id: int | None = None
+        hashed_password: str | None = None
+        created_at: datetime | None = None
+        updated_at: datetime | None = None
+
+        def as_model(self, db_table_model: type[User]) -> DeclarativeMeta:
+            return db_table_model(
+              **{k: v for k, v in asdict(self).items() if v is not None}
+            )

@@ -1,0 +1,94 @@
+- filename: db/__init__.py
+  content: |
+    from .db_manager import Base, SQLiteManager
+
+- filename: db/db_manager.py
+  content: |
+    import os
+    from sqlalchemy import create_engine, inspect
+    from sqlalchemy.engine import Engine
+    from sqlalchemy.orm import declarative_base, sessionmaker, Session
+    from typing import Generator, Type
+    from functools import cached_property
+
+    Base = declarative_base()
+
+    class SQLiteManager:
+        def __init__(self, db_name: str, base_dir: str = './db', echo: bool = False, readonly: bool = False):
+            self.db_name = db_name
+            self.base_dir = base_dir
+            self.echo = echo
+            self.readonly = readonly
+
+        @cached_property
+        def db_path(self) -> str:
+            return os.path.join(self.base_dir, f"{{self.db_name}}.db")
+
+        @cached_property
+        def db_url(self) -> str:
+            url = f"sqlite:///{self.db_path}"
+            if self.readonly:
+                url += "?mode=ro"
+            return url
+
+        @cached_property
+        def db_engine(self) -> Engine:
+            engine = create_engine(self.db_url, echo=self.echo)
+
+            @event.listens_for(engine, "connect")
+            def set_sqlite_pragma(dbapi_connection, connection_record):
+                cursor = dbapi_connection.cursor()
+                cursor.execute("PRAGMA journal_mode=WAL")
+                cursor.execute("PRAGMA busy_timeout=5000")
+                cursor.execute("PRAGMA synchronous=NORMAL")
+                cursor.execute("PRAGMA cache_size=-20000")
+                cursor.execute("PRAGMA foreign_keys=ON")
+                cursor.execute("PRAGMA temp_store=MEMORY")
+                cursor.execute("PRAGMA mmap_size=30000000000")
+                cursor.close()
+
+            return engine
+
+        def reset_db_engine(self):
+            if 'db_engine' in self.__dict__:
+                self.db_engine.dispose()
+                del self.__dict__['db_engine']
+
+        def create_session(self) -> Session:
+            return sessionmaker(bind=self.db_engine)()
+
+        def get_db(self) -> Generator[Session, None, None]:
+            '''Create a session and yield it to the caller function'''
+            db = self.create_session()
+            try:
+                yield db
+            finally:
+                db.close()
+
+
+        def create_tables(self):
+            """
+            Create all tables defined in the SQLAlchemy models.
+
+            This method uses the SQLAlchemy Base metadata to create all tables
+            that have been defined as models inheriting from Base. It binds
+            these tables to the current database engine.
+
+            This is typically called once when setting up the database schema.
+            If the tables already exist, SQLAlchemy will not attempt to recreate them.
+            """
+            Base.metadata.create_all(bind=self.db_engine)
+
+        def create_table(self, table_model: Type[Base]):
+            inspector = inspect(self.db_engine)
+            table_name = table_model.__tablename__
+            if table_name not in inspector.get_table_names():
+                table_model.__table__.create(self.db_engine)
+                if self.echo:
+                    print(f"Table {{table_name}} created successfully")
+            elif self.echo:
+                print(f"Table {{table_name}} already exists")
+
+        def __repr__(self) -> str:
+            return self.db_url
+
