@@ -67,7 +67,7 @@ pip install .
 After installing the package, run the `create-hyperpy-app {app name}` command to create a new application on the current working directory:
 
 ```bash
-create-hyperpy-app TestApplication
+create-hyperpy-app your_app_name
 ```
 
 You'll be prompted to enter:
@@ -114,6 +114,55 @@ your_app_name/
 ├── README.md
 └── tailwind.config.js
 ```
+### SQLite with Piccolo ORM
+
+HyperPyText uses [Piccolo ORM](https://piccolo-orm.com/) for database management with SQLite. Here's how to set up Piccolo in your project:
+
+1. Explore Piccolo CLI:
+   To see all available Piccolo CLI commands with descriptions, run:
+   ```bash
+   piccolo --help
+   ```
+2. Start a Piccolo project:
+   After creating your app, navigate to the project directory and run:
+   ```bash
+   piccolo project new --engine=sqlite
+   ```
+   This creates a `piccolo_conf.py` file in your project root.
+
+3. Create your first piccolo app:
+   HyperPyText comes with a pre-defined User table example. You can find it in `src/app/db/tables/user.py`:
+   ```python
+   from piccolo.table import Table
+   from piccolo.columns import Varchar, Integer, Timestamp
+
+   class User(Table):
+       name = Varchar(length=100, unique=True, index=True)
+       email = Varchar(length=100, unique=True, index=True)
+       hashed_password = Varchar(length=100, null=True)
+       created_at = Timestamp(auto_now=True)
+       updated_at = Timestamp(auto_now_add=True)
+   ```
+   You can use this table as a reference when creating your own tables.
+
+4. Run migrations:
+   After defining your tables, create and run migrations:
+   ```bash
+   piccolo migrations new
+   piccolo migrations run
+   ```
+
+5. Use Piccolo in your FastAPI app:
+   Import your tables and use Piccolo's query API in your route handlers:
+   ```python
+   from src.app.db.tables import User
+   
+   @app.get("/users")
+   async def get_users():
+       return await User.select().run()
+   ```
+
+Piccolo's intuitive API and powerful CLI tools make database management straightforward and efficient in your HyperPyText project.
 
 ### Tailwind CSS Integration
 

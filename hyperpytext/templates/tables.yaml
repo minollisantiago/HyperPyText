@@ -1,8 +1,8 @@
-- filename: ./src/app/db/schemas/__init__.py
+- filename: ./src/app/db/tables/__init__.py
   content: |
     from .user import User
 
-- filename: ./src/app/db/schemas/user.py
+- filename: ./src/app/db/tables/user.py
   content: |
     from piccolo.table import Table
     from piccolo.columns import Varchar, Integer, Timestamp

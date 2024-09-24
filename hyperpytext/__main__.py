@@ -63,7 +63,7 @@ def create_app(app_name):
     os.chdir(app_dir)
 
     folders = {
-        'src/app': ['api/routes', 'db/schemas', 'components', 'utils', 'templates'],
+        'src/app': ['api/routes', 'db/tables', 'components', 'utils', 'templates'],
         'src/assets': ['fonts', 'icons', 'images', 'svg-loaders', 'css', 'js']
     }
     for base, subdirs in folders.items():
@@ -129,8 +129,8 @@ def create_app(app_name):
                         content = template['content']
                         create_file(filename, content)
 
-                # Database schemas
-                if template_file == 'schemas.yaml':
+                # Database tables
+                if template_file == 'tables.yaml':
                     click.echo('Creating database tables example')
                     for template in templates:
                         filename = template['filename']
