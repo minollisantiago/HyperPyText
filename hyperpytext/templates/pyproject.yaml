@@ -9,9 +9,10 @@ content: |
 
   [tool.poetry.dependencies]
   python = "^3.10"
-  fastapi = "^0.100.0"
-  uvicorn = "^0.22.0"
   jinja2 = "^3.1.2"
+  uvicorn = "^0.22.0"
+  fastapi = "^0.100.0"
+  python-dotenv = "^1.0.0"
   piccolo = {{extras = ["sqlite"], version = "^0.121"}}
 
   [tool.poetry.dev-dependencies]

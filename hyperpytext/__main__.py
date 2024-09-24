@@ -35,15 +35,11 @@ def create_app(app_name):
     else:
         html_filename = 'index'
 
-    # Prompt for Tailwind CSS
+    # Prompt for Tailwind CSS and plugins
+    tailwind = 'none'
+    plugins = []
     if click.confirm('Would you like to use Tailwind CSS?', default=False):
         tailwind = click.prompt('Choose Tailwind CSS setup option', type=click.Choice(['npm', 'standalone']), default='npm')
-    else:
-        tailwind = 'none'
-
-    # Promp for Tailwind CSS plugins
-    plugins = []
-    if tailwind != 'none':
         for plugin in ['forms', 'typography', 'container-queries']:
             if click.confirm(f'Would you like to install the Tailwind {plugin} plugin?', default=False):
                 plugins.append(plugin)
@@ -88,7 +84,8 @@ def create_app(app_name):
     # Setup Tailwind if selected
     if tailwind == 'npm':
         setup_tailwind_npm(app_dir, plugins, fonts)
-        update_package_json(app_dir, '"build-css": "tailwindcss -i ./src/assets/css/globals.css -o ./src/assets/css/style.css --watch"')
+        update_package_json(app_dir, '"build-css": "tailwindcss -i ./src/assets/css/globals.css -o ./src/assets/css/style.css"')
+        update_package_json(app_dir, '"watch-css": "tailwindcss -i ./src/assets/css/globals.css -o ./src/assets/css/style.css --watch"')
     elif tailwind == 'standalone':
         setup_tailwind_standalone(app_dir)
 
@@ -108,6 +105,14 @@ def create_app(app_name):
 
                 templates = yaml.safe_load(file)
 
+                # App files
+                if template_file == 'app.yaml':
+                    click.echo('creating app files')
+                    for template in templates:
+                        filename = template['filename']
+                        content = template['content']
+                        create_file(filename, content)
+
                 # Api
                 if template_file == 'api.yaml':
                     click.echo(f'Creating fastApi routes example')
@@ -124,7 +129,7 @@ def create_app(app_name):
                         content = template['content']
                         create_file(filename, content)
 
-                # Sqalchemy schemas
+                # Database schemas
                 if template_file == 'schemas.yaml':
                     click.echo('Creating database tables example')
                     for template in templates:
@@ -142,12 +147,12 @@ def create_app(app_name):
                 # Root files & tailwind input.css
                 root_files = [
                     f'{filename}.yaml' for filename in [
-                        'app',
                         'env',
-                        'gitignore',
                         'init',
-                        'input_css',
                         'readme',
+                        'uvicorn',
+                        'gitignore',
+                        'input_css',
                     ]
                 ]
                 if template_file in root_files:
@@ -184,7 +189,7 @@ def create_app(app_name):
     click.echo(f"App '{app_name}' has been created successfully!")
 
     # Prompt to install environment
-    install_env = click.confirm('Would you like to install the environment now?', default=False)
+    install_env = click.confirm('Would you like to install python dependencies? (poetry required)', default=False)
     if install_env:
         if not check_poetry():
             poetry_install_instructions()

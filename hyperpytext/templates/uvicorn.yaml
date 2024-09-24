@@ -1,0 +1,16 @@
+filename: ./run_server.py
+content: |
+  import os
+  import uvicorn
+  from src.app import app
+  from dotenv import load_dotenv
+
+  load_dotenv()
+
+  if __name__ == "__main__":
+      host = os.getenv("SERVER_HOST")
+      port = os.getenv("SERVER_PORT")
+
+      if host is None or port is None:
+          raise ValueError("SERVER_HOST and SERVER_PORT must be set in the .env file")
+      uvicorn.run(app, host=host, port=int(port))

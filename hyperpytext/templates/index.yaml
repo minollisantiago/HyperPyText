@@ -5,15 +5,15 @@ content: |
   <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <script src="src/assets/js/theme-control.js"></script>
-    <link href="src/assets/css/style.css" rel="stylesheet">
-    <link href="src/assets/icons/favicon.ico" rel="icon">
+    <script src="/assets/js/theme-control.js"></script>
+    <link href="/assets/css/style.css" rel="stylesheet">
+    <link href="/assets/icons/favicon.ico" rel="icon">
     <script src="https://unpkg.com/htmx.org@1.9.10"
       integrity="sha384-D1Kt99CQMDuVetoL1lrYwg5t+9QdHe7NLX/SoJYkXDFfX37iInKRy5xLSi8nO7UC" crossorigin="anonymous">
       </script>
     <script src="https://unpkg.com/hyperscript.org@0.9.12"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
-    <script defer src="src/assets/js/scripts.js"></script>
+    <script defer src="/assets/js/scripts.js"></script>
     <script>lucide.createIcons();</script>
     <title>{title}</title>
   </head>

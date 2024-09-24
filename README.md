@@ -123,7 +123,18 @@ HyperPyText supports two methods of Tailwind CSS integration:
 
 - Standalone: Downloads the Tailwind CSS standalone CLI for direct usage.
 
-The setup process creates an `input.css` file and configures the build command to generate the final `style.css` file.
+The setup process creates an `globals.css` file and configures the build command to generate the final `style.css` file.
+
+To build the css run:
+
+```bash
+npm run build-css
+```
+Alternatively you can use the npm run watch-css command to rebuild the css file when you make changes:
+
+```bash
+npm run watch-css
+```
 
 The official plugins that come out of the box with the boilerplate are the [forms](https://github.com/tailwindlabs/tailwindcss-typography), [typography](https://github.com/tailwindlabs/tailwindcss-typography) and [container-queries](https://github.com/tailwindlabs/tailwindcss-container-queries) plugins.
 

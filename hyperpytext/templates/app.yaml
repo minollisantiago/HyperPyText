@@ -1,12 +1,30 @@
-filename: ./src/app/app.py
-content: |
-  from fastapi import FastAPI
-  from fastapi.staticfiles import StaticFiles
-  from src.app.api import router_root
+- filename: ./src/app/__init__.py
+  content: |
+    from .app import app
 
-  app = FastAPI()
+- filename: ./src/app/app.py
+  content: |
+    from fastapi import FastAPI
+    from fastapi.staticfiles import StaticFiles
+    from src.app.api import router_root
 
-  app.mount('/assets', StaticFiles(directory='./src/assets'), name='assets')
-  app.mount('/templates', StaticFiles(directory='./src/app/templates'), name='templates')
+    app_name = "HyperPyText-App"  # You can customize this name
+    app_description = "A FastAPI application created with HyperPyText"
+    app_version = "0.1.0"
 
-  app.include_router(router_root)
+    app = FastAPI(
+        title=app_name,
+        description=app_description,
+        version=app_version
+    )
+
+    # Static file mounts
+    app.mount('/assets', StaticFiles(directory='./src/assets'), name='assets')
+    app.mount('/templates', StaticFiles(directory='./src/app/templates'), name='templates')
+
+    # Router inclusion
+    app.include_router(router_root)
+
+    # You can add more app-wide configurations here, such as:
+    # app.add_middleware(...)
+    # app.add_exception_handler(...)
