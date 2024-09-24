@@ -3,10 +3,8 @@
 
 - filename: db/schemas/user.py
   content: |
-    from dataclasses import asdict, dataclass
-    from piccolo.columns import Varchar, Integer, Timestamp
     from piccolo.table import Table
-    from datetime import datetime
+    from piccolo.columns import Varchar, Integer, Timestamp
 
     class User(Table):
         name = Varchar(length=100, unique=True, index=True)
