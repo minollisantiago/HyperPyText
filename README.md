@@ -38,7 +38,7 @@ Built on top of:
 - Asset management structure
 - Environment variable configuration
 - Git integration with .gitignore
-- SQLite database integration with SQLAlchemy
+- SQLite database integration with piccolo (prefered/default) or sqlalchemy
 - Optional Electron setup for desktop applications
 - Poetry for python dependency management
 
@@ -82,29 +82,37 @@ The generated project will have the following structure:
 
 ```
 your_app_name/
-├── api/
-│   ├── routes/
-│   │   ├── __init__.py
-│   │   └── your_app_name_router.py
-│   └── __init__.py
-├── assets/
-│   ├── css/
-│   │   └── input.css
-│   ├── docs/
-│   ├── fonts/
-│   ├── icons/
-│   ├── images/
-│   ├── js/
-│   └── svg-loaders/
-├── templates/
-│   └── your_html_file.html
+├── src/
+│   ├── app/
+│   │   ├── api/
+│   │   │   ├── routes/
+│   │   │   │   ├── __init__.py
+│   │   │   │   └── root.py
+│   │   │   └── __init__.py
+│   │   ├── db/
+│   │   │   ├── schemas/
+│   │   │   │   ├── __init__.py
+│   │   │   │   └── user.py
+│   │   │   ├── __init__.py
+│   │   │   └── db_manager.py
+│   │   ├── templates/
+│   │   │   └── {filename}.html
+│   │   └── app.py
+│   └── assets/
+│       ├── css/
+│       │   └── globals.css
+│       ├── js/
+│       │   ├── theme-control.js
+│       │   └── scripts.js
+│       └── icons/
+│           └── favicon.ico
 ├── .env
 ├── .gitignore
-├── app.py
-├── install_env.bat
+├── main.js
+├── package.json
+├── pyproject.toml
 ├── README.md
-├── requirements.txt
-└── tailwind.config.js (if Tailwind CSS is selected)
+└── tailwind.config.js
 ```
 
 ### Tailwind CSS Integration
