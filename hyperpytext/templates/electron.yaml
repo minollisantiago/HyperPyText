@@ -1,6 +1,7 @@
 filename: ./main.js
 content: |
   const { app, BrowserWindow } = require("electron");
+  require('dotenv').config();
 
   function createWindow() {
     const win = new BrowserWindow({
@@ -15,7 +16,7 @@ content: |
       }
     });
 
-    const appUrl = 'http://127.0.0.1:8000';
+    const appUrl = process.env.APP_URL;
     win.loadURL(appUrl);
 
     win.setMenuBarVisibility(false);

@@ -1,18 +1,18 @@
-- filename: ./api/__init__.py
+- filename: ./src/app/api/__init__.py
   content: |
-    from .routes.{app_name}_router import router as router_root
+    from .routes.root import router as router_root
 
-- filename: ./api/routes/__init__.py
+- filename: ./src/app/api/routes/__init__.py
   content: |
 
-- filename: ./api/routes/{app_name}_router.py
+- filename: ./src/app/api/routes/root.py
   content: |
-    from fastapi import APIRouter, HTTPException, Request
     from fastapi.responses import HTMLResponse
+    from fastapi import APIRouter, HTTPException, Request
     from fastapi.templating import Jinja2Templates
 
     router = APIRouter()
-    templates = Jinja2Templates(directory='./templates')
+    templates = Jinja2Templates(directory='./src/app/templates')
 
     @router.get("/", response_class=HTMLResponse)
     async def root(request: Request) -> HTMLResponse:

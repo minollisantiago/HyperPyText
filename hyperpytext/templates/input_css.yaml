@@ -1,4 +1,4 @@
-filename: assets/css/input.css
+filename: ./src/assets/css/globals.css
 content: |
   @tailwind base;
   @tailwind components;

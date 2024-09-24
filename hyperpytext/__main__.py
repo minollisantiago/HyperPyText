@@ -1,8 +1,6 @@
 import os
-from typing import DefaultDict
-import click
-from click.termui import confirm
 import yaml
+import click
 from pkg_resources import resource_filename
 from utils.npm_utils import check_npm, npm_install_instructions
 from utils.npm_tailwind_utils import (
@@ -63,26 +61,18 @@ def create_app(app_name):
     click.echo(f"\nCreating a new HyperPy app in {os.path.join(os.getcwd(), app_name)}")
     click.echo("This process might take a few minutes. Please be patient.")
 
-    # Create main app directory
+    # Project structure
     os.makedirs(app_name, exist_ok=True)
     app_dir = os.path.abspath(app_name)
     os.chdir(app_dir)
 
-    # Create folders
-    folders = ['api', 'config', 'db', 'logs', 'notebooks', 'components', 'utils', 'templates']
-    for folder in folders:
-        os.makedirs(folder, exist_ok=True)
-
-    # Create 'routes' subfolder inside 'api'
-    os.makedirs(os.path.join('api', 'routes'), exist_ok=True)
-
-    # Create 'schemas' subfolder inside 'db'
-    os.makedirs(os.path.join('db', 'schemas'), exist_ok=True)
-
-    # Create assets subfolders
-    asset_subfolders = ['fonts', 'icons', 'images', 'svg-loaders', 'css', 'js', 'docs']
-    for subfolder in asset_subfolders:
-        os.makedirs(os.path.join('assets', subfolder), exist_ok=True)
+    folders = {
+        'src/app': ['api/routes', 'db/schemas', 'components', 'utils', 'templates'],
+        'src/assets': ['fonts', 'icons', 'images', 'svg-loaders', 'css', 'js']
+    }
+    for base, subdirs in folders.items():
+        for subdir in subdirs:
+            os.makedirs(os.path.join(base, subdir), exist_ok=True)
 
     # Tailwind css
     if tailwind == 'npm':
@@ -98,7 +88,7 @@ def create_app(app_name):
     # Setup Tailwind if selected
     if tailwind == 'npm':
         setup_tailwind_npm(app_dir, plugins, fonts)
-        update_package_json(app_dir, '"build-css": "tailwindcss -i ./assets/css/input.css -o ./assets/css/style.css --watch"')
+        update_package_json(app_dir, '"build-css": "tailwindcss -i ./src/assets/css/globals.css -o ./src/assets/css/style.css --watch"')
     elif tailwind == 'standalone':
         setup_tailwind_standalone(app_dir)
 
@@ -120,15 +110,15 @@ def create_app(app_name):
 
                 # Api
                 if template_file == 'api.yaml':
-                    click.echo(f'Creating fastApi scafolding')
+                    click.echo(f'Creating fastApi routes example')
                     for template in templates:
-                        filename = template['filename'].format(app_name=app_name)
-                        content = template['content'].format(app_name=app_name, html_filename=html_filename)
+                        filename = template['filename']
+                        content = template['content'].format(html_filename=html_filename)
                         create_file(filename, content)
 
                 # Database files
                 if template_file == 'db.yaml':
-                    click.echo('Creating database scafolding')
+                    click.echo('Setting up database')
                     for template in templates:
                         filename = template['filename']
                         content = template['content']
@@ -136,7 +126,7 @@ def create_app(app_name):
 
                 # Sqalchemy schemas
                 if template_file == 'schemas.yaml':
-                    click.echo('Creating SQLAlchemy schemas scafolding')
+                    click.echo('Creating database tables example')
                     for template in templates:
                         filename = template['filename']
                         content = template['content']

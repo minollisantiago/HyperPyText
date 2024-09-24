@@ -1,12 +1,12 @@
-filename: ./app.py
+filename: ./src/app/app.py
 content: |
   from fastapi import FastAPI
   from fastapi.staticfiles import StaticFiles
-  from api import router_root
+  from src.app.api import router_root
 
   app = FastAPI()
 
-  app.mount('/assets', StaticFiles(directory='assets'), name='assets')
-  app.mount('/templates', StaticFiles(directory='templates'), name='templates')
+  app.mount('/assets', StaticFiles(directory='./src/assets'), name='assets')
+  app.mount('/templates', StaticFiles(directory='./src/app/templates'), name='templates')
 
   app.include_router(router_root)

@@ -1,7 +1,7 @@
-- filename: db/schemas/__init__.py
+- filename: ./src/app/db/schemas/__init__.py
   content: |
 
-- filename: db/schemas/user.py
+- filename: ./src/app/db/schemas/user.py
   content: |
     from datetime import datetime
     from db.db_manager import Base

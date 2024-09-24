@@ -1,16 +1,16 @@
-- filename: db/__init__.py
+- filename: ./src/app/db/__init__.py
   content: |
-    from .db_manager import Base, SQLiteManager
+    from .db_manager import SQLiteManager
 
-- filename: db/db_manager.py
+- filename: ./src/app/db/db_manager.py
   content: |
-    from pathlib import Path
-    from piccolo.engine import Engine
-    from piccolo.engine.sqlite import SQLiteEngine
-    from piccolo.table import Table
-    from piccolo.conf.apps import AppRegistry
-    from functools import cached_property
     from typing import Type
+    from pathlib import Path
+    from piccolo.table import Table
+    from piccolo.engine import Engine
+    from piccolo.conf.apps import AppRegistry
+    from piccolo.engine.sqlite import SQLiteEngine
+    from functools import cached_property
 
 
     class SQLiteManager:

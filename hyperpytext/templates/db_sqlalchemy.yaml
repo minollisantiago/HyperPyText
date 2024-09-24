@@ -1,20 +1,20 @@
-- filename: db/__init__.py
+- filename: ./src/app/db/__init__.py
   content: |
     from .db_manager import Base, SQLiteManager
 
-- filename: db/db_manager.py
+- filename: ./src/app/db/db_manager.py
   content: |
     import os
-    from sqlalchemy import create_engine, inspect
-    from sqlalchemy.engine import Engine
-    from sqlalchemy.orm import declarative_base, sessionmaker, Session
     from typing import Generator, Type
     from functools import cached_property
+    from sqlalchemy.engine import Engine
+    from sqlalchemy import create_engine, inspect
+    from sqlalchemy.orm import declarative_base, sessionmaker, Session
 
     Base = declarative_base()
 
     class SQLiteManager:
-        def __init__(self, db_name: str, base_dir: str = './db', echo: bool = False, readonly: bool = False):
+        def __init__(self, db_name: str, base_dir: str = './src/app/db', echo: bool = False, readonly: bool = False):
             self.db_name = db_name
             self.base_dir = base_dir
             self.echo = echo
