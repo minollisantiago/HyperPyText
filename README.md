@@ -148,8 +148,13 @@ HyperPyText uses [Piccolo ORM](https://piccolo-orm.com/) for database management
 4. Run migrations:
    After defining your tables, create and run migrations:
    ```bash
-   piccolo migrations new
-   piccolo migrations run
+   piccolo migrations new [app_name]
+   piccolo migrations forwards [app_name]
+   ```
+   If the app is registered in the piccolo_conf.py file, you only need to specify the app name on the migrations command(s), you can check all the apps registered on the file as well by running this command:
+
+   ```bash
+   piccolo show_all
    ```
 
 5. Use Piccolo in your FastAPI app:
