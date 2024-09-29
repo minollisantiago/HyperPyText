@@ -1,4 +1,4 @@
-import os
+
 import yaml
 import click
 from pkg_resources import resource_filename
@@ -21,7 +21,10 @@ from utils.poetry_utils import (
     poetry_install_instructions
 )
 
-#TODO: Add a local port by default on .env maybe and a serve() or run() function to start the uvicorn server
+# TODO: Add a local port by default on .env maybe and a serve() or run() function to start the uvicorn server
+# TODO: Update all templates related to piccolo: __init__.py files (src, migrations, etc)
+# TODO: Add a section that prompts you to add a piccolo_conf.py file to the project without using the piccolo cli
+# TODO: Maybe add an app example (piccolo) to show how to set everything up
 
 @click.command()
 @click.argument('app_name')
