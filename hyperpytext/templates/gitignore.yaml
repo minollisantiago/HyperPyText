@@ -27,3 +27,9 @@ content: |
   # Tailwind CSS
   node_modules/
   package-lock.json
+
+  # Database files (SQLite)
+  db/*.sqlite
+  db/**/*.sqlite
+  db/*.db
+  db/**/*.db

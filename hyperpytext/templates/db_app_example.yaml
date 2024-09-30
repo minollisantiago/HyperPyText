@@ -1,0 +1,39 @@
+- filename: ./src/app/db/users/__init__.py
+  content: |
+
+- filename: ./src/app/db/users/migrations/__init__.py
+  content: |
+
+- filename: ./src/app/db/users/piccolo_app.py
+  content: |
+    """
+    Import all of the Tables subclasses in your app here, and register them with
+    the APP_CONFIG.
+    """
+
+    import os
+    from piccolo.conf.apps import AppConfig, table_finder
+
+    APP_NAME = "users"
+    CURRENT_DIRECTORY = os.path.dirname(os.path.abspath(__file__))
+    MIGRATIONS_PATH = os.path.join(CURRENT_DIRECTORY, "migrations")
+
+    APP_CONFIG = AppConfig(
+        app_name=APP_NAME,
+        migrations_folder_path=MIGRATIONS_PATH,
+        table_classes=table_finder(modules=[f"src.app.db.{APP_NAME}.tables"]),
+        migration_dependencies=[],
+        commands=[],
+    )
+
+- filename: ./src/app/db/users/tables.py
+  content: |
+    from piccolo.table import Table
+    from piccolo.columns import Varchar, Timestamp
+
+    class Users_(Table, tablename="users_"):
+        name = Varchar(length=100, unique=True, index=True)
+        email = Varchar(length=100, unique=True, index=True)
+        hashed_password = Varchar(length=100, null=True)
+        created_at = Timestamp(auto_now=True)
+        updated_at = Timestamp(auto_now_add=True)
