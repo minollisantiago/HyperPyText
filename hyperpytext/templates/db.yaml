@@ -1,103 +1,15 @@
 - filename: ./src/app/db/__init__.py
   content: |
-    from .db_manager import SQLiteManager
 
-- filename: ./src/app/db/db_manager.py
+- filename: ./piccolo_conf.py
   content: |
-    from typing import Type
-    from pathlib import Path
-    from piccolo.table import Table
-    from piccolo.engine import Engine
+    import os
     from piccolo.conf.apps import AppRegistry
     from piccolo.engine.sqlite import SQLiteEngine
-    from functools import cached_property
 
+    DB_PATH = os.path.join(os.path.dirname(__file__), 'src', 'app', 'db', 'app_db.sqlite')
+    DB = SQLiteEngine(path=DB_PATH)
 
-    class SQLiteManager:
-        def __init__(self, db_path: Path, echo: bool = False):
-            self.db_path = db_path
-            self.echo = echo
-
-        @cached_property
-        def db_engine(self) -> Engine:
-            engine = SQLiteEngine(path=self.db_path)
-            
-            engine.run_sync("PRAGMA journal_mode=WAL")
-            engine.run_sync("PRAGMA busy_timeout=5000")
-            engine.run_sync("PRAGMA synchronous=NORMAL")
-            engine.run_sync("PRAGMA cache_size=-20000")
-            engine.run_sync("PRAGMA foreign_keys=ON")
-            engine.run_sync("PRAGMA temp_store=MEMORY")
-            engine.run_sync("PRAGMA mmap_size=30000000000")
-
-            return engine
-
-        async def get_db(self):
-            """
-            Asynchronous database dependency for FastAPI.
-            This method is designed to be used as a dependency in FastAPI routes.
-            It manages the lifecycle of the database connection pool.
-
-            Usage:
-                @app.get("/")
-                async def root(db: Engine = Depends(sqlite_manager.get_db)):
-                    # Use db for database operations
-
-            Yields:
-                Engine: The Piccolo database engine with an active connection pool.
-            """
-            await self.db_engine.start_connection_pool()
-            try:
-                yield self.db_engine
-            finally:
-                await self.db_engine.close_connection_pool()
-
-        async def create_tables(self):
-            """
-            Create all tables defined in the Piccolo models.
-
-            This method uses the Piccolo AppRegistry to create all tables
-            that have been defined as models inheriting from Table.
-
-            This is typically called once when setting up the database schema.
-            If the tables already exist, Piccolo will not attempt to recreate them.
-            """
-            await AppRegistry().create_tables()
-
-        async def create_table(self, table_model: Type[Table]):
-            if not await table_model.table_exists():
-                await table_model.create_table()
-                if self.echo:
-                    print(f"Table {{table_model._meta.tablename}} created successfully")
-            elif self.echo:
-                print(f"Table {{table_model._meta.tablename}} already exists")
-
-        async def insert(self, table_instance: Table):
-            await table_instance.save()
-            return table_instance
-
-        async def select(self, table_model: Type[Table], where: Optional[Where] = None):
-            """
-            Asynchronously selects and returns all records from the specified table model.
-
-            This method performs a SELECT query on the given table model. If a 'where' clause
-            is provided, it filters the results accordingly. The query is executed synchronously
-            within an asynchronous context.
-
-            Args:
-                table_model (Type[Table]): The Piccolo Table model to query.
-                where (Optional[Where]): An optional Where clause to filter the results.
-
-            Returns:
-                List[Dict]: A list of dictionaries, each representing a row from the table.
-
-            Note:
-                The use of run_sync() suggests this method is designed to work within
-                an asynchronous environment but executes the database query synchronously.
-                This approach might be used for compatibility reasons or specific performance
-                considerations.
-            """
-            query = table_model.objects()
-            if where:
-                query = query.where(where)
-            return await query.run_sync()
+    # A list of paths to piccolo apps
+    # e.g. ['blog.piccolo_app']
+    APP_REGISTRY = AppRegistry(apps=[])

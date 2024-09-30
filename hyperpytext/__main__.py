@@ -1,4 +1,5 @@
 
+import os
 import yaml
 import click
 from pkg_resources import resource_filename
@@ -17,7 +18,7 @@ from utils.npm_electron_utils import (
 )
 from utils.poetry_utils import (
     check_poetry,
-    setup_environment, 
+    setup_environment,
     poetry_install_instructions
 )
 
