@@ -70,7 +70,7 @@ def create_app(app_name):
     os.chdir(app_dir)
 
     folders = {
-        'src/app': ['api/routes', 'components', 'db/users/migrations' if piccolo_example else 'db', 'utils', 'templates'],
+        'src/app': ['api/routes', 'components', 'db/primary/migrations' if piccolo_example else 'db', 'utils', 'templates'],
         'src/assets': ['fonts', 'icons', 'images', 'svg-loaders', 'css', 'js']
     }
     for base, subdirs in folders.items():
@@ -128,28 +128,20 @@ def create_app(app_name):
                         content = template['content'].format(html_filename=html_filename)
                         create_file(filename, content)
 
-                # Database files
-                if template_file == 'db.yaml':
-                    click.echo('Setting up the piccolo config')
+                # Database piccolo setup
+                db_files = [
+                    f'db_{filename}.yaml' for filename in [
+                        'primary',
+                        'cache',
+                        'queues',
+                    ]
+                ]
+                if template_file in db_files:
+                    click.echo('Creating all piccolo database files')
                     for template in templates:
                         filename = template['filename']
                         content = template['content']
                         create_file(filename, content)
-
-                # Database piccolo app example
-                if template_file == 'db_app_example.yaml' and piccolo_example:
-                    click.echo('Creating database piccolo app example')
-                    for template in templates:
-                        filename = template['filename']
-                        content = template['content']
-                        create_file(filename, content)
-
-                    filename = './piccolo_conf.py'
-                    with open(filename, 'r') as f:
-                        config = f.read()
-                    updated_config = config.replace("__APPS__", "'src.app.db.users.piccolo_app'")
-                    with open(filename, 'w') as f:
-                        f.write(updated_config)
 
                 # Index starter HTML5 template
                 if template_file == 'index.yaml':

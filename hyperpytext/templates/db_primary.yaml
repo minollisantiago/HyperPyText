@@ -1,32 +1,40 @@
-- filename: ./src/app/db/users/__init__.py
+- filename: ./src/app/db/primary/__init__.py
   content: |
 
-- filename: ./src/app/db/users/migrations/__init__.py
+- filename: ./src/app/db/primary/migrations/__init__.py
   content: |
 
-- filename: ./src/app/db/users/piccolo_app.py
+- filename: ./src/app/db/primary/piccolo_conf.py
+  content: |
+    from piccolo.conf.apps import AppRegistry
+    from piccolo.engine.sqlite import SQLiteEngine
+
+    DB = SQLiteEngine(path="primary_db.sqlite")
+
+    # A list of paths to piccolo apps
+    # e.g. ['blog.piccolo_app']
+    APP_REGISTRY = AppRegistry(apps=["piccolo_app"])
+
+- filename: ./src/app/db/primary/piccolo_app.py
   content: |
     """
     Import all of the Tables subclasses in your app here, and register them with
     the APP_CONFIG.
     """
 
-    import os
     from piccolo.conf.apps import AppConfig, table_finder
 
-    APP_NAME = "users"
-    CURRENT_DIRECTORY = os.path.dirname(os.path.abspath(__file__))
-    MIGRATIONS_PATH = os.path.join(CURRENT_DIRECTORY, "migrations")
+    APP_NAME = "primary"
 
     APP_CONFIG = AppConfig(
         app_name=APP_NAME,
-        migrations_folder_path=MIGRATIONS_PATH,
-        table_classes=table_finder(modules=[f"src.app.db.{APP_NAME}.tables"]),
+        migrations_folder_path="migrations",
+        table_classes=table_finder(modules=["tables"]),
         migration_dependencies=[],
         commands=[],
     )
 
-- filename: ./src/app/db/users/tables.py
+- filename: ./src/app/db/primary/tables.py
   content: |
     from piccolo.table import Table
     from piccolo.columns import Varchar, Timestamp

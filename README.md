@@ -116,7 +116,85 @@ your_app_name/
 ```
 ### SQLite with Piccolo ORM
 
-HyperPyText uses [Piccolo ORM](https://piccolo-orm.com/) for database management with SQLite. Here's how to set up Piccolo in your project:
+#### Default Database Structure
+
+HyperPyText uses [Piccolo ORM](https://piccolo-orm.com/) for database management with SQLite. 
+
+The project comes pre-configured with three separate database piccolo apps, each with its own SQLite database file:
+
+1. Primary Database
+2. Cache Database
+3. Queues Database
+
+This is the general structure of any of the apps from above:
+
+```
+src/app/db/
+├── primary/
+│   ├── migrations/
+│   │   └── __init__.py
+│   ├── __init__.py
+│   ├── piccolo_app.py
+│   ├── piccolo_conf.py
+│   ├── tables.py
+│   └── ...
+```
+
+Each of them is pre-built with the proper configuration, including `piccolo_app.py` files and all the necessary setup to start working with the piccolo CLI.
+
+#### Primary Database example
+
+If you choose to add the example piccolo app when prompted while creating the project, it will include a `tables.py` file with a pre-defined Users table example. You can find it at `src/app/db/primary/tables.py`. 
+
+The file will include a Users_ piccolo table, with the following model: 
+
+```python
+from piccolo.table import Table
+from piccolo.columns import Varchar, Timestamp
+
+class Users_(Table, tablename="users_"):
+    name = Varchar(length=100, unique=True, index=True)
+    email = Varchar(length=100, unique=True, index=True)
+    hashed_password = Varchar(length=100, null=True)
+    created_at = Timestamp(auto_now=True)
+    updated_at = Timestamp(auto_now_add=True)
+```
+
+#### Creating and running migrations
+
+Once you've created the project, you can create and run migrations for the primary database. First you need to navigate to the primary database folder:
+
+```bash
+cd src/app/db/primary
+```
+
+Then you can create and run migrations with the following commands:
+
+```bash
+piccolo migrations new primary
+piccolo migrations forwards primary
+```
+
+If the app is registered in the `piccolo_conf.py` file, you only need to specify the app name on the migrations command(s), like on the example above.
+
+You can check all the apps registered on the file as well by running this command:
+
+```bash
+piccolo show_all
+```
+
+You can also check all migrations that havent been run yet by running:
+
+```bash
+piccolo migrations check
+```
+In order to run the migrations you will need to write it yourself, as auto migrations are not supported for SQLite, see the Piccolo [migration docs](https://piccolo-orm.readthedocs.io/en/latest/piccolo/migrations/index.html) for more information.
+
+One you successfully run the migrations you can use the Piccolo CLI to interact with the database.
+
+#### Piccolo CLI
+
+Here is a general overview of the Piccolo CLI, for more information check the [Piccolo docs](https://piccolo-orm.readthedocs.io/en/latest/piccolo/getting_started/index.html):
 
 1. Explore Piccolo CLI:
    To see all available Piccolo CLI commands with descriptions, run:
@@ -130,20 +208,6 @@ HyperPyText uses [Piccolo ORM](https://piccolo-orm.com/) for database management
    ```
    This creates a `piccolo_conf.py` file in your project root.
 
-3. Create your first piccolo app:
-   HyperPyText comes with a pre-defined User table example. You can find it in `src/app/db/users/tables/user.py`:
-   ```python
-   from piccolo.table import Table
-   from piccolo.columns import Varchar, Integer, Timestamp
-
-   class User(Table):
-       name = Varchar(length=100, unique=True, index=True)
-       email = Varchar(length=100, unique=True, index=True)
-       hashed_password = Varchar(length=100, null=True)
-       created_at = Timestamp(auto_now=True)
-       updated_at = Timestamp(auto_now_add=True)
-   ```
-   You can use this table as a reference when creating your own tables.
 4. Create a new Piccolo app:
    To create a new Piccolo app within your project, use the following command:
    ```bash
@@ -158,7 +222,6 @@ HyperPyText uses [Piccolo ORM](https://piccolo-orm.com/) for database management
        # ... other registered apps
    ]
    ```
-
 4. Run migrations:
    After defining your tables, create and run migrations:
    ```bash
@@ -177,17 +240,17 @@ HyperPyText uses [Piccolo ORM](https://piccolo-orm.com/) for database management
    piccolo migrations check
    ```
 
-5. Use Piccolo in your FastAPI app:
-   Import your tables and use Piccolo's query API in your route handlers:
-   ```python
-   from src.app.db.tables import User
-   
-   @app.get("/users")
-   async def get_users():
-       return await User.select().run()
-   ```
+### Piccolo + FastAPI
 
-Piccolo's intuitive API and powerful CLI tools make database management straightforward and efficient in your HyperPyText project.
+To use Piccolo in your FastAPI endpoints, first import your tables and then use Piccolo's query API in your route handlers:
+
+```python
+from src.app.db.primary.tables import Users_
+
+@app.get("/users")
+async def get_users():
+      return await Users_.select().run()
+```
 
 ### Tailwind CSS Integration
 
