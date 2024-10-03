@@ -15,9 +15,9 @@ content: |
   python-dotenv = "^1.0.0"
   piccolo = {{extras = ["sqlite"], version = "^0.121"}}
   ipython = "^8.28.0"
+  {db_example_dependencies}
 
   [tool.poetry.dev-dependencies]
-
   pytest = "^7.0.1"
 
   [build-system]

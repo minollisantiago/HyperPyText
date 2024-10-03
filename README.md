@@ -188,9 +188,26 @@ You can also check all migrations that havent been run yet by running:
 ```bash
 piccolo migrations check
 ```
-In order to run the migrations you will need to write it yourself, as auto migrations are not supported for SQLite, see the Piccolo [migration docs](https://piccolo-orm.readthedocs.io/en/latest/piccolo/migrations/index.html) for more information.
+In order to run the migrations you will need to write the files yourself, as auto migrations are not supported for SQLite, see the Piccolo [migration docs](https://piccolo-orm.readthedocs.io/en/latest/piccolo/migrations/index.html) for more information.
 
-One you successfully run the migrations you can use the Piccolo CLI to interact with the database.
+One you successfully run the initial migration you can run the following command from the terminal *(need to have the python environment activated with all the dependencies installed)*:
+
+```bash
+cd src/app/db/primary
+python db_populate.py
+```
+This will populate the database with some random data so you can begin querying the database using the Piccolo CLI and its ipython shell. To activate the ipython shell run:
+
+```bash
+cd src/app/db/primary
+piccolo shell run
+```
+Then you can query the database using the piccolo syntax, for example for a `SELECT * FROM users_` query the syntax would be:
+
+```bash
+await Users_.select()
+```
+For more Query types, go [here](https://piccolo-orm.readthedocs.io/en/latest/piccolo/query_types/index.html).
 
 #### Piccolo CLI
 
@@ -240,7 +257,7 @@ Here is a general overview of the Piccolo CLI, for more information check the [P
    piccolo migrations check
    ```
 
-### Piccolo + FastAPI
+#### Piccolo + FastAPI
 
 To use Piccolo in your FastAPI endpoints, first import your tables and then use Piccolo's query API in your route handlers:
 

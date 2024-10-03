@@ -45,3 +45,74 @@
         hashed_password = Varchar(length=100, null=True)
         created_at = Timestamp(auto_now=True)
         updated_at = Timestamp(auto_now_add=True)
+
+- filename: ./src/app/db/primary/db_populate.py
+  content: |
+    import bcrypt
+    import asyncio
+    from faker import Faker
+    from datetime import datetime
+    from tables import Users_
+    from piccolo.engine import PostgresEngine, engine_finder
+
+    async def create_random_users(num_users=50):
+        """
+        Create random user entries in the database.
+
+        This function generates fake user data using the Faker library and inserts it into the Users_ table.
+        The Users_ table is defined in the tables.py file within the same directory.
+
+        Args:
+            num_users (int): The number of random users to create. Defaults to 50.
+
+        The function creates users with the following attributes:
+        - name: A randomly generated full name
+        - email: A randomly generated email address
+        - hashed_password: A bcrypt-hashed version of a randomly generated password
+        - created_at: The current timestamp
+        - updated_at: The current timestamp
+        """
+        fake = Faker()
+
+        for _ in range(num_users):
+            name = fake.name()
+            email = fake.email()
+            password = fake.password()
+            hashed_password = bcrypt.hashpw(
+                password.encode('utf-8'), bcrypt.gensalt()
+            ).decode('utf-8')
+
+            await Users_.insert(
+                Users_(
+                    name=name,
+                    email=email,
+                    hashed_password=hashed_password,
+                    created_at=datetime.now(),
+                    updated_at=datetime.now()
+                )
+            )
+            print(f"Created user {name}, email: {email}")
+        print(f"Created {num_users} random users.")
+
+    async def main():
+        """
+        Populates the primary database Users_ table with random users using the create_random_users() function.
+
+        This function determines the database engine being used (as configured in piccolo_conf.py)
+        and calls the create_random_users function accordingly.
+
+        Refer to the README.md for full setup and running instructions.
+        """
+        engine = engine_finder()
+        if isinstance(engine, PostgresEngine):
+            await engine.start_connection_pool()
+            try:
+                await create_random_users()
+            finally:
+                await engine.close_connection_pool()
+        else:
+            # For SQLite, we don't need connection pooling
+            await create_random_users()
+
+    if __name__ == "__main__":
+        asyncio.run(main())

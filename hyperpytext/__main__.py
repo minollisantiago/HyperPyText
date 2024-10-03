@@ -22,10 +22,8 @@ from utils.poetry_utils import (
     poetry_install_instructions
 )
 
+# TODO: Piccolo built-in auth, implement it
 # TODO: Add a local port by default on .env maybe and a serve() or run() function to start the uvicorn server
-# TODO: Update all templates related to piccolo: __init__.py files (src, migrations, etc)
-# TODO: Add a section that prompts you to add a piccolo_conf.py file to the project without using the piccolo cli
-# TODO: Maybe add an app example (piccolo) to show how to set everything up
 
 @click.command()
 @click.argument('app_name')
@@ -70,7 +68,7 @@ def create_app(app_name):
     os.chdir(app_dir)
 
     folders = {
-        'src/app': ['api/routes', 'components', 'db/primary/migrations' if piccolo_example else 'db', 'utils', 'templates'],
+        'src/app': ['api/routes', 'components', 'db', 'utils', 'templates'],
         'src/assets': ['fonts', 'icons', 'images', 'svg-loaders', 'css', 'js']
     }
     for base, subdirs in folders.items():
@@ -140,6 +138,8 @@ def create_app(app_name):
                     click.echo('Creating all piccolo database files')
                     for template in templates:
                         filename = template['filename']
+                        if not piccolo_example and (filename.endswith('tables.py') or filename.endswith('db_populate.py')):
+                            continue
                         content = template['content']
                         create_file(filename, content)
 
@@ -171,7 +171,11 @@ def create_app(app_name):
                 if template_file == 'pyproject.yaml':
                     filename = templates['filename']
                     content = templates['content']
-                    content = content.format(app_name=app_name)
+                    db_example_dependencies = 'bcrypt = "^4.2.0"\nfaker = "^30.1.0"' if piccolo_example else ''
+                    content = content.format(
+                        app_name=app_name,
+                        db_example_dependencies=db_example_dependencies
+                    )
                     create_file(filename, content)
 
                 # Tailwind config update
