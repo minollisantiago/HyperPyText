@@ -90,11 +90,27 @@ your_app_name/
 │   │   │   │   └── root.py
 │   │   │   └── __init__.py
 │   │   ├── db/
-│   │   │   ├── schemas/
+│   │   │   ├── primary/
+│   │   │   │   ├── migrations/
+│   │   │   │   │   └── __init__.py
 │   │   │   │   ├── __init__.py
-│   │   │   │   └── user.py
-│   │   │   ├── __init__.py
-│   │   │   └── db_manager.py
+│   │   │   │   ├── piccolo_app.py
+│   │   │   │   ├── piccolo_conf.py
+│   │   │   │   ├── tables.py
+│   │   │   │   └── db_populate.py
+│   │   │   ├── cache/
+│   │   │   │   ├── migrations/
+│   │   │   │   │   └── __init__.py
+│   │   │   │   ├── __init__.py
+│   │   │   │   ├── piccolo_app.py
+│   │   │   │   └── piccolo_conf.py
+│   │   │   ├── queues/
+│   │   │   │   ├── migrations/
+│   │   │   │   │   └── __init__.py
+│   │   │   │   ├── __init__.py
+│   │   │   │   ├── piccolo_app.py
+│   │   │   │   └── piccolo_conf.py
+│   │   │   └── __init__.py
 │   │   ├── templates/
 │   │   │   └── {filename}.html
 │   │   └── app.py
@@ -112,8 +128,10 @@ your_app_name/
 ├── package.json
 ├── pyproject.toml
 ├── README.md
+├── run_server.py
 └── tailwind.config.js
 ```
+
 ### SQLite with Piccolo ORM
 
 #### Default Database Structure
