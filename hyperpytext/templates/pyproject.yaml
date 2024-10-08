@@ -13,7 +13,8 @@ content: |
   uvicorn = "^0.22.0"
   fastapi = "^0.100.0"
   python-dotenv = "^1.0.0"
-  piccolo = {{extras = ["sqlite"], version = "^0.121"}}
+  piccolo = {{extras = ["all"], version = "^1.20.0"}}
+  piccolo-api = "^1.5.2"
   ipython = "^8.28.0"
   {db_example_dependencies}
 
@@ -23,4 +24,3 @@ content: |
   [build-system]
   requires = ["poetry-core>=1.0.0"]
   build-backend = "poetry.core.masonry.api"
-

@@ -57,6 +57,9 @@ def create_app(app_name):
 
     # Prompt for Piccolo app example
     piccolo_example = click.confirm('Would you like to include a Piccolo db app example for SQLite?', default=False)
+    
+    # Prompt for Piccolo auth
+    piccolo_auth = click.confirm('Would you like to include Piccolo authentication?', default=False)
 
     # Start populating the project folder
     click.echo(f"\nCreating a new HyperPy app in {os.path.join(os.getcwd(), app_name)}")
@@ -134,8 +137,11 @@ def create_app(app_name):
                         'queues',
                     ]
                 ]
+                if piccolo_auth:
+                    db_files.append('db_auth.yaml')
+
                 if template_file in db_files:
-                    click.echo('Creating all piccolo database files')
+                    click.echo('Creating piccolo database files')
                     for template in templates:
                         filename = template['filename']
                         if not piccolo_example and (filename.endswith('tables.py') or filename.endswith('db_populate.py')):

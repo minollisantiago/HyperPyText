@@ -268,6 +268,58 @@ from src.app.db.primary.tables import Users_
 async def get_users():
       return await Users_.select().run()
 ```
+#### Piccolo Auth
+
+**Structure**
+
+If you choose to go with Picoolo authentication, the project will have a folder inside the db folder with the following structure:
+
+```
+src/app/db/
+├── auth/
+│   ├── __init__.py
+│   ├── piccolo_conf.py
+│   └── ...
+```
+
+**Session Auth**
+Piccolo has a side project called piccolo-api that provides with some useful tools for ASGI applications, including built in authentication, admin interface, etc.
+
+Piccolo [recommends using session auth](https://piccolo-api.readthedocs.io/en/latest/which_authentication/index.html) for most apps, so we are going with that.
+
+For a complete guide on how to set up session auth with piccolo api, read their [docs](https://piccolo-api.readthedocs.io/en/latest/session_auth/index.html).
+
+Piccolo's session auth comes with a built in `SessionsBase` table to store the session tokens, and a `BaseUser` table to store user credentials. 
+
+**Piccolo auth apps and tables**
+Both apps are included by default in `src/app/db/auth/piccolo_conf.py`, so you can immediately start using them:
+
+```python
+from piccolo.conf.apps import AppRegistry
+from piccolo.engine.sqlite import SQLiteEngine
+
+DB = SQLiteEngine(path="auth_db.sqlite")
+
+# A list of paths to piccolo apps
+APP_REGISTRY = AppRegistry(
+    apps=[
+        "piccolo_api.session_auth.piccolo_app",
+        "piccolo.apps.user.piccolo_app",
+    ]
+)
+```
+
+To create both tables using migrations, after the hyperpytext app is created, run the following command to setup the auth app:
+
+```bash
+piccolo migrations forwards user
+piccolo migrations forwards session_auth
+```
+
+**Endpoints**
+
+
+
 
 ### Tailwind CSS Integration
 
