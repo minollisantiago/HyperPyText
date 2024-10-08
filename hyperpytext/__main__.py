@@ -23,6 +23,8 @@ from utils.poetry_utils import (
 )
 
 # TODO: Piccolo built-in auth, implement it
+# TODO: The piccolo example app for src/app/db/primary needs a way to pre-incluide the migration file content, the only problem is that the 
+# base file comes with the date, maybe we could include the current date
 # TODO: Add a local port by default on .env maybe and a serve() or run() function to start the uvicorn server
 
 @click.command()
@@ -177,7 +179,7 @@ def create_app(app_name):
                 if template_file == 'pyproject.yaml':
                     filename = templates['filename']
                     content = templates['content']
-                    db_example_dependencies = 'bcrypt = "^4.2.0"\nfaker = "^30.1.0"' if piccolo_example else ''
+                    db_example_dependencies = 'faker = "^30.1.0"' if piccolo_example else ''
                     content = content.format(
                         app_name=app_name,
                         db_example_dependencies=db_example_dependencies

@@ -39,58 +39,57 @@
     from piccolo.table import Table
     from piccolo.columns import Varchar, Timestamp
 
-    class Users_(Table, tablename="users_"):
+    class Clients(Table, tablename="clients"):
         name = Varchar(length=100, unique=True, index=True)
         email = Varchar(length=100, unique=True, index=True)
-        hashed_password = Varchar(length=100, null=True)
+        company = Varchar(length=100)
+        role = Varchar(length=100)
         created_at = Timestamp(auto_now=True)
         updated_at = Timestamp(auto_now_add=True)
 
 - filename: ./src/app/db/primary/db_populate.py
   content: |
-    import bcrypt
     import asyncio
     from faker import Faker
     from datetime import datetime
-    from tables import Users_
+    from tables import Clients
     from piccolo.engine import PostgresEngine, engine_finder
 
-    async def create_random_users(num_users=50):
+    async def create_random_clients(num_clients=50):
         """
-        Creates fake user data using the Faker library and inserts it into the Users_ table.
+        Creates fake client data using the Faker library and inserts it into the Clients table.
         """
         fake = Faker()
 
-        for _ in range(num_users):
+        for _ in range(num_clients):
             name = fake.name()
             email = fake.email()
-            password = fake.password()
-            hashed_password = bcrypt.hashpw(
-                password.encode('utf-8'), bcrypt.gensalt()
-            ).decode('utf-8')
+            company = fake.company()
+            role = fake.job()
 
-            await Users_.insert(
-                Users_(
+            await Clients.insert(
+                Clients(
                     name=name,
                     email=email,
-                    hashed_password=hashed_password,
+                    company=company,
+                    role=role,
                     created_at=datetime.now(),
                     updated_at=datetime.now()
                 )
             )
-            print(f"Created user {name}, email: {email}")
-        print(f"Created {num_users} random users.")
+            print(f"Created client {name}, email: {email}, company: {company}, role: {role}")
+        print(f"Created {num_clients} random clients.")
 
     async def main():
         engine = engine_finder()
         if isinstance(engine, PostgresEngine):
             await engine.start_connection_pool()
             try:
-                await create_random_users()
+                await create_random_clients()
             finally:
                 await engine.close_connection_pool()
         else:
-            await create_random_users()
+            await create_random_clients()
 
     if __name__ == "__main__":
         asyncio.run(main())

@@ -144,24 +144,24 @@ Each of them is pre-built with the proper configuration, including `piccolo_app.
 
 #### Primary Database example
 
-If you choose to add the example piccolo app when prompted while creating the project, it will include a `tables.py` file with a pre-defined Users table example. You can find it at `src/app/db/primary/tables.py`. 
+If you choose to add the example piccolo app when prompted while creating the project, it will include a `tables.py` file with a pre-defined `Clients` table example. You can find it at `src/app/db/primary/tables.py`. 
 
-The file will include a Users_ piccolo table, with the following model: 
+The file will include a Clients piccolo table, with the following model: 
 
 ```python
 from piccolo.table import Table
 from piccolo.columns import Varchar, Timestamp
 
-class Users_(Table, tablename="users_"):
+class Clients(Table, tablename="clients"):
     name = Varchar(length=100, unique=True, index=True)
     email = Varchar(length=100, unique=True, index=True)
-    hashed_password = Varchar(length=100, null=True)
+    company = Varchar(length=100)
+    role = Varchar(length=100)
     created_at = Timestamp(auto_now=True)
     updated_at = Timestamp(auto_now_add=True)
 ```
 
-#### Creating and running migrations
-
+**Creating and running migrations**
 Once you've created the project, you can create and run migrations for the primary database. First you need to navigate to the primary database folder:
 
 ```bash
@@ -202,10 +202,10 @@ This will populate the database with some random data so you can begin querying 
 cd src/app/db/primary
 piccolo shell run
 ```
-Then you can query the database using the piccolo syntax, for example for a `SELECT * FROM users_` query the syntax would be:
+Then you can query the database using the piccolo syntax, for example for a `SELECT * FROM clients` query the syntax would be:
 
 ```bash
-await Users_.select()
+await Clients.select()
 ```
 For more Query types, go [here](https://piccolo-orm.readthedocs.io/en/latest/piccolo/query_types/index.html).
 
@@ -262,11 +262,11 @@ Here is a general overview of the Piccolo CLI, for more information check the [P
 To use Piccolo in your FastAPI endpoints, first import your tables and then use Piccolo's query API in your route handlers:
 
 ```python
-from src.app.db.primary.tables import Users_
+from src.app.db.primary.tables import Clients
 
-@app.get("/users")
-async def get_users():
-      return await Users_.select().run()
+@app.get("/clients")
+async def get_clients():
+      return await Clients.select().run()
 ```
 #### Piccolo Auth
 
