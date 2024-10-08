@@ -2,6 +2,7 @@
 import os
 import yaml
 import click
+from datetime import datetime
 from pkg_resources import resource_filename
 from utils.npm_utils import check_npm, npm_install_instructions
 from utils.npm_tailwind_utils import (
@@ -106,6 +107,15 @@ def create_app(app_name):
         update_package_json_for_electron(app_dir, app_name)
         click.echo("Electron setup complete.")
 
+    # Setup Piccolo Database (auth and example if selected)
+    db_files = [f'db_{filename}.yaml' for filename in ['primary', 'cache', 'queues',]]
+    if piccolo_auth: db_files.append('db_auth.yaml')
+
+    # Setup Root files & tailwind input.css
+    root_files = [
+        f'{filename}.yaml' for filename in ['env', 'init', 'readme', 'uvicorn', 'gitignore', 'input_css',]
+    ]
+
     # Create files from templates
     for template_file in os.listdir(templates_dir):
 
@@ -131,26 +141,6 @@ def create_app(app_name):
                         content = template['content'].format(html_filename=html_filename)
                         create_file(filename, content)
 
-                # Database piccolo setup
-                db_files = [
-                    f'db_{filename}.yaml' for filename in [
-                        'primary',
-                        'cache',
-                        'queues',
-                    ]
-                ]
-                if piccolo_auth:
-                    db_files.append('db_auth.yaml')
-
-                if template_file in db_files:
-                    click.echo('Creating piccolo database files')
-                    for template in templates:
-                        filename = template['filename']
-                        if not piccolo_example and (filename.endswith('tables.py') or filename.endswith('db_populate.py')):
-                            continue
-                        content = template['content']
-                        create_file(filename, content)
-
                 # Index starter HTML5 template
                 if template_file == 'index.yaml':
                     click.echo(f'Creating {html_filename}.html file')
@@ -158,17 +148,25 @@ def create_app(app_name):
                     content = templates['content'].format(title=html_filename)
                     create_file(filename, content)
 
+                # Db
+                if template_file in db_files:
+                    click.echo('Creating piccolo database files')
+                    for template in templates:
+                        filename = template['filename']
+                        content = template['content']
+                        create_file(filename, content)
+
+                # Db example
+                if template_file == 'db_primary_example.yaml' and piccolo_example:
+                    current_time = datetime.now()
+                    migrations_timestamp = current_time.strftime("%Y-%m-%dT%H:%M:%S:%f")
+                    migrations_file_name = f"primary_{current_time.strftime('%Y_%m_%dt%H_%M_%S_%f')}.py"
+                    for template in templates:
+                        filename = template['filename'].format(filename=migrations_file_name)
+                        content = template['content'].replace('{migrations_timestamp}', migrations_timestamp)
+                        create_file(filename, content)
+
                 # Root files & tailwind input.css
-                root_files = [
-                    f'{filename}.yaml' for filename in [
-                        'env',
-                        'init',
-                        'readme',
-                        'uvicorn',
-                        'gitignore',
-                        'input_css',
-                    ]
-                ]
                 if template_file in root_files:
                     filename = templates['filename']
                     click.echo(f'Creating {filename}')
@@ -200,7 +198,7 @@ def create_app(app_name):
                     click.echo(f'Creating Electron main.js file')
                     filename = templates['filename']
                     content = templates['content']
-                    content = content.replace('{', '{{').replace('}', '}}')
+                    content = content.replace('{{', '{').replace('}}', '}')
                     content = content.format(app_name=app_name)
                     create_file(filename, content)
 
