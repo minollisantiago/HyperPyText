@@ -6,16 +6,16 @@
   content: |
     from fastapi import FastAPI
     from fastapi.staticfiles import StaticFiles
-    from src.app.api import router_root
+    from app.api.routes.root import router_root
 
-    app_name = "HyperPyText-App"  # You can customize this name
-    app_description = "A FastAPI application created with HyperPyText"
-    app_version = "0.1.0"
+    APP_NAME = "HyperPyText-App"  # You can customize this name
+    APP_DESCRIPTION = "A FastAPI application created with HyperPyText"
+    APP_VERSION = "0.1.0"
 
     app = FastAPI(
-        title=app_name,
-        description=app_description,
-        version=app_version
+        title=APP_NAME,
+        description=APP_DESCRIPTION,
+        version=APP_VERSION
     )
 
     # Static file mounts

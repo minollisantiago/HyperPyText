@@ -23,7 +23,8 @@ from utils.poetry_utils import (
     poetry_install_instructions
 )
 
-# TODO: Piccolo built-in auth, implement it
+# TODO: need to include the auth routes imports into app.py if piccolo_auth==True
+# TODO: Move the root route to a new yaml file: routes_root.yaml
 # TODO: Consider including vite for hot module replacement and fast build for js and css (tailwind), particularly during developement
 
 @click.command()
@@ -188,6 +189,7 @@ def create_app(app_name):
 
                 # Db example
                 if template_file == 'db_primary_example.yaml' and piccolo_example:
+                    click.echo('Creating a piccolo database example')
                     migrations_file_name = f"primary_{current_time.strftime('%Y_%m_%dt%H_%M_%S_%f')}.py"
                     for template in templates:
                         filename = template['filename'].format(filename=migrations_file_name)
@@ -195,12 +197,30 @@ def create_app(app_name):
                         create_file(filename, content)
 
                 # Authentication
-                if template_file == 'db_auth.yaml' and piccolo_auth:
-                    migrations_file_name = f"auth_{current_time.strftime('%Y_%m_%dt%H_%M_%S_%f')}.py"
-                    for template in templates:
-                        filename = template['filename'].format(filename=migrations_file_name)
-                        content = template['content'].replace('{migrations_timestamp}', migrations_timestamp)
-                        create_file(filename, content)
+                if piccolo_auth:
+                    click.echo('Creating authentication routes, route response schemas and piccolo_api dependencies')
+
+                    # Db
+                    if template_file == 'db_auth.yaml':
+                        migrations_file_name = f"auth_{current_time.strftime('%Y_%m_%dt%H_%M_%S_%f')}.py"
+                        for template in templates:
+                            filename = template['filename'].format(filename=migrations_file_name)
+                            content = template['content'].replace('{migrations_timestamp}', migrations_timestamp)
+                            create_file(filename, content)
+
+                    # Routes
+                    if template_file == 'routes_auth.yaml':
+                        for template in templates:
+                            filename = template['filename']
+                            content = template['content']
+                            create_file(filename, content)
+
+                    # Schemas
+                    if template_file == 'routes_schemas.yaml':
+                        for template in templates:
+                            filename = template['filename']
+                            content = template['content']
+                            create_file(filename, content)
 
                 # Root files & tailwind input.css
                 if template_file in root_files:

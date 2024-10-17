@@ -1,6 +1,5 @@
 - filename: ./src/app/api/__init__.py
   content: |
-    from .routes.root import router as router_root
 
 - filename: ./src/app/api/routes/__init__.py
   content: |

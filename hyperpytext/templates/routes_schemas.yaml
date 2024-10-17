@@ -1,0 +1,53 @@
+- filename: ./src/app/api/routes/schemas.py
+  content: |
+    from typing import Type
+    from pydantic import BaseModel
+    from piccolo.apps.user.tables import BaseUser
+    from piccolo_api.crud.serializers import create_pydantic_model
+
+    '''
+    Schemas for input/output serialization
+    Classes (UserModelIn / UserModelOut) are used to avoid type warnings form the linter (when using variables as types)
+    '''
+    UserModelIn_: Type[BaseModel] = create_pydantic_model(
+        table=BaseUser,
+        include_columns=(
+            BaseUser.username,
+            BaseUser.password,
+            BaseUser.email,
+        ),
+        exclude_columns=(
+            BaseUser.active,
+            BaseUser.admin,
+            BaseUser.first_name,
+            BaseUser.last_name,
+            BaseUser.superuser,
+            BaseUser.last_login,
+        ),
+        model_name="UserModelIn",
+    )
+
+
+    UserModelOut_: Type[BaseModel] = create_pydantic_model(
+        table=BaseUser,
+        include_default_columns=True,
+        exclude_columns=(
+            BaseUser.password,
+            BaseUser.email,
+            BaseUser.admin,
+            BaseUser.first_name,
+            BaseUser.last_name,
+            BaseUser.superuser,
+        ),
+        model_name="UserModelOut",
+    )
+
+
+    class UserModelIn(UserModelIn_):
+        username:str
+        password:str
+        email:str
+
+
+    class UserModelOut(UserModelOut_):
+        pass
