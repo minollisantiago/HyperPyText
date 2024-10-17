@@ -24,9 +24,7 @@ from utils.poetry_utils import (
 )
 
 # TODO: Piccolo built-in auth, implement it
-# TODO: The piccolo example app for src/app/db/primary needs a way to pre-incluide the migration file content, the only problem is that the 
-# base file comes with the date, maybe we could include the current date
-# TODO: Add a local port by default on .env maybe and a serve() or run() function to start the uvicorn server
+# TODO: Consider including vite for hot module replacement and fast build for js and css (tailwind), particularly during developement
 
 @click.command()
 @click.argument('app_name')
@@ -35,8 +33,8 @@ def create_app(app_name):
     templates_dir = resource_filename('hyperpytext', 'templates')
 
     ascii_logo = """
-                                            # ::::                                                                                           ::::::::::     
-                                       --------:::::             ::----::::::                :::::::::::              :::::::::         -=======---::::   
+                                            # ::::                                                                                           ::::::::::   
+                                       --:::::::::::             ::::::::::::                :::::::::::              :::::::::         -=======---::::   
                                    --=++++++++=---::::     ::---=++++++=----:::           --==++==----::::        ----===-----::::   **********+++=--:::: 
                                --=*#%%%%%%#***+++=--::::--=+**##%##*****++=--::::     --+*********+++=--:::   :-=+********+++=--:::*%%%%%%%%%%%***++=--:::
                             --+#%%%%%%%%%%%%%#***++---+*#%%%%%%%%%%%%%#***++=--:: --=*%%%%%%%%%%%#**+++--:::-+#%%%%%%%%%%****++=-+%%%%%%%%%%%%%%%**+++--::
@@ -60,6 +58,7 @@ def create_app(app_name):
    %%%%%%%%%%%%%%%      %%%%%%%%                        %%%%%%                    %%%%%%%%              %%%%%%%%%%%%%%%%%                                 
      %%%%%%%%%%                                                                                            @%%%%%%%%                                      
     """
+
     click.echo(ascii_logo)
 
     # Prompt for HTML filename

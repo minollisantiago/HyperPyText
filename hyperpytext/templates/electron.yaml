@@ -5,7 +5,7 @@ content: |
 
   function createWindow() {
     const win = new BrowserWindow({
-      title: "{app_name}",
+      title: {app_name},
       width: 1516,
       height: 872,
       minWidth: 1320,

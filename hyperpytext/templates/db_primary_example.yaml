@@ -4,12 +4,12 @@
     from piccolo.columns import Varchar, Timestamp
 
     class Clients(Table, tablename="clients"):
-        name = Varchar(length=100, unique=True, index=True)
-        email = Varchar(length=100, unique=True, index=True)
-        company = Varchar(length=100)
-        role = Varchar(length=100)
-        created_at = Timestamp(auto_now=True)
-        updated_at = Timestamp(auto_now_add=True)
+        name:Varchar = Varchar(length=100, unique=True, index=True)
+        email:Varchar  = Varchar(length=100, unique=True, index=True)
+        company:Varchar  = Varchar(length=100)
+        role:Varchar  = Varchar(length=100)
+        created_at:Timestamp = Timestamp(auto_now=True)
+        updated_at:Timestamp = Timestamp(auto_now_add=True)
 
 - filename: ./src/app/db/primary/migrations/{filename}
   content: |
