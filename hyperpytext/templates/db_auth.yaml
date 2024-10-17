@@ -1,6 +1,9 @@
 - filename: ./src/app/db/auth/__init__.py
   content: |
 
+- filename: ./src/app/db/auth/migrations/__init__.py
+  content: |
+
 - filename: ./src/app/db/auth/piccolo_conf.py
   content: |
     from piccolo.conf.apps import AppRegistry
@@ -12,8 +15,151 @@
     # e.g. ['blog.piccolo_app']
     APP_REGISTRY = AppRegistry(
         apps=[
+            "piccolo_app",
             "piccolo_api.session_auth.piccolo_app",
             "piccolo.apps.user.piccolo_app",
         ]
     )
 
+- filename: ./src/app/db/auth/piccolo_app.py
+  content: |
+    """
+    Import all of the Tables subclasses in your app here, and register them with
+    the APP_CONFIG.
+    """
+
+    from piccolo.conf.apps import AppConfig, table_finder
+
+    APP_NAME = "auth"
+
+    APP_CONFIG = AppConfig(
+        app_name=APP_NAME,
+        migrations_folder_path="migrations",
+        table_classes=table_finder(modules=["tables"]),
+        migration_dependencies=[],
+        commands=[],
+    )
+
+- filename: ./src/app/db/auth/tables.py
+  content: |
+    from __future__ import annotations
+
+    import secrets
+    from typing import Optional, cast
+    from piccolo.table import Table
+    from datetime import datetime
+    from piccolo.columns import Varchar, Timestamp, Integer
+    from piccolo.columns.defaults.timestamp import TimestampOffset
+
+    class PasswordResetToken(Table, tablename="reset_tokens"):
+        """
+        Same structure as ``SessionsBase``, simply used to temporary store a
+        token for password reset in case user forgot password.
+        """
+        token:Varchar = Varchar(length=100, unique=True, null=False)
+        user_id:Integer = Integer(null=False)
+        expiry_date:Timestamp = Timestamp(default=TimestampOffset(minutes=30), null=False)
+
+
+        @classmethod
+        async def create_token(
+            cls, user_id: int, expiry_date: Optional[datetime] = None,
+        ) -> PasswordResetToken:
+            """Creates a temporary token for password reset."""
+            while True:
+                token = secrets.token_urlsafe(nbytes=32)
+                if not await cls.exists().where(cls.token == token).run():
+                    break
+
+            password_reset_token = cls(token=token, user_id=user_id)
+            if expiry_date:
+                password_reset_token.expiry_date = expiry_date
+
+            await password_reset_token.save().run()
+            return password_reset_token
+
+
+        @classmethod
+        async def get_user_id(cls, token: str) -> Optional[int]:
+            """Returns the ``user_id`` if the given token is valid, otherwise ``None``."""
+            password_reset_token = await cls.objects().where(cls.token == token).first().run()
+
+            if not password_reset_token:
+                return None
+
+            now = datetime.now()
+            if password_reset_token.expiry_date > now:
+                return cast(Optional[int], password_reset_token.user_id)
+            else:
+                return None
+
+
+        @classmethod
+        async def remove_password_reset_token(cls, token: str):
+            """Deletes a matching password reset token from the database."""
+            await cls.delete().where(cls.token == token).run()
+
+- filename: ./src/app/db/auth/migrations/{filename}
+  content: |
+    from piccolo.apps.migrations.auto.migration_manager import MigrationManager
+    from piccolo.columns.defaults.timestamp import TimestampOffset
+
+    ID = "{migrations_timestamp}"
+    DESCRIPTION = "Creating the password reset token table"
+
+    async def forwards():
+        manager = MigrationManager(
+            migration_id=ID, app_name="primary", description=DESCRIPTION
+        )
+
+        print(f"running {ID}")
+
+        manager.add_table("PasswordResetToken", tablename="reset_tokens")
+
+        manager.add_column(
+            table_class_name="PasswordResetToken",
+            tablename="reset_tokens",
+            column_name="token",
+            column_class_name="Varchar",
+            params={
+                "length": 100,
+                "default": "",
+                "null": False,
+                "primary": False,
+                "key": False,
+                "unique": False,
+                "index": False,
+            },
+        )
+
+        manager.add_column(
+            table_class_name="PasswordResetToken",
+            tablename="reset_tokens",
+            column_name="user_id",
+            column_class_name="Integer",
+            params={
+                "default": 0,
+                "null": False,
+                "primary": False,
+                "key": False,
+                "unique": False,
+                "index": False,
+            },
+        )
+
+        manager.add_column(
+            table_class_name="PasswordResetToken",
+            tablename="reset_tokens",
+            column_name="expiry_date",
+            column_class_name="Timestamp",
+            params={
+                "default": TimestampOffset(minutes=30),
+                "null": False,
+                "primary": False,
+                "key": False,
+                "unique": False,
+                "index": False,
+            },
+        )
+
+        return manager

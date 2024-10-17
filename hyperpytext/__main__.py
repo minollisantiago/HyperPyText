@@ -87,7 +87,7 @@ def create_app(app_name):
 
     # Prompt for Piccolo app example
     piccolo_example = click.confirm('Would you like to include a Piccolo db app example for SQLite?', default=False)
-    
+
     # Prompt for Piccolo auth
     piccolo_auth = click.confirm('Would you like to include Piccolo authentication?', default=False)
 
@@ -134,9 +134,12 @@ def create_app(app_name):
         update_package_json_for_electron(app_dir, app_name)
         click.echo("Electron setup complete.")
 
-    # Setup Piccolo Database (auth and example if selected)
+    # Setup Piccolo Database
     db_files = [f'db_{filename}.yaml' for filename in ['primary', 'cache', 'queues',]]
-    if piccolo_auth: db_files.append('db_auth.yaml')
+
+    # Database migrations timestamp
+    current_time = datetime.now()
+    migrations_timestamp = current_time.strftime("%Y-%m-%dT%H:%M:%S:%f")
 
     # Setup Root files & tailwind input.css
     root_files = [
@@ -175,7 +178,7 @@ def create_app(app_name):
                     content = templates['content'].format(title=html_filename)
                     create_file(filename, content)
 
-                # Db
+                # Db base
                 if template_file in db_files:
                     click.echo('Creating piccolo database files')
                     for template in templates:
@@ -185,9 +188,15 @@ def create_app(app_name):
 
                 # Db example
                 if template_file == 'db_primary_example.yaml' and piccolo_example:
-                    current_time = datetime.now()
-                    migrations_timestamp = current_time.strftime("%Y-%m-%dT%H:%M:%S:%f")
                     migrations_file_name = f"primary_{current_time.strftime('%Y_%m_%dt%H_%M_%S_%f')}.py"
+                    for template in templates:
+                        filename = template['filename'].format(filename=migrations_file_name)
+                        content = template['content'].replace('{migrations_timestamp}', migrations_timestamp)
+                        create_file(filename, content)
+
+                # Authentication
+                if template_file == 'db_auth.yaml' and piccolo_auth:
+                    migrations_file_name = f"auth_{current_time.strftime('%Y_%m_%dt%H_%M_%S_%f')}.py"
                     for template in templates:
                         filename = template['filename'].format(filename=migrations_file_name)
                         content = template['content'].replace('{migrations_timestamp}', migrations_timestamp)
@@ -249,3 +258,4 @@ def create_file(filename, content=''):
 
 if __name__ == '__main__':
     create_app()
+
