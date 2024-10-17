@@ -198,10 +198,10 @@ def create_app(app_name):
 
                 # Authentication
                 if piccolo_auth:
-                    click.echo('Creating authentication routes, route response schemas and piccolo_api dependencies')
 
                     # Db
                     if template_file == 'db_auth.yaml':
+                        click.echo('Creating piccolo_api database dependencies')
                         migrations_file_name = f"auth_{current_time.strftime('%Y_%m_%dt%H_%M_%S_%f')}.py"
                         for template in templates:
                             filename = template['filename'].format(filename=migrations_file_name)
@@ -210,6 +210,7 @@ def create_app(app_name):
 
                     # Routes
                     if template_file == 'routes_auth.yaml':
+                        click.echo('Creating authentication routes.')
                         for template in templates:
                             filename = template['filename']
                             content = template['content']
@@ -217,6 +218,7 @@ def create_app(app_name):
 
                     # Schemas
                     if template_file == 'routes_schemas.yaml':
+                        click.echo('Creating route response schemas')
                         for template in templates:
                             filename = template['filename']
                             content = template['content']

@@ -6,7 +6,7 @@
   content: |
     from fastapi import FastAPI
     from fastapi.staticfiles import StaticFiles
-    from app.api.routes.root import router_root
+    from app.api.routes.root import router as router_root
 
     APP_NAME = "HyperPyText-App"  # You can customize this name
     APP_DESCRIPTION = "A FastAPI application created with HyperPyText"
