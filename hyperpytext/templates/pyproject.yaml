@@ -16,6 +16,7 @@ content: |
   python-dotenv = "^1.0.0"
   piccolo = {{extras = ["all"], version = "^1.20.0"}}
   piccolo-api = "^1.5.2"
+  yagmail = "^0.15.293"
   {db_example_dependencies}
 
   [tool.poetry.dev-dependencies]
