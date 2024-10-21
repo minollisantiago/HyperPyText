@@ -1,6 +1,8 @@
 - filename: ./src/app/api/routes/auth.py
   content: |
+    import os
     from pydantic import EmailStr
+    from dotenv import load_dotenv
     from schemas import UserModelIn, UserModelOut, ChangePasswordRequest
     from piccolo.apps.user.tables import BaseUser
     from src.app.db.auth.tables import PasswordResetToken
@@ -9,10 +11,11 @@
     from fastapi.security import OAuth2PasswordRequestForm
     from fastapi import APIRouter, Depends, HTTPException, status, Response, Cookie, BackgroundTasks
 
+    load_dotenv()
 
     TAG = "Auth"
     COOKIE_ALIAS = "session_id"
-    EMAIL_DOMAIN = "https://yourdomain.com"
+    EMAIL_DOMAIN = os.environ.get("APP_URL")
     router = APIRouter()
 
 
@@ -188,8 +191,3 @@
                     f"Welcome back, {user.username}! Your password has been reset successfully."
                 )
             }
-
-
-    @router.get("/profile/", response_model=UserModelOut, tags=["User profile"])
-    async def user_profile(current_user: UserModelOut = Depends(get_current_user),):
-        return current_user

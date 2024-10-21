@@ -8,9 +8,10 @@ content: |
   load_dotenv()
 
   if __name__ == "__main__":
-      host = os.getenv("SERVER_HOST")
-      port = os.getenv("SERVER_PORT")
+      host = os.environ.get("SERVER_HOST")
+      port = os.environ.get("SERVER_PORT")
 
-      if host is None or port is None:
-          raise ValueError("SERVER_HOST and SERVER_PORT must be set in the .env file")
+      if not host or not port:
+          raise ValueError("SERVER_HOST and SERVER_PORT must be set in the .env file or environment")
+      
       uvicorn.run(app, host=host, port=int(port))
