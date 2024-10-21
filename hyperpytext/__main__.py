@@ -23,7 +23,7 @@ from utils.poetry_utils import (
     poetry_install_instructions
 )
 
-# TODO: need to include the auth routes imports into app.py if piccolo_auth==True
+# TODO: Handle all authentication redirects, at least to specific endpoints, use piccolo docs for reference (all their auth endpoints have redirects)
 # TODO: Move the root route to a new yaml file: routes_root.yaml
 # TODO: Consider including vite for hot module replacement and fast build for js and css (tailwind), particularly during developement
 
