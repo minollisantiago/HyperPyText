@@ -216,9 +216,9 @@ def create_app(app_name):
                             content = template['content']
                             create_file(filename, content)
 
-                    # Schemas
-                    if template_file == 'routes_schemas.yaml':
-                        click.echo('Creating route response schemas')
+                    # Route Models (types)
+                    if template_file == 'routes_models.yaml':
+                        click.echo('Creating route response models')
                         for template in templates:
                             filename = template['filename']
                             content = template['content']

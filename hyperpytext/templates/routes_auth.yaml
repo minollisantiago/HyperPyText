@@ -3,7 +3,7 @@
     import os
     from pydantic import EmailStr
     from dotenv import load_dotenv
-    from schemas import UserModelIn, UserModelOut, ChangePasswordRequest
+    from models import UserModelIn, UserModelOut, ChangePasswordRequest
     from piccolo.apps.user.tables import BaseUser
     from src.app.db.auth.tables import PasswordResetToken
     from src.app.utils.send_email import send_email
