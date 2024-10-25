@@ -1,0 +1,33 @@
+filename: ./.gitignore
+content: |
+  # Python
+  __pycache__/
+  *.py[cod]
+  *$py.class
+
+  # Virtual Environment
+  venv/
+  env/
+  .env
+  server/.env
+
+  # IDEs
+  .vscode/
+  .idea/
+
+  # Logs
+  *.log
+
+  # OS generated files
+  .DS_Store
+  Thumbs.db
+
+  # Node
+  client/node_modules/
+  client/package-lock.json
+
+  # Database files (SQLite)
+  server/db/*.sqlite
+  server/db/**/*.sqlite
+  server/db/*.db
+  server/db/**/*.db

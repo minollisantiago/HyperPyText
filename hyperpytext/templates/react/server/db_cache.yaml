@@ -1,0 +1,35 @@
+- filename: ./server/src/app/db/cache/__init__.py
+  content: |
+
+- filename: ./server/src/app/db/cache/migrations/__init__.py
+  content: |
+
+- filename: ./server/src/app/db/cache/piccolo_conf.py
+  content: |
+    from piccolo.conf.apps import AppRegistry
+    from piccolo.engine.sqlite import SQLiteEngine
+
+    DB = SQLiteEngine(path="cache_db.sqlite")
+
+    # A list of paths to piccolo apps
+    # e.g. ['blog.piccolo_app']
+    APP_REGISTRY = AppRegistry(apps=["piccolo_app"])
+
+- filename: ./server/src/app/db/cache/piccolo_app.py
+  content: |
+    """
+    Import all of the Tables subclasses in your app here, and register them with
+    the APP_CONFIG.
+    """
+
+    from piccolo.conf.apps import AppConfig, table_finder
+
+    APP_NAME = "cache"
+
+    APP_CONFIG = AppConfig(
+        app_name=APP_NAME,
+        migrations_folder_path="migrations",
+        table_classes=table_finder(modules=["tables"]),
+        migration_dependencies=[],
+        commands=[],
+    )

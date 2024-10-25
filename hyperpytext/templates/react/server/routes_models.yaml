@@ -1,4 +1,4 @@
-- filename: ./src/app/api/routes/models.py
+- filename: ./server/src/app/api/routes/models.py
   content: |
     from typing import Type
     from pydantic import BaseModel

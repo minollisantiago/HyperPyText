@@ -1,0 +1,23 @@
+- filename: ./src/app/api/__init__.py
+  content: |
+
+- filename: ./src/app/api/routes/__init__.py
+  content: |
+
+- filename: ./src/app/api/routes/root.py
+  content: |
+    from fastapi.responses import HTMLResponse
+    from fastapi import APIRouter, HTTPException, Request
+    from fastapi.templating import Jinja2Templates
+
+    router = APIRouter()
+    templates = Jinja2Templates(directory='./src/app/templates')
+
+    @router.get("/", response_class=HTMLResponse)
+    async def root(request: Request) -> HTMLResponse:
+        try:
+            response_context = {{'request': request}}
+            response_ = templates.TemplateResponse('{html_filename}.html', response_context)
+            return response_
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=str(e))

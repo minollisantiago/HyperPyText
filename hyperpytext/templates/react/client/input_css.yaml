@@ -1,0 +1,36 @@
+filename: ./client/src/styles/globals.css
+content: |
+  @tailwind base;
+  @tailwind components;
+  @tailwind utilities;
+
+  @layer base {
+    /* Content grid for the whole dashboard with line columns */
+    .content-grid {
+      --gap: clamp(1rem, 3vw, 3rem);
+      --full: minmax(var(--gap), 1fr);
+      --content: min(82ch, 100% - var(--gap) * 2);
+      --popout: minmax(0, 20rem);
+      --feature: minmax(0, 4rem);
+
+      display: grid;
+      grid-template-columns:
+        [full-start] var(--full) [feature-start] var(--feature) [popout-start] var(--popout) [content-start] var(--content) [content-end] var(--popout) [popout-end] var(--feature) [feature-end] var(--full) [full-end];
+    }
+
+    .content-grid > * {
+      grid-column: content;
+    }
+
+    .popout {
+      grid-column: popout;
+    }
+
+    .feature {
+      grid-column: feature;
+    }
+
+    .full {
+      grid-column: full;
+    }
+  }

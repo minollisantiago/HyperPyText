@@ -1,0 +1,19 @@
+- filename: ./server/src/app/api/__init__.py
+  content: |
+
+- filename: ./server/src/app/api/routes/__init__.py
+  content: |
+
+- filename: ./server/src/app/api/routes/root.py
+  content: |
+    from fastapi import APIRouter, HTTPException, Request
+
+    router = APIRouter()
+
+    @router.get("/", response_model=dict[str, str])
+    async def root(request: Request):
+        try:
+            response_ = {"message": "Hello World!"}
+            return response_
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=str(e))

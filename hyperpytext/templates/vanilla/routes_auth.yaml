@@ -1,0 +1,193 @@
+- filename: ./src/app/api/routes/auth.py
+  content: |
+    import os
+    from pydantic import EmailStr
+    from dotenv import load_dotenv
+    from models import UserModelIn, UserModelOut, ChangePasswordRequest
+    from piccolo.apps.user.tables import BaseUser
+    from src.app.db.auth.tables import PasswordResetToken
+    from src.app.utils.send_email import send_email
+    from piccolo_api.session_auth.tables import SessionsBase
+    from fastapi.security import OAuth2PasswordRequestForm
+    from fastapi import APIRouter, Depends, HTTPException, status, Response, Cookie, BackgroundTasks
+
+    load_dotenv()
+
+    TAG = "Auth"
+    COOKIE_ALIAS = "session_id"
+    EMAIL_DOMAIN = os.environ.get("APP_URL")
+    router = APIRouter()
+
+
+    async def get_current_user(token: str = Cookie(None, alias=COOKIE_ALIAS)) -> BaseUser | None:
+        """
+        Checks the validity of the session token, retrieves and returns the associated user.
+        ### Args:
+            token (str): The session token obtained from the cookie.
+        """
+        if not token:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Not authenticated",
+            )
+
+        user_id: int | None = await SessionsBase.get_user_id(token)
+        if not user_id:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Invalid session",
+            )
+
+        user: BaseUser | None = await BaseUser.objects().get(BaseUser.id == user_id)
+        return user
+
+
+    @router.post("/login/", response_model=dict[str, str], tags=[TAG])
+    async def login_user(
+        form_data: OAuth2PasswordRequestForm = Depends(),
+        response: Response = Depends()
+    ):
+        """
+        Validates credentials, creates a session, and sets a session cookie.
+        ### Args:
+            form_data (OAuth2PasswordRequestForm): The login form data containing username and password.
+            response (Response): The FastAPI response object for setting cookies.
+        """
+        user_id: int | None = await BaseUser.login(
+            username=form_data.username, password=form_data.password
+        )
+
+        if not user_id:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Incorrect username or password",
+            )
+
+        session: SessionsBase = await SessionsBase.create_session(user_id)
+        response.set_cookie(key=COOKIE_ALIAS, value=session.token, httponly=True)
+
+        return {"message": "Login successful"}
+
+
+    @router.post("/logout/", response_model=dict[str, str], tags=[TAG])
+    async def logout_user(
+        token: str = Cookie(None, alias=COOKIE_ALIAS),
+        response: Response = Depends()
+    ):
+        """Logs out the user by removing the session and deleting the cookie."""
+        if token:
+            await SessionsBase.remove_session(token)
+            response.delete_cookie(key=COOKIE_ALIAS)
+            return {"message": "Logout successful"}
+
+        return {"message": "No active session to logout"}
+
+
+    @router.post("/register/", response_model=UserModelOut, tags=[TAG])
+    async def register_user(user: UserModelIn):
+        """
+        Register a new user with the provided information.
+        Returns serialized model class UserModelOut.
+        """
+        try:
+            new_user: BaseUser = await BaseUser.create_user(
+                username=user.username,
+                email=user.email,
+                password=user.password,
+                active=True,
+            )
+            return UserModelOut.model_validate(new_user)
+        except ValueError as e:
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                detail=str(e),
+            )
+
+
+    @router.post("/change-password/", response_model=dict[str, str], tags=[TAG])
+    async def change_password_(
+        request: ChangePasswordRequest,
+        current_user: BaseUser = Depends(get_current_user),
+        token: str = Cookie(None, alias=COOKIE_ALIAS),
+        response: Response = Depends()
+    ):
+        """
+        Change the password for an authenticated user.
+        Validates the current password, confirms new password match,
+        updates the password, and logs out the user.
+        """
+        if request.new_password != request.confirm_password:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="New passwords do not match",
+            )
+
+        if not await BaseUser.login(current_user.username, request.current_password):
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Current password is incorrect",
+            )
+
+        try:
+            await BaseUser.update_password(user=current_user.username, password=request.new_password)
+
+            if token:
+                await SessionsBase.remove_session(token)
+                response.delete_cookie(key=COOKIE_ALIAS)
+
+            return {
+                "message": "Your password has been changed successfully. Please log in again with your new password."
+            }
+
+        except ValueError as e:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e),)
+
+
+    @router.post("/password-reset-request/", response_model=dict[str, str], tags=[TAG])
+    async def request_password_reset(email: EmailStr, background_tasks: BackgroundTasks):
+        """
+        Initiates a password reset request for the given email.
+        If the email exists in the database, a password reset token is created and
+        a reset link is sent to the user's email address.
+        """
+        user: BaseUser | None = await BaseUser.objects().get(BaseUser.email == email)
+        if user:
+            token_db:PasswordResetToken = await PasswordResetToken.create_token(user_id=user.id)
+            reset_url = f"{EMAIL_DOMAIN}/password-reset?token={token_db.token}"
+            subject = "Password Reset Request"
+            body = f"Click the following link to reset your password: {reset_url}"
+            background_tasks.add_task(send_email, to_email=user.email, subject=subject, body=body)
+
+        return {"message": "If the email exists, a password reset link will be sent shortly."}
+
+
+    @router.post("/password-reset/", response_model=dict[str, str], tags=[TAG])
+    async def password_reset(token: str, new_password: str, confirm_password: str):
+        """
+        Reset user's password using a valid reset token.
+        Validates the token, confirms password match, updates the password
+        and deletes the used token.
+        """
+        if new_password != confirm_password:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Passwords do not match",
+            )
+
+        user_id: int | None = await PasswordResetToken.get_user_id(token)
+        if not user_id:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Invalid or expired token",
+            )
+
+        user: BaseUser | None = await BaseUser.objects().get(BaseUser.id == user_id)
+        if user:
+            await BaseUser.update_password(user=user.username, password=new_password)
+            await PasswordResetToken.delete().where(PasswordResetToken.user_id == user_id)
+
+            return {
+                "message": (
+                    f"Welcome back, {user.username}! Your password has been reset successfully."
+                )
+            }

@@ -7,7 +7,7 @@ setup(
     packages=['hyperpytext'],
     include_package_data=True,
     package_data={
-        'hyperpytext': ['templates/*.yaml'],
+        'hyperpytext': ['templates/**/*.yaml'],
     },
     install_requires=[
         'Click',

@@ -1,0 +1,28 @@
+filename: ./client/tailwind.config.js
+content: |
+  /** @type {import('tailwindcss').Config} */
+  const defaultTheme = require('tailwindcss/defaultTheme')
+  module.exports = {
+    darkMode: 'selector',
+    content: [
+      "./server/src/app/templates/**/*.html",
+      "./server/src/assets/**/*.js",
+      "./server/src/**/*.py",
+    ],
+    theme: {
+      screens: {
+        xs: '390px',
+        sm: '435px',
+        md: '768px',
+        lg: '1024px',
+        xl: '1280px',
+        xl2: '1536px',
+        xl3: '1680px',
+      },
+      extend: {
+        fontFamily: {__FONTS__},
+        colors: {},
+      },
+    },
+    plugins: [__PLUGINS__],
+  }
