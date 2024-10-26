@@ -1,9 +1,9 @@
-import subprocess
-import sys
-import click
-import json
 import os
-from .npm_utils import check_system, check_npm
+import sys
+import json
+import click
+import subprocess
+from .npm_utils import check_system, check_npm_package
 
 
 def check_tailwind_npm2():
@@ -15,17 +15,6 @@ def check_tailwind_npm2():
     except (subprocess.CalledProcessError, FileNotFoundError):
         return False
 
-def check_tailwind_npm():
-    package_json_ = os.path.join(os.getcwd(), 'package.json')
-    if os.path.exists(package_json_):
-        with open(package_json_, 'r') as file:
-            package_json = json.load(file)
-            dependencies = package_json.get('dependencies', {})
-            dev_dependencies = package_json.get('devDependencies', {})
-            if any(['tailwindcss' in dep for dep in [dependencies, dev_dependencies]]):
-                return True
-    return False
-
 
 def check_tailwind_standalone():
     tailwind_exe = "tailwindcss.exe" if sys.platform.startswith('win') else "tailwindcss"
@@ -36,7 +25,7 @@ def setup_tailwind_npm(project_dir, plugins, fonts):
     os.chdir(project_dir)
     npm_ = "npm.cmd" if check_system() == "windows" else "npm"
     npx_ = "npx.cmd" if check_system() == "windows" else "npx"
-    if not check_tailwind_npm():
+    if not check_npm_package('tailwindcss'):
         click.echo("Installing Tailwind CSS...")
         subprocess.run([npm_, "init", "-y"], check=True)
         subprocess.run([npm_, "install", "-D", "tailwindcss@latest", "autoprefixer@latest"], check=True)

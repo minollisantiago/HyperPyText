@@ -1,6 +1,8 @@
-import subprocess
+import os
 import sys
+import json
 import click
+import subprocess
 
 
 def check_system():
@@ -39,3 +41,15 @@ def npm_install_instructions():
     click.echo("4. After installation, restart your terminal/command prompt")
     click.echo("5. Verify the installation by running 'node --version' and 'npm --version'")
     click.echo("Once npm is installed, please run this script again.")
+
+
+def check_npm_package(package):
+    package_json_ = os.path.join(os.getcwd(), 'package.json')
+    if os.path.exists(package_json_):
+        with open(package_json_, 'r') as file:
+            package_json = json.load(file)
+            dependencies = package_json.get('dependencies', {})
+            dev_dependencies = package_json.get('devDependencies', {})
+            if any([package in dep for dep in [dependencies, dev_dependencies]]):
+                return True
+    return False

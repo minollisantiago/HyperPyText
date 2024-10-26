@@ -4,23 +4,31 @@ import yaml
 import click
 from datetime import datetime
 from pkg_resources import resource_filename
-from utils.npm_utils import check_npm, npm_install_instructions
+from utils.npm_utils import (
+    check_npm,
+    npm_install_instructions,
+    check_npm_package,
+)
+from utils.npm_vite_utils import (
+    setup_vite_npm,
+    update_package_json_for_vite,
+    configure_vite_proxy,
+)
 from utils.npm_tailwind_utils import (
-    check_tailwind_npm,
     check_tailwind_standalone,
     setup_tailwind_npm,
     setup_tailwind_standalone,
     update_tailwind_config,
-    update_package_json
+    update_package_json,
 )
 from utils.npm_electron_utils import (
     setup_electron_npm,
-    update_package_json_for_electron
+    update_package_json_for_electron,
 )
 from utils.poetry_utils import (
     check_poetry,
     setup_environment,
-    poetry_install_instructions
+    poetry_install_instructions,
 )
 
 # TODO: Handle all authentication redirects, at least to specific endpoints, use piccolo docs for reference (all their auth endpoints have redirects)
@@ -211,6 +219,12 @@ def create_app(app_name):
                         create_file(filename, content)
 
         click.echo(f"App '{app_name}' has been created successfully!")
+        click.echo(f"Now setting up the react client app...")
+
+        # Setup Vite and the react client
+        setup_vite_npm(app_dir, template='react', use_typescript=True)
+        update_package_json_for_vite(app_dir)
+        configure_vite_proxy(app_dir)
 
         # Prompt to install environment
         install_env = click.confirm('Would you like to install python dependencies? (poetry required)', default=False)
@@ -282,7 +296,7 @@ def create_app(app_name):
             if not check_npm():
                 npm_install_instructions()
                 return
-            if not check_tailwind_npm():
+            if not check_npm_package('tailwindcss'):
                 click.echo("Tailwind CSS is not installed. It will be installed during app setup.")
         elif tailwind == 'standalone':
             if not check_tailwind_standalone():
