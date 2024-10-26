@@ -224,10 +224,39 @@ def create_app(app_name):
         click.echo(f"App '{app_name}' has been created successfully!")
         click.echo(f"Now setting up the react client app...")
 
+        # Prompt for Tailwind CSS and plugins
+        tailwind = 'none'
+        plugins = []
+        if click.confirm('Would you like to use Tailwind CSS?', default=False):
+            tailwind = 'npm'
+            for plugin in ['forms', 'typography', 'container-queries']:
+                if click.confirm(f'Would you like to install the Tailwind {plugin} plugin?', default=False):
+                    plugins.append(plugin)
+
+        # Pompt for custom fonts
+        fonts = False
+        if check_npm() and tailwind != 'none':
+            if click.confirm(f'Would you like to install Geist fonts?', default=False):
+                fonts = True
+
         # Setup Vite and the react client
-        setup_vite_npm(app_dir, template='react', use_typescript=True)
-        update_package_json_for_vite(app_dir)
-        configure_vite_proxy(app_dir)
+        if not check_npm():
+            npm_install_instructions()
+            return
+        else:
+            setup_vite_npm(app_dir, template='react', use_typescript=True)
+            update_package_json_for_vite(app_dir)
+            configure_vite_proxy(app_dir)
+
+        # Setup Tailwind if selected
+        if not check_npm():
+            npm_install_instructions()
+            return
+        else:
+            client_dir = os.path.join(app_dir, 'client')
+            setup_tailwind_npm(client_dir, plugins, fonts)
+            update_package_json(client_dir, '"build-css": "tailwindcss -i ./src/assets/css/globals.css -o ./src/assets/css/style.css"')
+            update_package_json(client_dir, '"watch-css": "tailwindcss -i ./src/assets/css/globals.css -o ./src/assets/css/style.css --watch"')
 
         # Prompt to install environment
         install_env = click.confirm('Would you like to install python dependencies? (poetry required)', default=False)
