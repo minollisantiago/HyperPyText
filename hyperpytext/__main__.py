@@ -4,16 +4,6 @@ import yaml
 import click
 from datetime import datetime
 from pkg_resources import resource_filename
-from utils.npm_utils import (
-    check_npm,
-    npm_install_instructions,
-    check_npm_package,
-)
-from utils.npm_vite_utils import (
-    setup_vite_npm,
-    update_package_json_for_vite,
-    configure_vite_proxy,
-)
 from utils.npm_tailwind_utils import (
     check_tailwind_standalone,
     setup_tailwind_npm,
@@ -21,16 +11,14 @@ from utils.npm_tailwind_utils import (
     update_tailwind_config,
     update_package_json,
 )
-from utils.npm_electron_utils import (
-    setup_electron_npm,
-    update_package_json_for_electron,
-)
-from utils.poetry_utils import (
-    check_poetry,
-    setup_environment,
-    poetry_install_instructions,
-)
+from utils.npm_shadcnui_utils import setup_shadcn_ui
+from utils.npm_utils import check_npm, npm_install_instructions, check_npm_package
+from utils.npm_electron_utils import setup_electron_npm, update_package_json_for_electron
+from utils.poetry_utils import check_poetry, setup_environment, poetry_install_instructions
+from utils.npm_vite_utils import setup_vite_npm, update_package_json_for_vite, configure_vite_proxy
 
+# TODO: Make a reference to the host and port on this file to reference on the vite server proxy and .env file
+# TODO: Make the update_package_json function more generic, one for all npm dependencies
 # TODO: Update docs with the new project structure (react app)
 # TODO: Update docs with auth setup (backend) including migrations
 # TODO: Update docs with all shortcut scripts created on package.json
@@ -86,8 +74,10 @@ def create_app(app_name):
         default='react',
     )
 
-    ###### REACT FRONTEND SETUP ######
+    ###### PYTHON + REACT APP SETUP ######
     if app_client == 'react':
+
+        ### Server setup ###
 
         click.echo(f"\nSetting up the python server:")
 
@@ -222,6 +212,9 @@ def create_app(app_name):
                         create_file(filename, content)
 
         click.echo(f"App '{app_name}' has been created successfully!")
+        
+        ### Client setup ###
+
         click.echo(f"Now setting up the react client app...")
 
         # Prompt for Tailwind CSS and plugins
@@ -233,33 +226,43 @@ def create_app(app_name):
                 if click.confirm(f'Would you like to install the Tailwind {plugin} plugin?', default=False):
                     plugins.append(plugin)
 
-        # Pompt for custom fonts
+        # Prompt for custom fonts
         fonts = False
         if check_npm() and tailwind != 'none':
-            if click.confirm(f'Would you like to install Geist fonts?', default=False):
-                fonts = True
+            fonts = click.confirm(f'Would you like to install Geist fonts?', default=False)
 
-        # Setup Vite and the react client
+        # Prompt for Shadcn UI
+        shadcn_ui = False
+        if check_npm() and tailwind != 'none':
+            shadcn_ui = click.confirm('Would you like to install Shadcn UI components?', default=False)
+
+        # Setup NPM dependencies
         if not check_npm():
             npm_install_instructions()
             return
         else:
+            # Setup Vite and the react client
             setup_vite_npm(app_dir, template='react', use_typescript=True)
             update_package_json_for_vite(app_dir)
             configure_vite_proxy(app_dir)
 
-        # Setup Tailwind if selected
-        if not check_npm():
-            npm_install_instructions()
-            return
-        else:
-            client_dir = os.path.join(app_dir, 'client')
-            setup_tailwind_npm(client_dir, plugins, fonts)
-            update_package_json(client_dir, '"build-css": "tailwindcss -i ./src/assets/css/globals.css -o ./src/assets/css/style.css"')
-            update_package_json(client_dir, '"watch-css": "tailwindcss -i ./src/assets/css/globals.css -o ./src/assets/css/style.css --watch"')
+            # Setup Tailwind if selected
+            if tailwind != 'none':
+                client_dir = os.path.join(app_dir, 'client')
+                setup_tailwind_npm(client_dir, plugins, fonts)
+                update_package_json(client_dir, '"build-css": "tailwindcss -i ./src/assets/css/globals.css -o ./src/assets/css/style.css"')
+                update_package_json(client_dir, '"watch-css": "tailwindcss -i ./src/assets/css/globals.css -o ./src/assets/css/style.css --watch"')
+
+            # Setup Shadcn UI if selected
+            if shadcn_ui and tailwind != 'none':
+                setup_shadcn_ui(app_dir)
 
         # Prompt to install environment
-        install_env = click.confirm('Would you like to install python dependencies? (poetry required)', default=False)
+        install_env = click.confirm(
+            'Would you like to install python dependencies? (poetry required)',
+            default=False
+        )
+
         if install_env:
             if not check_poetry():
                 poetry_install_instructions()
@@ -271,7 +274,7 @@ def create_app(app_name):
                 os.chdir(app_dir)
 
 
-    ###### VANILLA JS FRONTEND SETUP ######
+    ###### PYTHON + VANILLA JS APP SETUP ######
     elif app_client == 'vanilla':
 
         templates_dir = resource_filename('hyperpytext', 'templates/vanilla')

@@ -42,19 +42,23 @@ def update_package_json_for_vite(project_dir):
 
 
 def configure_vite_proxy(project_dir):
-    vite_config_path = os.path.join(project_dir, 'client', 'vite.config.js')
+    vite_config_path = os.path.join(project_dir, 'client', 'vite.config.ts')
     if os.path.exists(vite_config_path):
         with open(vite_config_path, 'r') as f:
             config_content = f.read()
         
         updated_config = config_content.replace(
             "export default defineConfig({",
-            """export default defineConfig({
-  server: {
-    proxy: {
-      '/api': 'http://localhost:8000',
-    },
-  },"""
+            (
+            """
+            export default defineConfig({
+                server: {
+                    proxy: {
+                        '/api': 'http://localhost:8000',
+                    },
+                },
+            """
+            )
         )
         
         with open(vite_config_path, 'w') as f:
