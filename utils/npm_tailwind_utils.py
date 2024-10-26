@@ -28,7 +28,10 @@ def setup_tailwind_npm(project_dir, plugins, fonts):
     if not check_npm_package('tailwindcss'):
         click.echo("Installing Tailwind CSS...")
         subprocess.run([npm_, "init", "-y"], check=True)
-        subprocess.run([npm_, "install", "-D", "tailwindcss@latest", "autoprefixer@latest"], check=True)
+        subprocess.run(
+            [npm_, "install", "-D", "tailwindcss@latest", "autoprefixer@latest", "postcss@latest"],
+            check=True
+        )
 
     subprocess.run([npx_, "tailwindcss", "init", "-p"], check=True)
 

@@ -31,6 +31,9 @@ from utils.poetry_utils import (
     poetry_install_instructions,
 )
 
+# TODO: Update docs with the new project structure (react app)
+# TODO: Update docs with auth setup (backend) including migrations
+# TODO: Update docs with all shortcut scripts created on package.json
 # TODO: Handle all authentication redirects, at least to specific endpoints, use piccolo docs for reference (all their auth endpoints have redirects)
 # TODO: Move the root route to a new yaml file: routes_root.yaml
 # TODO: Consider including vite for hot module replacement and fast build for js and css (tailwind), particularly during developement
