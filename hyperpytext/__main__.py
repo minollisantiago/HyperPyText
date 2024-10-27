@@ -117,11 +117,8 @@ def create_app(app_name):
 
         # Create files from templates
         for template_file in os.listdir(templates_dir):
-
             if template_file.endswith('.yaml'):
-
                 with open(os.path.join(templates_dir, template_file), 'r') as file:
-
                     templates = yaml.safe_load(file)
 
                     # App files
@@ -217,11 +214,13 @@ def create_app(app_name):
 
         click.echo(f"Now setting up the react client app...")
 
+        templates_dir = resource_filename('hyperpytext', 'templates/react/client')
+        client_dir = os.path.join(app_dir, 'client')
+
         # Prompt for Tailwind CSS and plugins
-        tailwind = 'none'
         plugins = []
-        if click.confirm('Would you like to use Tailwind CSS?', default=False):
-            tailwind = 'npm'
+        tailwind = click.confirm('Would you like to use Tailwind CSS?', default=False)
+        if tailwind:
             for plugin in ['forms', 'typography', 'container-queries']:
                 if click.confirm(f'Would you like to install the Tailwind {plugin} plugin?', default=False):
                     plugins.append(plugin)
@@ -243,19 +242,36 @@ def create_app(app_name):
         else:
             # Setup Vite and the react client
             setup_vite_npm(app_dir, template='react', use_typescript=True)
-            update_package_json_for_vite(app_dir)
-            configure_vite_proxy(app_dir)
 
             # Setup Tailwind if selected
-            if tailwind != 'none':
-                client_dir = os.path.join(app_dir, 'client')
+            if tailwind:
                 setup_tailwind_npm(client_dir, plugins, fonts)
-                update_package_json(client_dir, '"build-css": "tailwindcss -i ./src/assets/css/globals.css -o ./src/assets/css/style.css"')
-                update_package_json(client_dir, '"watch-css": "tailwindcss -i ./src/assets/css/globals.css -o ./src/assets/css/style.css --watch"')
 
-            # Setup Shadcn UI if selected
-            if shadcn_ui and tailwind != 'none':
-                setup_shadcn_ui(app_dir)
+                for template_file in os.listdir(templates_dir):
+                    if template_file.endswith('.yaml'):
+                        with open(os.path.join(templates_dir, template_file), 'r') as file:
+                            templates = yaml.safe_load(file)
+
+                            # Tailwind config update
+                            if template_file == 'tailwind.config.js.yaml':
+                                click.echo(f'Updated tailwind.config.js')
+                                filename = templates['filename']
+                                content = templates['content']
+                                create_file(filename, content)
+                                update_tailwind_config(filename, plugins, fonts)
+
+                            # Tailwind globals.css
+                            if template_file == 'globals.css.yaml':
+                                filename = templates['filename']
+                                click.echo(f'Creating {filename}')
+                                content = templates['content']
+                                create_file(filename, content)
+
+                # Setup Shadcn UI if selected
+                if shadcn_ui:
+                    setup_shadcn_ui(client_dir)
+
+                os.chdir(app_dir)
 
         # Prompt to install environment
         install_env = click.confirm(
@@ -340,8 +356,6 @@ def create_app(app_name):
         # Setup Tailwind if selected
         if tailwind == 'npm':
             setup_tailwind_npm(app_dir, plugins, fonts)
-            update_package_json(app_dir, '"build-css": "tailwindcss -i ./src/assets/css/globals.css -o ./src/assets/css/style.css"')
-            update_package_json(app_dir, '"watch-css": "tailwindcss -i ./src/assets/css/globals.css -o ./src/assets/css/style.css --watch"')
         elif tailwind == 'standalone':
             setup_tailwind_standalone(app_dir)
 
@@ -366,11 +380,8 @@ def create_app(app_name):
 
         # Create files from templates
         for template_file in os.listdir(templates_dir):
-
             if template_file.endswith('.yaml'):
-
                 with open(os.path.join(templates_dir, template_file), 'r') as file:
-
                     templates = yaml.safe_load(file)
 
                     # App files

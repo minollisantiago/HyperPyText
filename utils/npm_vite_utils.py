@@ -5,23 +5,6 @@ import subprocess
 from .npm_utils import check_system, check_npm_package
 
 
-def setup_vite_npm(project_dir, template='react', use_typescript=True):
-    os.chdir(project_dir)
-    npm_ = "npm.cmd" if check_system() == "windows" else "npm"
-    if not check_npm_package('vite'):
-        click.echo("Setting up Vite...")
-        template_with_ts = f"{template}-ts" if use_typescript else template
-        subprocess.run(
-            [npm_, "create", "vite@latest", "client", "--", "--template", template_with_ts], 
-            check=True
-        )
-        os.chdir("client")
-        click.echo("Running npm install...")
-        subprocess.run([npm_, "install"], check=True)
-        os.chdir("..")
-        click.echo("Vite setup complete.")
-
-
 def update_package_json_for_vite(project_dir):
     client_dir = os.path.join(project_dir, 'client')
     client_package_path = os.path.join(client_dir, 'package.json')
@@ -67,4 +50,26 @@ def configure_vite_proxy(project_dir):
         click.echo("Updated Vite config with proxy settings.")
     else:
         click.echo("Vite config not found. Skipping proxy configuration.")
+
+
+def setup_vite_npm(project_dir, template='react', use_typescript=True):
+    os.chdir(project_dir)
+    npm_ = "npm.cmd" if check_system() == "windows" else "npm"
+    if not check_npm_package('vite'):
+        click.echo("Setting up Vite...")
+        template_with_ts = f"{template}-ts" if use_typescript else template
+        subprocess.run(
+            [npm_, "create", "vite@latest", "client", "--", "--template", template_with_ts], 
+            check=True
+        )
+
+        os.chdir("client")
+        click.echo("Running npm install...")
+        subprocess.run([npm_, "install"], check=True)
+
+        update_package_json_for_vite(project_dir)
+        configure_vite_proxy(project_dir)
+
+        os.chdir("..")
+        click.echo("Vite setup complete.")
 

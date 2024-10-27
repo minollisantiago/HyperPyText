@@ -1,4 +1,4 @@
-filename: ./client/src/styles/globals.css
+filename: ./src/styles/globals.css
 content: |
   @tailwind base;
   @tailwind components;

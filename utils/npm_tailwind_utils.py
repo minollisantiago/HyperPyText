@@ -21,6 +21,24 @@ def check_tailwind_standalone():
     return os.path.exists(tailwind_exe)
 
 
+def update_package_json_for_tailwind(project_dir):
+    package_path = os.path.join(project_dir, 'package.json')
+    
+    if os.path.exists(package_path):
+        with open(package_path, 'r') as f:
+            package = json.load(f)
+        
+        package['scripts']['build-css'] = 'tailwindcss -i ./src/assets/css/globals.css -o ./src/assets/css/style.css'
+        package['scripts']['watch-css'] = 'tailwindcss -i ./src/assets/css/globals.css -o ./src/assets/css/style.css --watch'
+        
+        with open(package_path, 'w') as f:
+            json.dump(package, f, indent=2)
+        
+        click.echo("Updated package.json with Tailwind CSS scripts.")
+    else:
+        click.echo("package.json not found. Skipping package.json update for Tailwind CSS.")
+
+
 def setup_tailwind_npm(project_dir, plugins, fonts):
     os.chdir(project_dir)
     npm_ = "npm.cmd" if check_system() == "windows" else "npm"
@@ -42,6 +60,8 @@ def setup_tailwind_npm(project_dir, plugins, fonts):
     if fonts:
         click.echo(f"Installing Geist Fonts...")
         subprocess.run([npm_, "i", 'geist'], check=True)
+
+    update_package_json_for_tailwind(project_dir)
 
 
 def setup_tailwind_standalone(project_dir):
@@ -92,4 +112,3 @@ def update_tailwind_config(filename, plugins, fonts):
     # Update the file
     with open(filename, 'w') as f:
         f.write(updated_config)
-

@@ -6,7 +6,7 @@ from .npm_utils import check_system
 
 
 def update_tsconfig_json(project_dir):
-    tsconfig_path = os.path.join(project_dir, 'client', 'tsconfig.json')
+    tsconfig_path = os.path.join(project_dir, 'tsconfig.json')
     if os.path.exists(tsconfig_path):
         with open(tsconfig_path, 'r') as f:
             tsconfig = json.load(f)
@@ -28,7 +28,7 @@ def update_tsconfig_json(project_dir):
 
 
 def update_tsconfig_app_json(project_dir):
-    tsconfig_app_path = os.path.join(project_dir, 'client', 'tsconfig.app.json')
+    tsconfig_app_path = os.path.join(project_dir, 'tsconfig.app.json')
     if os.path.exists(tsconfig_app_path):
         new_config = {
             "compilerOptions": {
@@ -65,7 +65,7 @@ def update_tsconfig_app_json(project_dir):
 
 
 def install_types_node(project_dir):
-    os.chdir(os.path.join(project_dir, 'client'))
+    os.chdir(project_dir)
     npm_ = "npm.cmd" if check_system() == "windows" else "npm"
     try:
         subprocess.run([npm_, "install", "-D", "@types/node"], check=True)
@@ -75,23 +75,23 @@ def install_types_node(project_dir):
 
 
 def update_vite_config(project_dir):
-    vite_config_path = os.path.join(project_dir, 'client', 'vite.config.ts')
+    vite_config_path = os.path.join(project_dir, 'vite.config.ts')
     if os.path.exists(vite_config_path):
         new_config = (
-            """
-            import path from "path"
-            import react from "@vitejs/plugin-react"
-            import { defineConfig } from "vite"
+"""
+import path from "path"
+import react from "@vitejs/plugin-react"
+import { defineConfig } from "vite"
 
-            export default defineConfig({
-            plugins: [react()],
-            resolve: {
-                alias: {
-                "@": path.resolve(__dirname, "./src"),
-                },
-            },
-            })
-            """
+export default defineConfig({
+plugins: [react()],
+resolve: {
+    alias: {
+    "@": path.resolve(__dirname, "./src"),
+    },
+},
+})
+"""
         )
         with open(vite_config_path, 'w') as f:
             f.write(new_config)
@@ -106,7 +106,7 @@ def setup_shadcn_ui(project_dir):
     install_types_node(project_dir)
     update_vite_config(project_dir)
 
-    os.chdir(os.path.join(project_dir, 'client'))
+    os.chdir(project_dir)
     npx_ = "npx.cmd" if check_system() == "windows" else "npx"
     click.echo("Initializing Shadcn UI...")
     try:
