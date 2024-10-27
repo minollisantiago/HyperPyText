@@ -110,7 +110,7 @@ def setup_shadcn_ui(project_dir):
     npx_ = "npx.cmd" if check_system() == "windows" else "npx"
     click.echo("Initializing Shadcn UI...")
     try:
-        subprocess.run([npx_, "shadcn-ui@latest", "init"], check=True)
+        subprocess.run([npx_, "shadcn@latest", "init"], check=True)
         click.echo("Shadcn UI initialized successfully.")
     except subprocess.CalledProcessError:
         click.echo(
