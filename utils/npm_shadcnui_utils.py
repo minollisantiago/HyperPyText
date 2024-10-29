@@ -111,10 +111,7 @@ def setup_shadcn_ui(project_dir):
     click.echo("Initializing Shadcn UI...")
     try:
         subprocess.run([npx_, "shadcn@latest", "init"], check=True)
-        click.echo("Shadcn UI initialized successfully.")
     except subprocess.CalledProcessError:
         click.echo(
             "Failed to initialize Shadcn UI. Please check your npm installation and try again."
         )
-
-    click.echo("Shadcn UI configuration complete.")
