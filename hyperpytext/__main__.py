@@ -18,6 +18,7 @@ from utils.poetry_utils import check_poetry, setup_environment, poetry_install_i
 from utils.npm_vite_utils import setup_vite_npm, update_package_json_for_vite, configure_vite_proxy
 
 # TODO: testing SSH
+# TODO: Add some default shadcn components, at least examples
 # TODO: Make a reference to the host and port on this file to reference on the vite server proxy and .env file
 # TODO: Make the update_package_json function more generic, one for all npm dependencies
 # TODO: Update docs with the new project structure (react app)
