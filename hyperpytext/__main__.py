@@ -4,18 +4,18 @@ import yaml
 import click
 from datetime import datetime
 from pkg_resources import resource_filename
-from utils.npm_tailwind_utils import (
+from hyperpytext.utils.npm_tailwind_utils import (
     check_tailwind_standalone,
     setup_tailwind_npm,
     setup_tailwind_standalone,
     update_tailwind_config,
     update_package_json,
 )
-from utils.npm_shadcnui_utils import setup_shadcn_ui
-from utils.npm_utils import check_npm, npm_install_instructions, check_npm_package
-from utils.npm_electron_utils import setup_electron_npm, update_package_json_for_electron
-from utils.poetry_utils import check_poetry, setup_environment, poetry_install_instructions
-from utils.npm_vite_utils import setup_vite_npm, update_package_json_for_vite, configure_vite_proxy
+from hyperpytext.utils.npm_shadcnui_utils import setup_shadcn_ui
+from hyperpytext.utils.npm_utils import check_npm, npm_install_instructions, check_npm_package
+from hyperpytext.utils.npm_electron_utils import setup_electron_npm, update_package_json_for_electron
+from hyperpytext.utils.poetry_utils import check_poetry, setup_environment, poetry_install_instructions
+from hyperpytext.utils.npm_vite_utils import setup_vite_npm, update_package_json_for_vite, configure_vite_proxy
 
 # TODO: testing SSH
 # TODO: Add some default shadcn components, at least examples
