@@ -25,7 +25,7 @@ def poetry_install_instructions():
     click.echo("4. Verify the installation by running 'poetry --version'")
 
 
-def setup_environment():
+def setup_poetry_environment():
     click.echo("Installing environment...")
     try:
         subprocess.run(["poetry", "install"], check=True)

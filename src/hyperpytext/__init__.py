@@ -10,20 +10,23 @@ from hyperpytext.utils.npm_tailwind_utils import (
     update_tailwind_config,
 )
 from hyperpytext.utils.npm_shadcnui_utils import setup_shadcn_ui
-from hyperpytext.utils.npm_utils import check_npm, check_system, npm_install_instructions, check_npm_package
-from hyperpytext.utils.npm_electron_utils import setup_electron_npm, update_package_json_for_electron
-from hyperpytext.utils.poetry_utils import check_poetry, setup_environment, poetry_install_instructions
+from hyperpytext.utils.npm_utils import check_npm, npm_install_instructions, check_npm_package
+from hyperpytext.utils.npm_electron_utils import setup_electron_npm
+from hyperpytext.utils.poetry_utils import check_poetry, setup_poetry_environment, poetry_install_instructions
+from hyperpytext.utils.uv_utils import check_uv, setup_uv_environment, uv_install_instructions, uv_add_dependency, uv_remove_dependency
 from hyperpytext.utils.npm_vite_utils import setup_vite_npm
 
+#APP SETUP
+# TODO: Cleanup the code on this script, server first, then client, too much repeated code
 # TODO: Add some default shadcn components, at least examples
 # TODO: Make a reference to the host and port on this file to reference on the vite server proxy and .env file
-# TODO: Make the update_package_json function more generic, one for all npm dependencies
+# TODO: Handle all authentication redirects, at least to specific endpoints, use piccolo docs for reference (all their auth endpoints have redirects)
+# TODO: Move the root route to a new yaml file: routes_root.yaml
+
+#DOCS
 # TODO: Update docs with the new project structure (react app)
 # TODO: Update docs with auth setup (backend) including migrations
 # TODO: Update docs with all shortcut scripts created on package.json
-# TODO: Handle all authentication redirects, at least to specific endpoints, use piccolo docs for reference (all their auth endpoints have redirects)
-# TODO: Move the root route to a new yaml file: routes_root.yaml
-# TODO: Consider including vite for hot module replacement and fast build for js and css (tailwind), particularly during developement
 
 
 def get_template_path(template_path: str) -> str:
@@ -39,9 +42,27 @@ def create_file(filename, content=''):
         f.write(content)
 
 
+server_dependencies = [
+    "jinja2~=3.1.2",
+    "ipython~=8.28.0",
+    "uvicorn~=0.32.0",
+    "fastapi~=0.115.0",
+    "python-dotenv~=1.0.0",
+    "piccolo[all]~=1.22.0",
+    "piccolo-api~=1.5.2",
+    "yagmail~=0.15.293"
+]
+
 @click.command()
 @click.argument('app_name')
 def main(app_name:str) -> None:
+
+    # Prompt for App backend project manager
+    project_manager = click.prompt(
+        'Select a python project manager',
+        type=click.Choice(['poetry', 'uv']),
+        default='uv',
+    )
 
     # Prompt for App frontend
     app_client = click.prompt(
@@ -55,15 +76,15 @@ def main(app_name:str) -> None:
 
         ### Server setup ###
 
-        click.echo(f"\nSetting up the python server:")
+        click.echo(f"\nSetting up the python web server:")
 
         templates_dir = get_template_path('react/server')
 
+        # Prompt for Piccolo auth
+        piccolo_auth = click.confirm('Would you like to include authentication with Piccolo?', default=False)
+
         # Prompt for Piccolo app example
         piccolo_example = click.confirm('Would you like to include a Piccolo db app example for SQLite?', default=False)
-
-        # Prompt for Piccolo auth
-        piccolo_auth = click.confirm('Would you like to include Piccolo authentication?', default=False)
 
         # Start populating the project folder
         click.echo(f"\nCreating a new HyperPy app in {os.path.join(os.getcwd(), app_name)}")
@@ -72,21 +93,38 @@ def main(app_name:str) -> None:
         # Project structure
         os.makedirs(app_name, exist_ok=True)
         app_dir = os.path.abspath(app_name)
+        server_dir = os.path.join(app_dir, 'server')
+        os.makedirs(server_dir, exist_ok=True)
+
+        # Setup project
+        os.chdir(server_dir)
+
+        if piccolo_example:
+            server_dependencies.append('faker~=30.1.0')
+
+        if project_manager == 'uv':
+            if not check_uv():
+                uv_install_instructions()
+                return
+            else:
+                setup_uv_environment(dependencies=server_dependencies)
+
         os.chdir(app_dir)
 
+        # Setup server folders
         folders = {'server/src/app': ['api/routes', 'db', 'utils']}
         for base, subdirs in folders.items():
             for subdir in subdirs:
                 os.makedirs(os.path.join(base, subdir), exist_ok=True)
 
-        # Setup Piccolo Database
+        # Setup database
         db_files = [f'db_{filename}.yaml' for filename in ['primary', 'cache', 'queues',]]
 
         # Database migrations timestamp
         current_time = datetime.now()
         migrations_timestamp = current_time.strftime("%Y-%m-%dT%H:%M:%S:%f")
 
-        # Setup Root files
+        # Setup root files
         root_files = [
             f'{filename}.yaml' for filename in ['env', 'init', 'readme', 'uvicorn', 'gitignore']
         ]
@@ -99,7 +137,7 @@ def main(app_name:str) -> None:
 
                     # App files
                     if template_file == 'app.yaml':
-                        click.echo('creating app files')
+                        click.echo('Created app files')
                         for template in templates:
                             filename = template['filename']
                             content = template['content']
@@ -107,7 +145,7 @@ def main(app_name:str) -> None:
 
                     # Api
                     if template_file == 'api.yaml':
-                        click.echo(f'Creating fastApi routes example')
+                        click.echo(f'Created fastApi routes example')
                         for template in templates:
                             filename = template['filename']
                             content = template['content']
@@ -115,7 +153,7 @@ def main(app_name:str) -> None:
 
                     # Db base
                     if template_file in db_files:
-                        click.echo('Creating piccolo database files')
+                        click.echo('Created piccolo database files')
                         for template in templates:
                             filename = template['filename']
                             content = template['content']
@@ -123,7 +161,7 @@ def main(app_name:str) -> None:
 
                     # Db example
                     if template_file == 'db_primary_example.yaml' and piccolo_example:
-                        click.echo('Creating a piccolo database example')
+                        click.echo('Created a piccolo database example')
                         migrations_file_name = f"primary_{current_time.strftime('%Y_%m_%dt%H_%M_%S_%f')}.py"
                         for template in templates:
                             filename = template['filename'].format(filename=migrations_file_name)
@@ -135,7 +173,7 @@ def main(app_name:str) -> None:
 
                         # Db
                         if template_file == 'db_auth.yaml':
-                            click.echo('Creating piccolo_api database dependencies')
+                            click.echo('Created piccolo_api database dependencies')
                             migrations_file_name = f"auth_{current_time.strftime('%Y_%m_%dt%H_%M_%S_%f')}.py"
                             for template in templates:
                                 filename = template['filename'].format(filename=migrations_file_name)
@@ -144,7 +182,7 @@ def main(app_name:str) -> None:
 
                         # Routes
                         if template_file == 'routes_auth.yaml':
-                            click.echo('Creating authentication routes.')
+                            click.echo('Created authentication routes.')
                             for template in templates:
                                 filename = template['filename']
                                 content = template['content']
@@ -152,7 +190,7 @@ def main(app_name:str) -> None:
 
                         # Route Models (types)
                         if template_file == 'routes_models.yaml':
-                            click.echo('Creating route response models')
+                            click.echo('Created route response models')
                             for template in templates:
                                 filename = template['filename']
                                 content = template['content']
@@ -160,7 +198,7 @@ def main(app_name:str) -> None:
 
                     # Utils files
                     if template_file == 'utils.yaml':
-                        click.echo('creating app files')
+                        click.echo('Created app files')
                         for template in templates:
                             filename = template['filename']
                             content = template['content']
@@ -169,12 +207,12 @@ def main(app_name:str) -> None:
                     # Root files
                     if template_file in root_files:
                         filename = templates['filename']
-                        click.echo(f'Creating {filename}')
+                        click.echo(f'Created {filename}')
                         content = templates['content']
                         create_file(filename, content)
 
                     # Poetry config update
-                    if template_file == 'pyproject.yaml':
+                    if template_file == 'pyproject.yaml' and project_manager == 'poetry':
                         filename = templates['filename']
                         content = templates['content']
                         db_example_dependencies = 'faker = "^30.1.0"' if piccolo_example else ''
@@ -185,7 +223,7 @@ def main(app_name:str) -> None:
                         create_file(filename, content)
 
         click.echo(f"App '{app_name}' has been created successfully!")
-        
+
         ### Client setup ###
 
         click.echo(f"Now setting up the react client app...")
@@ -239,7 +277,7 @@ def main(app_name:str) -> None:
                             # Tailwind globals.css
                             if template_file == 'globals.css.yaml':
                                 filename = templates['filename']
-                                click.echo(f'Creating {filename}')
+                                click.echo(f'Created {filename}')
                                 content = templates['content']
                                 create_file(filename, content)
 
@@ -250,20 +288,20 @@ def main(app_name:str) -> None:
                 os.chdir(app_dir)
 
         # Prompt to install environment
-        install_env = click.confirm(
-            'Would you like to install python dependencies? (poetry required)',
-            default=False
-        )
-
-        if install_env:
-            if not check_poetry():
-                poetry_install_instructions()
-                return
-            else:
-                server_dir = os.path.join(os.getcwd(), 'server')
-                os.chdir(server_dir)
-                setup_environment()
-                os.chdir(app_dir)
+        if project_manager == 'poetry':
+            install_env = click.confirm(
+                'Would you like to install python dependencies? (poetry required)',
+                default=False
+            )
+            if install_env:
+                if not check_poetry():
+                    poetry_install_instructions()
+                    return
+                else:
+                    server_dir = os.path.join(os.getcwd(), 'server')
+                    os.chdir(server_dir)
+                    setup_poetry_environment()
+                    os.chdir(app_dir)
 
 
     ###### PYTHON + VANILLA JS APP SETUP ######
@@ -308,8 +346,25 @@ def main(app_name:str) -> None:
         # Project structure
         os.makedirs(app_name, exist_ok=True)
         app_dir = os.path.abspath(app_name)
+        server_dir = os.path.join(app_dir, 'server')
+        os.makedirs(server_dir, exist_ok=True)
+
+        # Setup project
+        os.chdir(server_dir)
+
+        if piccolo_example:
+            server_dependencies.append('faker~=30.1.0')
+
+        if project_manager == 'uv':
+            if not check_uv():
+                uv_install_instructions()
+                return
+            else:
+                setup_uv_environment(dependencies=server_dependencies)
+
         os.chdir(app_dir)
 
+        # Setup server folders
         folders = {
             'src/app': ['api/routes', 'components', 'db', 'utils', 'templates'],
             'src/assets': ['fonts', 'icons', 'images', 'svg-loaders', 'css', 'js']
@@ -361,7 +416,7 @@ def main(app_name:str) -> None:
 
                     # App files
                     if template_file == 'app.yaml':
-                        click.echo('creating app files')
+                        click.echo('Created app files')
                         for template in templates:
                             filename = template['filename']
                             content = template['content']
@@ -369,7 +424,7 @@ def main(app_name:str) -> None:
 
                     # Api
                     if template_file == 'api.yaml':
-                        click.echo(f'Creating fastApi routes example')
+                        click.echo(f'Created fastApi routes example')
                         for template in templates:
                             filename = template['filename']
                             content = template['content'].format(html_filename=html_filename)
@@ -377,14 +432,14 @@ def main(app_name:str) -> None:
 
                     # Index starter HTML5 template
                     if template_file == 'index.yaml':
-                        click.echo(f'Creating {html_filename}.html file')
+                        click.echo(f'Created {html_filename}.html file')
                         filename = templates['filename'].format(filename=html_filename)
                         content = templates['content'].format(title=html_filename)
                         create_file(filename, content)
 
                     # Db base
                     if template_file in db_files:
-                        click.echo('Creating piccolo database files')
+                        click.echo('Created piccolo database files')
                         for template in templates:
                             filename = template['filename']
                             content = template['content']
@@ -392,7 +447,7 @@ def main(app_name:str) -> None:
 
                     # Db example
                     if template_file == 'db_primary_example.yaml' and piccolo_example:
-                        click.echo('Creating a piccolo database example')
+                        click.echo('Created a piccolo database example')
                         migrations_file_name = f"primary_{current_time.strftime('%Y_%m_%dt%H_%M_%S_%f')}.py"
                         for template in templates:
                             filename = template['filename'].format(filename=migrations_file_name)
@@ -404,7 +459,7 @@ def main(app_name:str) -> None:
 
                         # Db
                         if template_file == 'db_auth.yaml':
-                            click.echo('Creating piccolo_api database dependencies')
+                            click.echo('Created piccolo_api database dependencies')
                             migrations_file_name = f"auth_{current_time.strftime('%Y_%m_%dt%H_%M_%S_%f')}.py"
                             for template in templates:
                                 filename = template['filename'].format(filename=migrations_file_name)
@@ -413,7 +468,7 @@ def main(app_name:str) -> None:
 
                         # Routes
                         if template_file == 'routes_auth.yaml':
-                            click.echo('Creating authentication routes.')
+                            click.echo('Created authentication routes.')
                             for template in templates:
                                 filename = template['filename']
                                 content = template['content']
@@ -421,7 +476,7 @@ def main(app_name:str) -> None:
 
                         # Route Models (types)
                         if template_file == 'routes_models.yaml':
-                            click.echo('Creating route response models')
+                            click.echo('Created route response models')
                             for template in templates:
                                 filename = template['filename']
                                 content = template['content']
@@ -429,7 +484,7 @@ def main(app_name:str) -> None:
 
                     # Utils files
                     if template_file == 'utils.yaml':
-                        click.echo('creating app files')
+                        click.echo('Created app files')
                         for template in templates:
                             filename = template['filename']
                             content = template['content']
@@ -438,12 +493,12 @@ def main(app_name:str) -> None:
                     # Root files & tailwind input.css
                     if template_file in root_files:
                         filename = templates['filename']
-                        click.echo(f'Creating {filename}')
+                        click.echo(f'Created {filename}')
                         content = templates['content']
                         create_file(filename, content)
 
                     # Poetry config update
-                    if template_file == 'pyproject.yaml':
+                    if template_file == 'pyproject.yaml' and project_manager == 'poetry':
                         filename = templates['filename']
                         content = templates['content']
                         db_example_dependencies = 'faker = "^30.1.0"' if piccolo_example else ''
@@ -464,7 +519,7 @@ def main(app_name:str) -> None:
 
                     # Electron setup
                     if template_file == 'electron.yaml' and use_electron:
-                        click.echo(f'Creating Electron main.js file')
+                        click.echo(f'Created Electron main.js file')
                         filename = templates['filename']
                         content = templates['content']
                         content = content.replace('{', '{{').replace('}', '}}')
@@ -474,10 +529,14 @@ def main(app_name:str) -> None:
         click.echo(f"App '{app_name}' has been created successfully!")
 
         # Prompt to install environment
-        install_env = click.confirm('Would you like to install python dependencies? (poetry required)', default=False)
-        if install_env:
-            if not check_poetry():
-                poetry_install_instructions()
-                return
-            else:
-                setup_environment()
+        if project_manager == 'poetry':
+            install_env = click.confirm(
+                'Would you like to install python dependencies? (poetry required)',
+                default=False
+            )
+            if install_env:
+                if not check_poetry():
+                    poetry_install_instructions()
+                    return
+                else:
+                    setup_poetry_environment()
