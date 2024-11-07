@@ -1,23 +1,20 @@
-
 import os
 import yaml
 import click
 from datetime import datetime
-from pkg_resources import resource_filename
+from importlib import resources
 from hyperpytext.utils.npm_tailwind_utils import (
     check_tailwind_standalone,
     setup_tailwind_npm,
     setup_tailwind_standalone,
     update_tailwind_config,
-    update_package_json,
 )
 from hyperpytext.utils.npm_shadcnui_utils import setup_shadcn_ui
-from hyperpytext.utils.npm_utils import check_npm, npm_install_instructions, check_npm_package
+from hyperpytext.utils.npm_utils import check_npm, check_system, npm_install_instructions, check_npm_package
 from hyperpytext.utils.npm_electron_utils import setup_electron_npm, update_package_json_for_electron
 from hyperpytext.utils.poetry_utils import check_poetry, setup_environment, poetry_install_instructions
-from hyperpytext.utils.npm_vite_utils import setup_vite_npm, update_package_json_for_vite, configure_vite_proxy
+from hyperpytext.utils.npm_vite_utils import setup_vite_npm
 
-# TODO: testing SSH
 # TODO: Add some default shadcn components, at least examples
 # TODO: Make a reference to the host and port on this file to reference on the vite server proxy and .env file
 # TODO: Make the update_package_json function more generic, one for all npm dependencies
@@ -29,7 +26,14 @@ from hyperpytext.utils.npm_vite_utils import setup_vite_npm, update_package_json
 # TODO: Consider including vite for hot module replacement and fast build for js and css (tailwind), particularly during developement
 
 
+def get_template_path(template_path: str) -> str:
+    """Get the absolute path to a template directory."""
+    with resources.path('hyperpytext.templates', template_path) as path:
+        return str(path)
+
+
 def create_file(filename, content=''):
+    """Writes the template file"""
     os.makedirs(os.path.dirname(filename), exist_ok=True)
     with open(filename, 'w') as f:
         f.write(content)
@@ -37,37 +41,7 @@ def create_file(filename, content=''):
 
 @click.command()
 @click.argument('app_name')
-def create_app(app_name):
-
-    ascii_logo = """
-                                            # ::::                                                                                           ::::::::::   
-                                       --:::::::::::             ::::::::::::                :::::::::::              :::::::::         -=======---::::   
-                                   --=++++++++=---::::     ::---=++++++=----:::           --==++==----::::        ----===-----::::   **********+++=--:::: 
-                               --=*#%%%%%%#***+++=--::::--=+**##%##*****++=--::::     --+*********+++=--:::   :-=+********+++=--:::*%%%%%%%%%%%***++=--:::
-                            --+#%%%%%%%%%%%%%#***++---+*#%%%%%%%%%%%%%#***++=--:: --=*%%%%%%%%%%%#**+++--:::-+#%%%%%%%%%%****++=-+%%%%%%%%%%%%%%%**+++--::
-                         -=*%%%%%%%%%%%%%%%%%%%#***#%%%%%%%%%%%%%%%%%%%%%**++=---*#%%%%%%%%%%%%%%%%#**++=+*%%%%%%%%%%%%%%%%#**+*%%%%%%%%%%%%%%%%%%**++=-::
-                      -=#%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%**++#%%%%%%%%%%%%%%%%%%%%%%**%%%%%%%%%%%%%%%%%%%%%%#%%%%%%%%%%%%%%%%%%%%%**+=-::
-                   -=#%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%**+=-::
-                 =#%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%**+-:: 
-              -*%%%%%#*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*+-:   
-            +%%%%%%%%#*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*=%%%%%%%%%%%%%%%%%%%%%%%%%%%%#=#%%%%%%%%%%%%%%%%%%*=:     
-         -#%%%%%%%%%%#******%%%**%%%%**%%*******%%%%#*****%%%%*******%%%#..-*-.:%%%.+%%%#.#%%=======*%%%+=====%%%#=+%%*=*%%+=======%%%%%%%%%%%%%%+:       
-       *%%%%%%%%%%%%%#*%%%%*#%%%*#%%#*%%%**%%%%#*%%#*%%%%#*%%%%%**%%%%%%#.#%%%*.-%%=.#%%.-%%%%%*=%%%%%%+=%%%%==%%%%==+=%%%%%%#=#%%%%%%%%%%%%%%%+:         
-     %%%%%%%%%%%%%%%%#*%%%%*#%%%#*%%*#%%%**%%%%#*%%********%%%%%*#%%%%%%#.#%%%%.:%%%-:%+.%%%%%%*=%%%%%%========%%%%%==*%%%%%%#=#%%%%%%%%%%%%%*-:          
-   %%%%%%%%%%%%%%%%%%#*%%%%*#%%%%****%%%%**%%%%**%%#*%%%%#*%%%%%*#%%%%%%#.-%%%=.%%%%%.-.+%%%%%%*=%%%%%%+=%%%%==%%%*=*#=+%%%%%#=*%%%%%%%%%%%*-:            
- %%%%%%%%%%%%%%%%%%%%#*%%%%*#%%%%%**%%%%%**#***#%%%%%****#%%%%******#%%%#.*-..-%%%%%%#.-%%%%%%%%+===*%%%#====*%%%+=#%%%==%%%%%*====%%%%%%#-:              
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%#**#%%%%%**%%%%%%%%%%%%%%%%%%%%%%%%%%%%%#.#%%%%%%%%%:.:%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%#=:                
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%#=                   
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%#+                     
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%#                        
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%          %%%%%%%%%%%%%%%%%%%%%%     %%%%%%%%%%%%%%%%%%%%%   %%%%%%%%%%%%%%%%%%%%%%%%%%%                          
- %%%%%%%%%%%%%%%%%%# %%%%%%%%%%%%%%%%               %%%%%%%%%%%%%%%%           %%%%%%%%%%%%%%%        %%%%%%%%%%%%%%%%%%%%%%%                             
-   %%%%%%%%%%%%%%%      %%%%%%%%                        %%%%%%                    %%%%%%%%              %%%%%%%%%%%%%%%%%                                 
-     %%%%%%%%%%                                                                                            @%%%%%%%%                                      
-    """
-
-    click.echo(ascii_logo)
-
+def main(app_name:str) -> None:
 
     # Prompt for App frontend
     app_client = click.prompt(
@@ -83,7 +57,7 @@ def create_app(app_name):
 
         click.echo(f"\nSetting up the python server:")
 
-        templates_dir = resource_filename('hyperpytext', 'templates/react/server')
+        templates_dir = get_template_path('react/server')
 
         # Prompt for Piccolo app example
         piccolo_example = click.confirm('Would you like to include a Piccolo db app example for SQLite?', default=False)
@@ -216,7 +190,7 @@ def create_app(app_name):
 
         click.echo(f"Now setting up the react client app...")
 
-        templates_dir = resource_filename('hyperpytext', 'templates/react/client')
+        templates_dir = get_template_path('react/client')
         client_dir = os.path.join(app_dir, 'client')
 
         # Prompt for Tailwind CSS and plugins
@@ -295,7 +269,7 @@ def create_app(app_name):
     ###### PYTHON + VANILLA JS APP SETUP ######
     elif app_client == 'vanilla':
 
-        templates_dir = resource_filename('hyperpytext', 'templates/vanilla')
+        templates_dir = get_template_path('vanilla')
 
         # Prompt for HTML filename
         if click.confirm('Would you like to change the name of index.html?', default=False):
@@ -364,8 +338,7 @@ def create_app(app_name):
         # Setup Electron if selected
         if use_electron:
             click.echo("Setting up Electron...")
-            setup_electron_npm(app_dir)
-            update_package_json_for_electron(app_dir, app_name)
+            setup_electron_npm(app_dir, app_name)
             click.echo("Electron setup complete.")
 
         # Setup Piccolo Database
@@ -508,8 +481,3 @@ def create_app(app_name):
                 return
             else:
                 setup_environment()
-
-
-if __name__ == '__main__':
-    create_app()
-

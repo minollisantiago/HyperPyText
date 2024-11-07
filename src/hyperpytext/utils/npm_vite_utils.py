@@ -1,27 +1,17 @@
 import os
-import json
 import click
 import subprocess
-from .npm_utils import check_system, check_npm_package
+from .npm_utils import check_system, check_npm_package, update_package_json
 
 
 def update_package_json_for_vite(project_dir):
-    client_dir = os.path.join(project_dir, 'client')
-    client_package_path = os.path.join(client_dir, 'package.json')
-    
-    if os.path.exists(client_package_path):
-        with open(client_package_path, 'r') as f:
-            client_package = json.load(f)
-        
-        client_package['scripts']['start'] = 'vite'
-        client_package['scripts']['build'] = 'vite build'
-        
-        with open(client_package_path, 'w') as f:
-            json.dump(client_package, f, indent=2)
-        
-        click.echo("Updated client package.json with Vite scripts.")
-    else:
-        click.echo("Client package.json not found. Skipping package.json update.")
+    updates = {
+        'scripts': {
+            'start': 'vite',
+            'build': 'vite build'
+        }
+    }
+    update_package_json(project_dir, updates, subdir='client')
 
 
 def configure_vite_proxy(project_dir):
@@ -29,7 +19,7 @@ def configure_vite_proxy(project_dir):
     if os.path.exists(vite_config_path):
         with open(vite_config_path, 'r') as f:
             config_content = f.read()
-        
+
         updated_config = config_content.replace(
             "export default defineConfig({",
             (
@@ -43,10 +33,10 @@ def configure_vite_proxy(project_dir):
             """
             )
         )
-        
+
         with open(vite_config_path, 'w') as f:
             f.write(updated_config)
-        
+
         click.echo("Updated Vite config with proxy settings.")
     else:
         click.echo("Vite config not found. Skipping proxy configuration.")

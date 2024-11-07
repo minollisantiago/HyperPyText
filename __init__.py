@@ -1,1 +1,0 @@
-from .hyperpytext import main

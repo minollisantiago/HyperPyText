@@ -1,9 +1,8 @@
 import os
 import sys
-import json
 import click
 import subprocess
-from .npm_utils import check_system, check_npm_package
+from .npm_utils import check_system, check_npm_package, update_package_json
 
 
 def check_tailwind_npm2():
@@ -22,21 +21,13 @@ def check_tailwind_standalone():
 
 
 def update_package_json_for_tailwind(project_dir):
-    package_path = os.path.join(project_dir, 'package.json')
-    
-    if os.path.exists(package_path):
-        with open(package_path, 'r') as f:
-            package = json.load(f)
-        
-        package['scripts']['build-css'] = 'tailwindcss -i ./src/assets/css/globals.css -o ./src/assets/css/style.css'
-        package['scripts']['watch-css'] = 'tailwindcss -i ./src/assets/css/globals.css -o ./src/assets/css/style.css --watch'
-        
-        with open(package_path, 'w') as f:
-            json.dump(package, f, indent=2)
-        
-        click.echo("Updated package.json with Tailwind CSS scripts.")
-    else:
-        click.echo("package.json not found. Skipping package.json update for Tailwind CSS.")
+    updates = {
+        'scripts': {
+            'build-css': 'tailwindcss -i ./src/assets/css/globals.css -o ./src/assets/css/style.css',
+            'watch-css': 'tailwindcss -i ./src/assets/css/globals.css -o ./src/assets/css/style.css --watch'
+        }
+    }
+    update_package_json(project_dir, updates)
 
 
 def setup_tailwind_npm(project_dir, plugins, fonts):
@@ -85,15 +76,6 @@ def setup_tailwind_standalone(project_dir):
             subprocess.run(["chmod", "+x", output], check=True)
             subprocess.run(["mv", output, "tailwindcss"], check=True)
     subprocess.run([f"./tailwindcss", "init"], check=True)
-
-
-def update_package_json(project_dir, new_scripts):
-    os.chdir(project_dir)
-    with open('package.json', 'r') as f:
-        package = json.load(f)
-    package['scripts'].update(json.loads('{' + new_scripts + '}'))
-    with open('package.json', 'w') as f:
-        json.dump(package, f, indent=2)
 
 
 def update_tailwind_config(filename, plugins, fonts):

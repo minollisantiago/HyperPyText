@@ -53,3 +53,34 @@ def check_npm_package(package):
             if any([package in dep for dep in [dependencies, dev_dependencies]]):
                 return True
     return False
+
+
+def update_package_json(project_dir, updates, subdir=None):
+    """
+    Universal package.json updater
+
+    Args:
+        project_dir: Base project directory
+        updates: Dict containing updates to merge into package.json
+        subdir: Optional subdirectory (from root) where package.json is located (e.g., 'client')
+    """
+    target_dir = os.path.join(project_dir, subdir) if subdir else project_dir
+    package_path = os.path.join(target_dir, 'package.json')
+
+    if os.path.exists(package_path):
+        with open(package_path, 'r') as f:
+            package = json.load(f)
+        
+        # Deep merge the updates
+        for key, value in updates.items():
+            if isinstance(value, dict) and key in package:
+                package[key].update(value)
+            else:
+                package[key] = value
+
+        with open(package_path, 'w') as f:
+            json.dump(package, f, indent=2)
+
+        click.echo(f"Updated package.json in {target_dir}")
+    else:
+        click.echo(f"package.json not found in {target_dir}. Skipping update.")

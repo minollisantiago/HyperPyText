@@ -1,9 +1,8 @@
 import click
 import subprocess
-import os
 
 
-def check_poetry(verbose=False):
+def check_poetry():
     try:
         result = subprocess.run(["poetry", "--version"], check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
         click.echo(f"Poetry is installed. Version: {result.stdout.strip()}")
