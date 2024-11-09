@@ -1,0 +1,7 @@
+filename: ./.envrc
+content: |
+  # Sync dependencies
+  uv sync
+
+  # Activate the project environment
+  source .venv/bin/activate

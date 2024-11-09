@@ -7,9 +7,13 @@ __pycache__/
 venv/
 env/
 .env
+.venv
 
 #Cursor
 .cursorrules
+
+#Direnv
+.envrc
 
 # Distribution / packaging
 .Python
@@ -25,6 +29,7 @@ parts/
 sdist/
 var/
 wheels/
+*.egg-info
 *.egg-info/
 .installed.cfg
 *.egg
@@ -42,9 +47,6 @@ Thumbs.db
 
 # Temporary files
 *.tmp
-
-# Poetry
-poetry.lock
 
 # Poetry
 poetry.lock

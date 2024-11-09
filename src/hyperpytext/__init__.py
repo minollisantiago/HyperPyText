@@ -1,6 +1,7 @@
 import os
 import yaml
 import click
+import subprocess
 from datetime import datetime
 from importlib import resources
 from hyperpytext.utils.npm_tailwind_utils import (
@@ -13,7 +14,7 @@ from hyperpytext.utils.npm_shadcnui_utils import setup_shadcn_ui
 from hyperpytext.utils.npm_utils import check_npm, npm_install_instructions, check_npm_package
 from hyperpytext.utils.npm_electron_utils import setup_electron_npm
 from hyperpytext.utils.poetry_utils import check_poetry, setup_poetry_environment, poetry_install_instructions
-from hyperpytext.utils.uv_utils import check_uv, setup_uv_environment, uv_install_instructions, uv_add_dependency, uv_remove_dependency
+from hyperpytext.utils.uv_utils import check_uv, setup_uv_environment, uv_install_instructions
 from hyperpytext.utils.npm_vite_utils import setup_vite_npm
 
 #APP SETUP
@@ -126,7 +127,7 @@ def main(app_name:str) -> None:
 
         # Setup root files
         root_files = [
-            f'{filename}.yaml' for filename in ['env', 'init', 'readme', 'uvicorn', 'gitignore']
+            f'{filename}.yaml' for filename in ['env', 'envrc', 'init', 'readme', 'uvicorn', 'gitignore']
         ]
 
         # Create files from templates
@@ -222,8 +223,6 @@ def main(app_name:str) -> None:
                         )
                         create_file(filename, content)
 
-        click.echo(f"App '{app_name}' has been created successfully!")
-
         ### Client setup ###
 
         click.echo(f"Now setting up the react client app...")
@@ -303,6 +302,9 @@ def main(app_name:str) -> None:
                     setup_poetry_environment()
                     os.chdir(app_dir)
 
+        # Task complete message
+        click.echo(f"App '{app_name}' has been created successfully!")
+
 
     ###### PYTHON + VANILLA JS APP SETUP ######
     elif app_client == 'vanilla':
@@ -346,11 +348,9 @@ def main(app_name:str) -> None:
         # Project structure
         os.makedirs(app_name, exist_ok=True)
         app_dir = os.path.abspath(app_name)
-        server_dir = os.path.join(app_dir, 'server')
-        os.makedirs(server_dir, exist_ok=True)
 
         # Setup project
-        os.chdir(server_dir)
+        os.chdir(app_dir)
 
         if piccolo_example:
             server_dependencies.append('faker~=30.1.0')
@@ -361,8 +361,6 @@ def main(app_name:str) -> None:
                 return
             else:
                 setup_uv_environment(dependencies=server_dependencies)
-
-        os.chdir(app_dir)
 
         # Setup server folders
         folders = {
@@ -405,7 +403,7 @@ def main(app_name:str) -> None:
 
         # Setup Root files & tailwind input.css
         root_files = [
-            f'{filename}.yaml' for filename in ['env', 'init', 'readme', 'uvicorn', 'gitignore', 'input_css',]
+            f'{filename}.yaml' for filename in ['env', 'envrc', 'init', 'readme', 'uvicorn', 'gitignore', 'input_css',]
         ]
 
         # Create files from templates
@@ -526,6 +524,7 @@ def main(app_name:str) -> None:
                         content = content.format(app_name=app_name)
                         create_file(filename, content)
 
+        # Task complete message
         click.echo(f"App '{app_name}' has been created successfully!")
 
         # Prompt to install environment

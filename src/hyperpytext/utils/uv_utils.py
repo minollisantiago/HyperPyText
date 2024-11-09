@@ -26,7 +26,7 @@ def uv_install_instructions():
     click.echo("4. Verify the installation by running 'uv --version'")
 
 
-def setup_uv_environment(dependencies: list[str] = None):
+def setup_uv_environment(dependencies: list[str] | None = None):
     click.echo("Setting up environment...")
     try:
         click.echo("Initializing project...")
@@ -36,10 +36,10 @@ def setup_uv_environment(dependencies: list[str] = None):
             click.echo("Adding project dependencies...")
             for package in dependencies:
                 uv_add_dependency(package)
-        
+
         click.echo("Syncing environment...")
         subprocess.run(["uv", "sync"], check=True)
-                
+
         click.echo("Environment set up successfully!")
     except subprocess.CalledProcessError:
         click.echo("Failed to set up environment. Please make sure uv is installed and try again.")
