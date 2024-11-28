@@ -183,7 +183,9 @@ your_app_name/
 │   │   │   │   │   ├── migrations/
 │   │   │   │   │   │   └── auth_{timestamp}.py
 │   │   │   │   │   ├── __init__.py
-│   │   │   │   │   └── piccolo_conf.py
+│   │   │   │   │   ├── piccolo_app.py
+│   │   │   │   │   ├── piccolo_conf.py
+│   │   │   │   │   └── tables.py
 │   │   │   │   └── __init__.py
 │   │   │   └── utils/
 │   │   │       └── __init__.py
@@ -198,7 +200,7 @@ your_app_name/
 > [!NOTE]
 > The client structure is the basic react + typescript vite setup, with shadcn and tailwind already installed if selected on the project creation.
 
-## Server templates
+## Server Templates
 
 ### SQLite with Piccolo ORM
 
@@ -367,11 +369,11 @@ async def get_clients():
       return await Clients.select().run()
 ```
 
-### Piccolo Auth
+### Authentication (Piccolo)
 
 **Structure**
 
-If you choose to go with Picoolo authentication, the project will have a folder inside the db folder with the following structure:
+If you choose to go with Piccoolo authentication, the project will have a folder inside the db folder with the following structure:
 
 ```
 src/app/db/
@@ -380,21 +382,26 @@ src/app/db/
 │   │   ├── __init__.py
 │   │   └── auth_{timestamp}.py
 │   ├── __init__.py
-│   └── piccolo_conf.py
+│   ├── piccolo_app.py
+│   ├── piccolo_conf.py
+│   └── tables.py
 │...
 
 ```
 
 **Session Auth**
-Piccolo has a side project called piccolo-api that provides with some useful tools for ASGI applications, including built in authentication, admin interface and endpoints for authentication, we will be using our own endpoints templates.
+
+Piccolo has a side project called piccolo-api that provides with some useful tools for ASGI applications, including built in authentication, admin interface and endpoints for authentication, **we will be using our own endpoints templates**.
 
 Piccolo [recommends using session auth](https://piccolo-api.readthedocs.io/en/latest/which_authentication/index.html) for most apps, so we are going with that.
 
-For a complete guide on how to set up session auth with piccolo api, read their [docs](https://piccolo-api.readthedocs.io/en/latest/session_auth/index.html).
+>[!NOTE]
+>For a complete guide on how to set up session auth with piccolo api, read their [docs](https://piccolo-api.readthedocs.io/en/latest/session_auth/index.html).
 
 Piccolo's session auth comes with a built in `SessionsBase` table to store the session tokens, and a `BaseUser` table to store user credentials. 
 
 **Piccolo auth apps and tables**
+
 Both apps are included by default in `src/app/db/auth/piccolo_conf.py`, so you can immediately start using them:
 
 ```python
@@ -419,12 +426,33 @@ piccolo migrations forwards user
 piccolo migrations forwards session_auth
 ```
 
+**Custom Tables**
+
+I've included a new table called `PasswordResetToken` located at `src/app/db/auth/tables.py` to store the password reset tokens. 
+
+It has the same structure as the `SessionsBase` table, but comes with a few methods of its own, and is intended to be used only for password reset. It is structured in a way that allows us to take advantage of the piccolo api session auth features without interfering with the `SessionsBase` table.
+
+The template includes the migrations file for this table, so you can run the migrations like for any other piccolo table.
+
 **Endpoints**
 
+The app, if prompted to include auth, will come with custom fastapi template routes for authentication, including:
 
+- login
+- logout
+- register
+- change password
+- password reset
+- a `models.py` file with searializers for the request and response models
 
+All of them are located at `src/app/api/routes/`.
 
-### Tailwind CSS Integration
+## Client Templates
+
+>[!IMPORTANT]
+> The client templates are still under development, expect changes and outdated documentation.
+
+### Tailwind CSS
 
 HyperPyText supports two methods of Tailwind CSS integration:
 
@@ -451,7 +479,7 @@ The geist fonts are set as default both for sans and mono families.
 
 ### Custom CSS (react or vanilla clients)
 
-The `input.css` file includes a content-grid class that allows you to establish a content hiearchy in a straightforward way, mobile friendly as well:
+The `globals.css` file includes a content-grid class that allows you to establish a content hiearchy in a straightforward way, mobile friendly as well:
 
 ![content-grid](./images/content-grid.PNG)
 
