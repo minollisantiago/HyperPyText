@@ -433,7 +433,11 @@ I've included a new table called `PasswordResetToken` located at `src/app/db/aut
 
 It has the same structure as the `SessionsBase` table, but comes with a few methods of its own, and is intended to be used only for password reset. It is structured in a way that allows us to take advantage of the piccolo api session auth features without interfering with the `SessionsBase` table.
 
-The template includes the migrations file for this table, so you can run the migrations like for any other piccolo table.
+The template includes the migrations file for this table, so you can run the migrations like for any other piccolo table:
+
+```bash
+piccolo migrations forwards auth
+```
 
 **Endpoints**
 
