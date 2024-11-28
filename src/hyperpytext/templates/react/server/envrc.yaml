@@ -1,4 +1,4 @@
-filename: ./.envrc
+filename: ./server/.envrc
 content: |
   # Sync dependencies
   uv sync

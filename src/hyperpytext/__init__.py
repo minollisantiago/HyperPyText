@@ -19,6 +19,8 @@ from hyperpytext.utils.npm_vite_utils import setup_vite_npm
 
 #APP SETUP
 # TODO: Cleanup the code on this script, server first, then client, too much repeated code
+# TODO: Make the server template more precise: app / library
+# TODO: I might remove poetry alltogether and focus on uv for package and project management
 # TODO: Add some default shadcn components, at least examples
 # TODO: Make a reference to the host and port on this file to reference on the vite server proxy and .env file
 # TODO: Handle all authentication redirects, at least to specific endpoints, use piccolo docs for reference (all their auth endpoints have redirects)

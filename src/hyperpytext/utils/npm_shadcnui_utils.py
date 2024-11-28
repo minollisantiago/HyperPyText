@@ -10,18 +10,18 @@ def update_tsconfig_json(project_dir):
     if os.path.exists(tsconfig_path):
         with open(tsconfig_path, 'r') as f:
             tsconfig = json.load(f)
-        
+
         if 'compilerOptions' not in tsconfig:
             tsconfig['compilerOptions'] = {}
-        
+
         tsconfig['compilerOptions']['baseUrl'] = '.'
         tsconfig['compilerOptions']['paths'] = {
             "@/*": ["./src/*"]
         }
-        
+
         with open(tsconfig_path, 'w') as f:
             json.dump(tsconfig, f, indent=2)
-        
+
         click.echo("Updated tsconfig.json with baseUrl and paths for Shadcn UI.")
     else:
         click.echo("tsconfig.json not found. Skipping update.")
@@ -55,10 +55,10 @@ def update_tsconfig_app_json(project_dir):
             },
             "include": ["src"]
         }
-        
+
         with open(tsconfig_app_path, 'w') as f:
             json.dump(new_config, f, indent=2)
-        
+
         click.echo("Updated tsconfig.app.json with baseUrl and paths for Shadcn UI.")
     else:
         click.echo("tsconfig.app.json not found. Skipping update.")
