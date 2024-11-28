@@ -1,6 +1,9 @@
 # HyperPyText
 
-#### Build python and vanilla javascript apps :fire: :rocket: :fire:
+#### Python and react/vanilla javascript apps boilerplate to get your project started fast:fire: :rocket: :fire:
+
+> [!NOTE]
+> This is a work in progress, more documentation will be added as it improves, also undergoing iterations, so expect changes and outdated documentation.
 
 <br>
 <br>
@@ -10,39 +13,58 @@
 <br>
 <br>
 
-HyperPyText is a Python-based tool for creating FastAPI application boilerplates with Tailwind CSS integration. It streamlines the process of setting up a new project by automating the creation of directory structures, configuration files, and initial code templates.
+HyperPyText is a Python-based tool for creating fullstack applications. It streamlines the process of setting up a new project by automating the creation of directory structures, configuration files, and initial backend and frontend templates.
 
-The idea is to set up a dashboard/app project as fast as possible and get working quickly. This boilerplate is a simpler version of [FastHTML](https://fastht.ml/). I just prefer to write the html/css myself.
-
-Its important to note that fastHTML is more robust and complete, this is just a simplified version (no auth, database, ease of deployment tools), so its minimal as of now.
-
-literally built it in a couple of hours with Claude 3.5 Sonnet from [Anthropic](https://www.anthropic.com/).
-
-Ill add more documentation as it improves, this is the first iteration, built in a couple of hours.
+The idea is to set up a dashboard/app project as fast as possible and get working quickly.
 
 Built on top of:
 
 - [FastApi](https://fastapi.tiangolo.com/)
-- [Jinja Templates](https://jinja.palletsprojects.com/en/3.1.x/)
-- [SQLAlchemy](https://www.sqlalchemy.org/)
+- [Piccolo ORM](https://piccolo-orm.readthedocs.io/en/latest/)
+- [Piccolo API](https://piccolo-api.readthedocs.io/en/latest/)
 - [SQLite](https://www.sqlite.org/index.html)
-- [HTMX](https://htmx.org/)
+- [UV](https://docs.astral.sh/uv/)
+- [React](https://react.dev/)
+- [Shadcn](https://ui.shadcn.com/)
 - [Tailwindcss](https://tailwindcss.com/)
+- [Jinja Templates](https://jinja.palletsprojects.com/en/3.1.x/)
+- [HTMX](https://htmx.org/)
 
 ## Features
 
+**Backend:**
+
 - FastAPI application setup
-- Tailwind CSS integration (npm or standalone)
-- Jinja2 templating
+- [Piccolo ORM](https://piccolo-orm.readthedocs.io/en/latest/) setup with [SQLite](https://www.sqlite.org/index.html): example main database, cache database and queues database
+- Authentication with [Piccolo API](https://piccolo-api.readthedocs.io/en/latest/), [fastapi](https://fastapi.tiangolo.com/) routes and tables
+- [Uv](https://docs.astral.sh/uv/) or [Poetry](https://python-poetry.org/) for python dependency management
+- Automatic project env with uv (prefered)
+- Environment default variable configuration
+
+**Frontend (react):**
+
+- React + typescript setup with [vite](https://vitejs.dev/)
+- [Shadcn](https://ui.shadcn.com/) setup with (in the future) custom components
+
+**Frontend (Vanilla with htmx):**
+- [htmx](https://htmx.org/) setup
+- [Jinja2](https://jinja.palletsprojects.com/en/3.1.x/) templating
 - Customizable HTML templates
 - Asset management structure
-- Environment variable configuration
-- Git integration with .gitignore
-- SQLite database integration with piccolo (prefered/default) or sqlalchemy
-- Optional Electron setup for desktop applications
-- Poetry for python dependency management
+
+**Frontend (general):**
+
+- Tailwind CSS integration + [plugins](https://tailwindcss.com/docs/plugins)
+- Optional [Electron](https://www.electronjs.org/) setup for desktop applications
+- Vercel [Geist](https://vercel.com/font) font (sans and mono)
+
 
 ## Installation
+
+> [!IMPORTANT]
+> You need to have uv installed to use this tool.
+> For more information on how to install uv check [here](https://docs.astral.sh/uv/getting-started/installation/).
+> You do not need to have python installed to install uv itself, which is pretty handy.
 
 1. Clone the repository:
 
@@ -56,87 +78,136 @@ git clone https://github.com/yourusername/hyperpytext.git
 cd hyperpytext
 ```
 
-3. Install the package using pip:
+3. Activate the environment and update/install the dependencies:
 
 ```bash
-pip install .
+uv sync
 ```
+
+> [!NOTE]
+> Uv does not need to have python installed previously, it will handle the installation itself.
 
 ## Usage
 
-After installing the package, run the `create-hyperpy-app {app name}` command to create a new application on the current working directory:
+Navigate to the folder where you want to create your project:
+
+```bash
+cd /path/to/your/new/app/folder
+```
+
+Activate the hyperpytext environment, this will depend on your shell, for a bash example:
+
+```bash
+source path/to/hyperpytext/.venv/bin/activate
+```
+
+Run the `create-hyperpy-app {app name}` command to create a new application on the current working directory:
 
 ```bash
 create-hyperpy-app your_app_name
 ```
 
-You'll be prompted to enter:
-
-- The HTML file name _(defaults to index.html)_.
-- If you want Tailwind css and all its setup options: (npm or standalone installation and [plugins](https://tailwindcss.com/docs/plugins)).
-- If you want to install [Vercel's Geist font](https://vercel.com/font) _(sans and mono versions, using npm)_.
+Follow the instructions on the terminal to choose the options you want for your project.
 
 ## Project Structure
 
-The generated project will have the following structure:
+> [!NOTE]
+> Im only including the structure of the python + react client/server version, as it is the most comprehensive and polished one for now:
+
+**General Project Structure:**
 
 ```
 your_app_name/
-├── src/
-│   ├── app/
-│   │   ├── api/
-│   │   │   ├── routes/
-│   │   │   │   ├── __init__.py
-│   │   │   │   └── root.py
-│   │   │   └── __init__.py
-│   │   ├── db/
-│   │   │   ├── primary/
-│   │   │   │   ├── migrations/
-│   │   │   │   │   └── __init__.py
-│   │   │   │   ├── __init__.py
-│   │   │   │   ├── piccolo_app.py
-│   │   │   │   ├── piccolo_conf.py
-│   │   │   │   ├── tables.py
-│   │   │   │   └── db_populate.py
-│   │   │   ├── cache/
-│   │   │   │   ├── migrations/
-│   │   │   │   │   └── __init__.py
-│   │   │   │   ├── __init__.py
-│   │   │   │   ├── piccolo_app.py
-│   │   │   │   └── piccolo_conf.py
-│   │   │   ├── queues/
-│   │   │   │   ├── migrations/
-│   │   │   │   │   └── __init__.py
-│   │   │   │   ├── __init__.py
-│   │   │   │   ├── piccolo_app.py
-│   │   │   │   └── piccolo_conf.py
-│   │   │   └── __init__.py
-│   │   ├── templates/
-│   │   │   └── {filename}.html
-│   │   └── app.py
-│   └── assets/
-│       ├── css/
-│       │   └── globals.css
-│       ├── js/
-│       │   ├── theme-control.js
-│       │   └── scripts.js
-│       └── icons/
-│           └── favicon.ico
-├── .env
-├── .gitignore
-├── main.js
-├── package.json
-├── pyproject.toml
-├── README.md
-├── run_server.py
-└── tailwind.config.js
+├── server/               # Python FastAPI backend
+│   ├── src/              # Server source code
+│   ├── .env              # Server environment variables
+│   ├── .envrc            # Direnv configuration
+│   ├── .gitignore        # Server-specific gitignore
+│   ├── README.md         # Server documentation
+│   ├── pyproject.toml    # Project configuration
+│   └── run_server.py     # Server entry point
+│
+├── client/                 # React frontend
+│   ├── src/                # Client source code
+│   ├── public/             # Static assets
+│   ├── .gitignore          # Client-specific gitignore
+│   ├── index.html          # HTML entry point
+│   ├── package.json        # NPM dependencies and scripts
+│   ├── tailwind.config.js  # Tailwind configuration
+│   ├── tsconfig.json       # TypeScript configuration
+│   └── vite.config.ts      # Vite configuration
 ```
+**Python Server Structure:**
+
+```
+your_app_name/
+├── server/
+│   ├── src/
+│   │   ├── app/
+│   │   │   ├── api/
+│   │   │   │   ├── routes/
+│   │   │   │   │   ├── __init__.py
+│   │   │   │   │   ├── root.py
+│   │   │   │   │   └── auth/
+│   │   │   │   │       ├── __init__.py
+│   │   │   │   │       ├── login.py
+│   │   │   │   │       ├── logout.py
+│   │   │   │   │       ├── register.py
+│   │   │   │   │       └── session.py
+│   │   │   │   ├── models/
+│   │   │   │   │   ├── __init__.py
+│   │   │   │   │   └── auth.py
+│   │   │   │   └── __init__.py
+│   │   │   ├── db/
+│   │   │   │   ├── primary/
+│   │   │   │   │   ├── migrations/
+│   │   │   │   │   │   └── __init__.py
+│   │   │   │   │   ├── __init__.py
+│   │   │   │   │   ├── piccolo_app.py
+│   │   │   │   │   ├── piccolo_conf.py
+│   │   │   │   │   ├── tables.py
+│   │   │   │   │   └── db_populate.py
+│   │   │   │   ├── cache/
+│   │   │   │   │   ├── migrations/
+│   │   │   │   │   │   └── __init__.py
+│   │   │   │   │   ├── __init__.py
+│   │   │   │   │   ├── piccolo_app.py
+│   │   │   │   │   └── piccolo_conf.py
+│   │   │   │   ├── queues/
+│   │   │   │   │   ├── migrations/
+│   │   │   │   │   │   └── __init__.py
+│   │   │   │   │   ├── __init__.py
+│   │   │   │   │   ├── piccolo_app.py
+│   │   │   │   │   └── piccolo_conf.py
+│   │   │   │   ├── auth/
+│   │   │   │   │   ├── migrations/
+│   │   │   │   │   │   └── auth_{timestamp}.py
+│   │   │   │   │   ├── __init__.py
+│   │   │   │   │   └── piccolo_conf.py
+│   │   │   │   └── __init__.py
+│   │   │   └── utils/
+│   │   │       └── __init__.py
+│   ├── .env
+│   ├── .envrc
+│   ├── .gitignore
+│   ├── README.md
+│   ├── pyproject.toml
+│   └── run_server.py
+```
+
+> [!NOTE]
+> The client structure is the basic react + typescript vite setup, with shadcn and tailwind already installed if selected on the project creation.
+
+## Server templates
 
 ### SQLite with Piccolo ORM
 
 #### Default Database Structure
 
-HyperPyText uses [Piccolo ORM](https://piccolo-orm.com/) for database management with SQLite. 
+HyperPyText uses [Piccolo ORM](https://piccolo-orm.com/) for database management with SQLite.
+
+>[!NOTE]
+> Postgress support will be added in the future, but for now SQLite is the only db with templates out of the box, as this is intended for small lightweight apps.
 
 The project comes pre-configured with three separate database piccolo apps, each with its own SQLite database file:
 
@@ -206,14 +277,22 @@ You can also check all migrations that havent been run yet by running:
 ```bash
 piccolo migrations check
 ```
-In order to run the migrations you will need to write the files yourself, as auto migrations are not supported for SQLite, see the Piccolo [migration docs](https://piccolo-orm.readthedocs.io/en/latest/piccolo/migrations/index.html) for more information.
+>[!IMPORTANT]
+>In order to run the migrations you will need to write the files yourself, as auto migrations are not supported for SQLite, see the Piccolo [migration docs](https://piccolo-orm.readthedocs.io/en/latest/piccolo/migrations/index.html) for more information.
 
-One you successfully run the initial migration you can run the following command from the terminal *(need to have the python environment activated with all the dependencies installed)*:
+Once you successfully run the initial migration you can run the following command from the terminal *(need to have the python environment activated with all the dependencies installed)*:
 
 ```bash
 cd src/app/db/primary
 python db_populate.py
 ```
+With uv:
+
+```bash
+cd src/app/db/primary
+uv run db_populate.py
+```
+
 This will populate the database with some random data so you can begin querying the database using the Piccolo CLI and its ipython shell. To activate the ipython shell run:
 
 ```bash
@@ -225,7 +304,8 @@ Then you can query the database using the piccolo syntax, for example for a `SEL
 ```bash
 await Clients.select()
 ```
-For more Query types, go [here](https://piccolo-orm.readthedocs.io/en/latest/piccolo/query_types/index.html).
+> [!NOTE]
+> For more Query types, go [here](https://piccolo-orm.readthedocs.io/en/latest/piccolo/query_types/index.html).
 
 #### Piccolo CLI
 
@@ -286,7 +366,8 @@ from src.app.db.primary.tables import Clients
 async def get_clients():
       return await Clients.select().run()
 ```
-#### Piccolo Auth
+
+### Piccolo Auth
 
 **Structure**
 
@@ -295,13 +376,17 @@ If you choose to go with Picoolo authentication, the project will have a folder 
 ```
 src/app/db/
 ├── auth/
+│   ├── migrations/
+│   │   ├── __init__.py
+│   │   └── auth_{timestamp}.py
 │   ├── __init__.py
-│   ├── piccolo_conf.py
-│   └── ...
+│   └── piccolo_conf.py
+│...
+
 ```
 
 **Session Auth**
-Piccolo has a side project called piccolo-api that provides with some useful tools for ASGI applications, including built in authentication, admin interface, etc.
+Piccolo has a side project called piccolo-api that provides with some useful tools for ASGI applications, including built in authentication, admin interface and endpoints for authentication, we will be using our own endpoints templates.
 
 Piccolo [recommends using session auth](https://piccolo-api.readthedocs.io/en/latest/which_authentication/index.html) for most apps, so we are going with that.
 
@@ -364,7 +449,7 @@ The official plugins that come out of the box with the boilerplate are the [form
 
 The geist fonts are set as default both for sans and mono families.
 
-### Custom CSS
+### Custom CSS (react or vanilla clients)
 
 The `input.css` file includes a content-grid class that allows you to establish a content hiearchy in a straightforward way, mobile friendly as well:
 
@@ -392,10 +477,6 @@ Inspired by [this blogpost](https://ryanmulligan.dev/blog/layout-breakouts/).
 ### Customization
 
 You can customize the generated templates by modifying the YAML files in the `templates/` directory of the HyperPyText project.
-
-### Contributing
-
-Contributions are welcome! Please feel free to submit a Pull Request.
 
 ### License
 
