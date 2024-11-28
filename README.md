@@ -413,6 +413,7 @@ DB = SQLiteEngine(path="auth_db.sqlite")
 # A list of paths to piccolo apps
 APP_REGISTRY = AppRegistry(
     apps=[
+        "piccolo_app",
         "piccolo_api.session_auth.piccolo_app",
         "piccolo.apps.user.piccolo_app",
     ]
