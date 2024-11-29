@@ -95,10 +95,10 @@
 
 - filename: ./src/app/db/primary/db_populate.py
   content: |
-    import asyncio
     from faker import Faker
-    from datetime import datetime
     from tables import Clients
+    from datetime import datetime
+    from asyncio import run as asyncio_run
     from piccolo.engine import PostgresEngine, engine_finder
 
     async def create_random_clients(num_clients=50):
@@ -138,4 +138,4 @@
             await create_random_clients()
 
     if __name__ == "__main__":
-        asyncio.run(main())
+        asyncio_run(main())

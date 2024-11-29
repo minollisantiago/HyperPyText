@@ -97,8 +97,8 @@
   content: |
     import asyncio
     from faker import Faker
-    from datetime import datetime
     from tables import Clients
+    from datetime import datetime
     from piccolo.engine import PostgresEngine, engine_finder
 
     async def create_random_clients(num_clients=50):
