@@ -70,7 +70,7 @@ def update_package_json(project_dir, updates, subdir=None):
     if os.path.exists(package_path):
         with open(package_path, 'r') as f:
             package = json.load(f)
-        
+
         # Deep merge the updates
         for key, value in updates.items():
             if isinstance(value, dict) and key in package:
