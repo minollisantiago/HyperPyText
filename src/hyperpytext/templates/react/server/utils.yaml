@@ -3,8 +3,8 @@
 
 - filename: ./server/src/app/utils/send_email.py
   content: |
-    import os
     import yagmail
+    from os import environ as env
     from dotenv import load_dotenv
 
     load_dotenv()
@@ -30,8 +30,8 @@
             ``html_content (str, optional):`` HTML content of the email
             ``attachments (list, optional):`` List of file paths to attach
         """
-        email = os.environ.get('EMAIL_ADDRESS')
-        oauth2_file = os.environ.get('OAUTH2_FILE_PATH')
+        email = env.get('EMAIL_ADDRESS')
+        oauth2_file = env.get('OAUTH2_FILE_PATH')
 
         if not email or not oauth2_file:
             raise ValueError("Email or OAuth2 file path not set in environment variables")
