@@ -23,8 +23,8 @@ def check_tailwind_standalone():
 def update_package_json_for_tailwind(project_dir):
     updates = {
         'scripts': {
-            'build-css': 'tailwindcss -i ./src/styles/css/globals.css -o ./src/styles/css/style.css',
-            'watch-css': 'tailwindcss -i ./src/styles/css/globals.css -o ./src/styles/css/style.css --watch'
+            'build-css': 'tailwindcss -i ./src/styles/globals.css -o ./src/styles/style.css',
+            'watch-css': 'tailwindcss -i ./src/styles/globals.css -o ./src/styles/css --watch'
         }
     }
     update_package_json(project_dir, updates)
