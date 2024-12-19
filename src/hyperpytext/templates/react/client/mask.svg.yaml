@@ -1,0 +1,5 @@
+filename: ./src/assets/mask.svg
+content: |
+  <svg width="166" height="162" viewBox="0 0 166 162" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <ellipse cx="83" cy="81" rx="83" ry="81" fill="#FA7C82"/>
+  </svg>
