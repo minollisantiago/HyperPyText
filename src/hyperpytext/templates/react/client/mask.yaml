@@ -1,0 +1,59 @@
+filename: ./src/components/landing/Mask.tsx
+content: |
+  import { useEffect, useState } from 'react';
+
+  const Mask = () => {
+    const [isContentHovered, setIsContentHovered] = useState<boolean>(false);
+
+    const shiftMask = (e: MouseEvent): void => {
+      const mask = document.getElementById('mask');
+      if (!mask) return;
+
+      const rect = mask.getBoundingClientRect();
+
+      const mouseX = e.clientX - rect.left;
+      const mouseY = e.clientY - rect.top;
+
+      const posX = (mouseX / rect.width) * 100;
+      const posY = (mouseY / rect.height) * 100;
+
+      const size: number = isContentHovered ? 342 : 42;
+
+      const currentPosition = `${posX}% ${posY}%`;
+      const currentMaskSize = `${size}px`;
+
+      mask.animate(
+        { maskPosition: currentPosition, maskSize: currentMaskSize },
+        { duration: 750, fill: 'forwards', easing: 'ease' }
+      );
+    };
+
+    useEffect(() => {
+      const handleMouseMove = (e: MouseEvent): void => shiftMask(e);
+      window.addEventListener('mousemove', handleMouseMove);
+
+      return () => {
+        window.removeEventListener('mousemove', handleMouseMove);
+      };
+    }, [isContentHovered]);
+
+    return (
+      <div id="mask" className="mask full grid grid-rows-[35%_15%_50%] absolute h-full w-screen">
+        <div></div>
+        <div className="content-grid h-full w-screen">
+          <div
+            className="content flex flex-col gap-8 justify-start pt-4 h-full"
+            id="mask-hover"
+            onMouseEnter={() => setIsContentHovered(true)}
+            onMouseLeave={() => setIsContentHovered(false)}
+          >
+            <p id="mask-text" className="font-sans font-bold text-6xl text-neutral-100 text-center">
+              On top of FastApi, Vite, Tailwind and Shadcn
+            </p>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  export default Mask;

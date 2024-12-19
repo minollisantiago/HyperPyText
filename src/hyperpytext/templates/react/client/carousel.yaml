@@ -1,0 +1,60 @@
+filename: ./src/components/landing/Carousel.tsx
+content: |
+  import { useEffect } from 'react';
+  import viteLogo from '/vite.svg'
+  import reactLogo from '@/assets/react.svg'
+  import pythonLogo from '@/assets/python.svg'
+  import fastapiLogo from '@/assets/fastapi.svg'
+  import shadcnLogo from '@/assets/shadcn.svg'
+  import tailwindLogo from '@/assets/tailwindcss.svg'
+
+  const Carousel = () => {
+    const speed = 10;
+
+    const logos = [
+      { href: "https://python.org", src: pythonLogo, alt: "Python logo", className: "python" },
+      { href: "https://fastapi.tiangolo.com/", src: fastapiLogo, alt: "Fastapi logo", className: "fastapi" },
+      { href: "https://vite.dev", src: viteLogo, alt: "Vite logo", className: "" },
+      { href: "https://react.dev", src: reactLogo, alt: "React logo", className: "react" },
+      { href: "https://tailwindcss.com/", src: tailwindLogo, alt: "Tailwindcss logo", className: "tailwind" },
+      { href: "https://ui.shadcn.com/", src: shadcnLogo, alt: "Shadcn logo", className: "shadcn" },
+    ];
+
+    const logoList = (
+      <>
+        {logos.map((logo, index) => (
+          <a key={index} href={logo.href} target="_blank" className="logo-link">
+            <li className="border border-slate-200 bg-sky-50 w-24 h-24 flex items-center justify-center rounded-3xl shadow-sm">
+              <img
+                src={logo.src}
+                className={"logo ${logo.className} h-12"}
+                alt={logo.alt}
+              />
+            </li>
+          </a>
+        ))}
+      </>
+    );
+
+    useEffect(() => {
+      const ulElement = document.querySelector(".carousel-content") as HTMLUListElement | null;
+      if (ulElement) {
+        ulElement.style.animation = "track-translate ${speed}s infinite linear";
+      }
+    }, [speed]);
+
+    return (
+      <div className="content-grid">
+        <div className="content overflow-hidden relative z-10">
+          <div className="absolute left-0 top-0 h-24 w-32 bg-gradient-to-r from-neutral-100 to-transparent z-20"></div>
+          <div className="absolute right-0 top-0 h-24 w-32 bg-gradient-to-l from-neutral-100 to-transparent z-20"></div>
+          <ul className="carousel-content flex flex-row w-max space-x-4 mt-6">
+            {logoList}
+            {logoList}
+          </ul>
+        </div>
+      </div>
+    );
+  }
+
+  export default Carousel;
