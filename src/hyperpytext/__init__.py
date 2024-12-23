@@ -227,7 +227,7 @@ def main(app_name:str) -> None:
 
         ### Client setup ###
 
-        click.echo(f"Now setting up the react client app...")
+        click.echo(f"Setting up the react client app...")
 
         templates_dir = get_template_path('react/client')
         client_dir = os.path.join(app_dir, 'client')
@@ -276,7 +276,7 @@ def main(app_name:str) -> None:
                                 update_tailwind_config(filename, plugins, fonts)
 
                             # Tailwind globals.css
-                            if template_file == 'globals.css.yaml':
+                            else:
                                 filename = templates['filename']
                                 click.echo(f'Created {filename}')
                                 content = templates['content']
@@ -304,9 +304,16 @@ def main(app_name:str) -> None:
                     setup_poetry_environment()
                     os.chdir(app_dir)
 
+        # Show available npm scripts
+        click.echo("\nAvailable npm scripts:")
+        click.echo("  npm run start    - Start Vite development server")
+        click.echo("  npm run build    - Build Vite production bundle")
+        if tailwind:
+            click.echo("  npm run build-css - Build Tailwind CSS")
+            click.echo("  npm run watch-css - Watch and build Tailwind CSS changes")
+
         # Task complete message
         click.echo(f"App '{app_name}' has been created successfully!")
-
 
     ###### PYTHON + VANILLA JS APP SETUP ######
     elif app_client == 'vanilla':
