@@ -15,6 +15,16 @@ def update_package_json_for_vite(project_dir):
 
 
 def configure_vite_proxy(project_dir):
+    """
+    Configure Vite's development server proxy settings to forward API requests to the FastAPI backend.
+
+    This function updates the Vite config to proxy all /api/* requests to the FastAPI server running on 
+    localhost:8000. This allows the React frontend to make API calls to relative URLs like '/api/...' 
+    which will be automatically forwarded to the backend server.
+
+    The FastAPI backend has routes defined under /api prefix, including the root route at /api/ which 
+    returns a "Hello World" message.
+    """
     vite_config_path = os.path.join(project_dir, 'client', 'vite.config.ts')
     if os.path.exists(vite_config_path):
         with open(vite_config_path, 'r') as f:
