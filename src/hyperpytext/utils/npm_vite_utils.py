@@ -52,6 +52,20 @@ def configure_vite_proxy(project_dir):
         click.echo("Vite config not found. Skipping proxy configuration.")
 
 
+def remove_default_styles(project_dir):
+    """Remove default style files created by Vite."""
+    app_css_path = os.path.join(project_dir, 'client', 'src', 'App.css')
+    index_css_path = os.path.join(project_dir, 'client', 'src', 'index.css')
+
+    if os.path.exists(app_css_path):
+        os.remove(app_css_path)
+        click.echo("Removed default App.css file.")
+
+    if os.path.exists(index_css_path):
+        os.remove(index_css_path)
+        click.echo("Removed default index.css file.")
+
+
 def setup_vite_npm(project_dir, template='react', use_typescript=True):
     os.chdir(project_dir)
     npm_ = "npm.cmd" if check_system() == "windows" else "npm"
@@ -69,6 +83,7 @@ def setup_vite_npm(project_dir, template='react', use_typescript=True):
 
         update_package_json_for_vite(project_dir)
         configure_vite_proxy(project_dir)
+        remove_default_styles(project_dir)
 
         os.chdir("..")
         click.echo("Vite setup complete.")
