@@ -28,7 +28,7 @@ def check_npm(verbose=False):
         return False
     except FileNotFoundError:
         if verbose:
-            click.echo("npm command not found in PATH...")
+            click.echo("🚩 npm command not found in PATH...")
         return False
 
 
@@ -81,6 +81,6 @@ def update_package_json(project_dir, updates, subdir=None):
         with open(package_path, 'w') as f:
             json.dump(package, f, indent=2)
 
-        click.echo(f"Updated package.json in {target_dir}")
+        click.echo(f"✔ Updated package.json in {target_dir}")
     else:
-        click.echo(f"package.json not found in {target_dir}. Skipping update.")
+        click.echo(f"🚩 package.json not found in {target_dir}. Skipping update.")

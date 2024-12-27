@@ -22,9 +22,9 @@ def update_tsconfig_json(project_dir):
         with open(tsconfig_path, 'w') as f:
             json.dump(tsconfig, f, indent=2)
 
-        click.echo("Updated tsconfig.json with baseUrl and paths for Shadcn UI.")
+        click.echo("✔ Updated tsconfig.json with baseUrl and paths for Shadcn UI.")
     else:
-        click.echo("tsconfig.json not found. Skipping update.")
+        click.echo("🚩 tsconfig.json not found. Skipping update.")
 
 
 def update_tsconfig_app_json(project_dir):
@@ -59,9 +59,9 @@ def update_tsconfig_app_json(project_dir):
         with open(tsconfig_app_path, 'w') as f:
             json.dump(new_config, f, indent=2)
 
-        click.echo("Updated tsconfig.app.json with baseUrl and paths for Shadcn UI.")
+        click.echo("✔ Updated tsconfig.app.json with baseUrl and paths for Shadcn UI.")
     else:
-        click.echo("tsconfig.app.json not found. Skipping update.")
+        click.echo("🚩 tsconfig.app.json not found. Skipping update.")
 
 
 def install_types_node(project_dir):
@@ -69,9 +69,9 @@ def install_types_node(project_dir):
     npm_ = "npm.cmd" if check_system() == "windows" else "npm"
     try:
         subprocess.run([npm_, "install", "-D", "@types/node"], check=True)
-        click.echo("Installed @types/node successfully.")
+        click.echo("✔ Installed @types/node successfully.")
     except subprocess.CalledProcessError:
-        click.echo("Failed to install @types/node. Please check your npm installation.")
+        click.echo("🚩 Failed to install @types/node. Please check your npm installation.")
 
 
 def update_vite_config(project_dir):
@@ -100,9 +100,9 @@ server: {
         )
         with open(vite_config_path, 'w') as f:
             f.write(new_config)
-        click.echo("Updated vite.config.ts for Shadcn UI.")
+        click.echo("✔ Updated vite.config.ts for Shadcn UI.")
     else:
-        click.echo("vite.config.ts not found. Skipping update.")
+        click.echo("🚩 vite.config.ts not found. Skipping update.")
 
 
 def setup_shadcn_ui(project_dir):
@@ -118,5 +118,5 @@ def setup_shadcn_ui(project_dir):
         subprocess.run([npx_, "shadcn@latest", "init"], check=True)
     except subprocess.CalledProcessError:
         click.echo(
-            "Failed to initialize Shadcn UI. Please check your npm installation and try again."
+            "🚩 Failed to initialize Shadcn UI. Please check your npm installation and try again."
         )

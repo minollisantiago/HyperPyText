@@ -5,8 +5,7 @@
 - filename: ./server/src/app/app.py
   content: |
     from fastapi import FastAPI
-    from fastapi.staticfiles import StaticFiles
-    from app.api.routes.root import router as router_root
+    from src.app.api.routes.root import router as router_root
 
     APP_NAME = "HyperPyText-App"  # You can customize this name
     APP_DESCRIPTION = "A FastAPI application created with HyperPyText"
@@ -17,10 +16,6 @@
         description=APP_DESCRIPTION,
         version=APP_VERSION
     )
-
-    # Static file mounts
-    app.mount('/assets', StaticFiles(directory='./server/src/assets'), name='assets')
-    app.mount('/templates', StaticFiles(directory='./server/src/app/templates'), name='templates')
 
     # Routers
     app.include_router(router_root)

@@ -1,7 +1,6 @@
 import os
 import yaml
 import click
-import subprocess
 from datetime import datetime
 from importlib import resources
 from hyperpytext.utils.npm_tailwind_utils import (
@@ -65,6 +64,7 @@ def main(app_name:str) -> None:
         'Select a python project manager',
         type=click.Choice(['poetry', 'uv']),
         default='uv',
+        show_default=True,
     )
 
     # Prompt for App frontend
@@ -72,6 +72,7 @@ def main(app_name:str) -> None:
         'Select a framework for the client',
         type=click.Choice(['react', 'vanilla']),
         default='react',
+        show_default=True,
     )
 
     ###### PYTHON + REACT APP SETUP ######
@@ -79,7 +80,7 @@ def main(app_name:str) -> None:
 
         ### Server setup ###
 
-        click.echo(f"\nSetting up the python web server:")
+        click.echo(f"\n🐍 Setting up the python web server:")
 
         templates_dir = get_template_path('react/server')
 
@@ -91,7 +92,7 @@ def main(app_name:str) -> None:
 
         # Start populating the project folder
         click.echo(f"\nCreating a new HyperPy app in {os.path.join(os.getcwd(), app_name)}")
-        click.echo("This process might take a few minutes. Please be patient.")
+        click.echo("⌛ This process might take a few minutes. Please be patient.")
 
         # Project structure
         os.makedirs(app_name, exist_ok=True)
@@ -140,7 +141,7 @@ def main(app_name:str) -> None:
 
                     # App files
                     if template_file == 'app.yaml':
-                        click.echo('Created app files')
+                        click.echo('✔ Created app files')
                         for template in templates:
                             filename = template['filename']
                             content = template['content']
@@ -148,7 +149,7 @@ def main(app_name:str) -> None:
 
                     # Api
                     if template_file == 'api.yaml':
-                        click.echo(f'Created fastApi routes example')
+                        click.echo(f'✔ Created fastApi routes example')
                         for template in templates:
                             filename = template['filename']
                             content = template['content']
@@ -156,7 +157,7 @@ def main(app_name:str) -> None:
 
                     # Db base
                     if template_file in db_files:
-                        click.echo('Created piccolo database files')
+                        click.echo('✔ Created piccolo database files')
                         for template in templates:
                             filename = template['filename']
                             content = template['content']
@@ -164,7 +165,7 @@ def main(app_name:str) -> None:
 
                     # Db example
                     if template_file == 'db_primary_example.yaml' and piccolo_example:
-                        click.echo('Created a piccolo database example')
+                        click.echo('✔ Created a piccolo database example')
                         migrations_file_name = f"primary_{current_time.strftime('%Y_%m_%dt%H_%M_%S_%f')}.py"
                         for template in templates:
                             filename = template['filename'].format(filename=migrations_file_name)
@@ -176,7 +177,7 @@ def main(app_name:str) -> None:
 
                         # Db
                         if template_file == 'db_auth.yaml':
-                            click.echo('Created piccolo_api database dependencies')
+                            click.echo('✔ Created piccolo_api database dependencies')
                             migrations_file_name = f"auth_{current_time.strftime('%Y_%m_%dt%H_%M_%S_%f')}.py"
                             for template in templates:
                                 filename = template['filename'].format(filename=migrations_file_name)
@@ -185,7 +186,7 @@ def main(app_name:str) -> None:
 
                         # Routes
                         if template_file == 'routes_auth.yaml':
-                            click.echo('Created authentication routes.')
+                            click.echo('✔ Created authentication routes.')
                             for template in templates:
                                 filename = template['filename']
                                 content = template['content']
@@ -193,7 +194,7 @@ def main(app_name:str) -> None:
 
                         # Route Models (types)
                         if template_file == 'routes_models.yaml':
-                            click.echo('Created route response models')
+                            click.echo('✔ Created route response models')
                             for template in templates:
                                 filename = template['filename']
                                 content = template['content']
@@ -201,7 +202,7 @@ def main(app_name:str) -> None:
 
                     # Utils files
                     if template_file == 'utils.yaml':
-                        click.echo('Created app files')
+                        click.echo('✔ Created app files')
                         for template in templates:
                             filename = template['filename']
                             content = template['content']
@@ -210,7 +211,7 @@ def main(app_name:str) -> None:
                     # Root files
                     if template_file in root_files:
                         filename = templates['filename']
-                        click.echo(f'Created {filename}')
+                        click.echo(f'✔ Created {filename}')
                         content = templates['content']
                         create_file(filename, content)
 
@@ -227,7 +228,7 @@ def main(app_name:str) -> None:
 
         ### Client setup ###
 
-        click.echo(f"Setting up the react client app...")
+        click.echo(f"⚛️ Setting up the react client app...")
 
         templates_dir = get_template_path('react/client')
         client_dir = os.path.join(app_dir, 'client')
@@ -269,7 +270,7 @@ def main(app_name:str) -> None:
 
                             # Tailwind config update
                             if template_file == 'tailwind.config.js.yaml':
-                                click.echo(f'Updated tailwind.config.js')
+                                click.echo(f'✔ Updated tailwind.config.js')
                                 filename = templates['filename']
                                 content = templates['content']
                                 create_file(filename, content)
@@ -278,7 +279,7 @@ def main(app_name:str) -> None:
                             # Tailwind globals.css
                             else:
                                 filename = templates['filename']
-                                click.echo(f'Created {filename}')
+                                click.echo(f'✔ Created {filename}')
                                 content = templates['content']
                                 create_file(filename, content)
 
@@ -305,15 +306,15 @@ def main(app_name:str) -> None:
                     os.chdir(app_dir)
 
         # Show available npm scripts
-        click.echo("\nAvailable npm scripts:")
-        click.echo("  npm run start    - Start Vite development server")
-        click.echo("  npm run build    - Build Vite production bundle")
+        click.echo("\n📦 Available npm scripts:")
+        click.echo(click.style("+", fg="#5cf19e") + "  npm run start    - Start Vite development server")
+        click.echo(click.style("+", fg="#5cf19e") + "  npm run build    - Build Vite production bundle")
         if tailwind:
-            click.echo("  npm run build-css - Build Tailwind CSS")
-            click.echo("  npm run watch-css - Watch and build Tailwind CSS changes")
+            click.echo(click.style("+", fg="#5cf19e") + "  npm run build-css - Build Tailwind CSS")
+            click.echo(click.style("+", fg="#5cf19e") + "  npm run watch-css - Watch and build Tailwind CSS changes")
 
         # Task complete message
-        click.echo(f"App '{app_name}' has been created successfully!")
+        click.echo(click.style("Success!", fg="#5cf19e") + f" App '{app_name}' has been created successfully!")
 
     ###### PYTHON + VANILLA JS APP SETUP ######
     elif app_client == 'vanilla':
@@ -351,8 +352,8 @@ def main(app_name:str) -> None:
         piccolo_auth = click.confirm('Would you like to include Piccolo authentication?', default=False)
 
         # Start populating the project folder
-        click.echo(f"\nCreating a new HyperPy app in {os.path.join(os.getcwd(), app_name)}")
-        click.echo("This process might take a few minutes. Please be patient.")
+        click.echo(f"\n🚀 Creating a new HyperPy app in {os.path.join(os.getcwd(), app_name)}")
+        click.echo("⌛ This process might take a few minutes. Please be patient.")
 
         # Project structure
         os.makedirs(app_name, exist_ok=True)
@@ -399,9 +400,9 @@ def main(app_name:str) -> None:
 
         # Setup Electron if selected
         if use_electron:
-            click.echo("Setting up Electron...")
+            click.echo("⌛ Setting up Electron...")
             setup_electron_npm(app_dir, app_name)
-            click.echo("Electron setup complete.")
+            click.echo("✔ Electron setup complete.")
 
         # Setup Piccolo Database
         db_files = [f'db_{filename}.yaml' for filename in ['primary', 'cache', 'queues',]]
@@ -423,7 +424,7 @@ def main(app_name:str) -> None:
 
                     # App files
                     if template_file == 'app.yaml':
-                        click.echo('Created app files')
+                        click.echo('✔ Created app files')
                         for template in templates:
                             filename = template['filename']
                             content = template['content']
@@ -431,7 +432,7 @@ def main(app_name:str) -> None:
 
                     # Api
                     if template_file == 'api.yaml':
-                        click.echo(f'Created fastApi routes example')
+                        click.echo(f'✔ Created fastApi routes example')
                         for template in templates:
                             filename = template['filename']
                             content = template['content'].format(html_filename=html_filename)
@@ -439,14 +440,14 @@ def main(app_name:str) -> None:
 
                     # Index starter HTML5 template
                     if template_file == 'index.yaml':
-                        click.echo(f'Created {html_filename}.html file')
+                        click.echo(f'✔ Created {html_filename}.html file')
                         filename = templates['filename'].format(filename=html_filename)
                         content = templates['content'].format(title=html_filename)
                         create_file(filename, content)
 
                     # Db base
                     if template_file in db_files:
-                        click.echo('Created piccolo database files')
+                        click.echo('✔ Created piccolo database files')
                         for template in templates:
                             filename = template['filename']
                             content = template['content']
@@ -454,7 +455,7 @@ def main(app_name:str) -> None:
 
                     # Db example
                     if template_file == 'db_primary_example.yaml' and piccolo_example:
-                        click.echo('Created a piccolo database example')
+                        click.echo('✔ Created a piccolo database example')
                         migrations_file_name = f"primary_{current_time.strftime('%Y_%m_%dt%H_%M_%S_%f')}.py"
                         for template in templates:
                             filename = template['filename'].format(filename=migrations_file_name)
@@ -466,7 +467,7 @@ def main(app_name:str) -> None:
 
                         # Db
                         if template_file == 'db_auth.yaml':
-                            click.echo('Created piccolo_api database dependencies')
+                            click.echo('✔ Created piccolo_api database dependencies')
                             migrations_file_name = f"auth_{current_time.strftime('%Y_%m_%dt%H_%M_%S_%f')}.py"
                             for template in templates:
                                 filename = template['filename'].format(filename=migrations_file_name)
@@ -475,7 +476,7 @@ def main(app_name:str) -> None:
 
                         # Routes
                         if template_file == 'routes_auth.yaml':
-                            click.echo('Created authentication routes.')
+                            click.echo('✔ Created authentication routes.')
                             for template in templates:
                                 filename = template['filename']
                                 content = template['content']
@@ -483,7 +484,7 @@ def main(app_name:str) -> None:
 
                         # Route Models (types)
                         if template_file == 'routes_models.yaml':
-                            click.echo('Created route response models')
+                            click.echo('✔ Created route response models')
                             for template in templates:
                                 filename = template['filename']
                                 content = template['content']
@@ -491,7 +492,7 @@ def main(app_name:str) -> None:
 
                     # Utils files
                     if template_file == 'utils.yaml':
-                        click.echo('Created app files')
+                        click.echo('✔ Created app files')
                         for template in templates:
                             filename = template['filename']
                             content = template['content']
@@ -500,7 +501,7 @@ def main(app_name:str) -> None:
                     # Root files & tailwind input.css
                     if template_file in root_files:
                         filename = templates['filename']
-                        click.echo(f'Created {filename}')
+                        click.echo(f'✔ Created {filename}')
                         content = templates['content']
                         create_file(filename, content)
 
@@ -518,7 +519,7 @@ def main(app_name:str) -> None:
                     # Tailwind config update
                     if template_file == 'tailwind_config.yaml':
                         if tailwind != 'none':
-                            click.echo(f'Updated tailwind.config.js')
+                            click.echo(f'✔ Updated tailwind.config.js')
                             filename = templates['filename']
                             content = templates['content']
                             create_file(filename, content)
@@ -526,7 +527,7 @@ def main(app_name:str) -> None:
 
                     # Electron setup
                     if template_file == 'electron.yaml' and use_electron:
-                        click.echo(f'Created Electron main.js file')
+                        click.echo(f'✔ Created Electron main.js file')
                         filename = templates['filename']
                         content = templates['content']
                         content = content.replace('{', '{{').replace('}', '}}')
@@ -534,7 +535,7 @@ def main(app_name:str) -> None:
                         create_file(filename, content)
 
         # Task complete message
-        click.echo(f"App '{app_name}' has been created successfully!")
+        click.echo(click.style("Success!", fg="#5cf19e") + f" App '{app_name}' has been created successfully!")
 
         # Prompt to install environment
         if project_manager == 'poetry':

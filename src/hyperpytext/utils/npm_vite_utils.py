@@ -47,9 +47,9 @@ def configure_vite_proxy(project_dir):
         with open(vite_config_path, 'w') as f:
             f.write(updated_config)
 
-        click.echo("Updated Vite config with proxy settings.")
+        click.echo("✔ Updated Vite config with proxy settings.")
     else:
-        click.echo("Vite config not found. Skipping proxy configuration.")
+        click.echo("🚩 Vite config not found. Skipping proxy configuration.")
 
 
 def remove_default_styles(project_dir):
@@ -59,11 +59,11 @@ def remove_default_styles(project_dir):
 
     if os.path.exists(app_css_path):
         os.remove(app_css_path)
-        click.echo("Removed default App.css file.")
+        click.echo("✔ Removed default App.css file.")
 
     if os.path.exists(index_css_path):
         os.remove(index_css_path)
-        click.echo("Removed default index.css file.")
+        click.echo("✔ Removed default index.css file.")
 
 
 def setup_vite_npm(project_dir, template='react', use_typescript=True):
@@ -86,5 +86,5 @@ def setup_vite_npm(project_dir, template='react', use_typescript=True):
         remove_default_styles(project_dir)
 
         os.chdir("..")
-        click.echo("Vite setup complete.")
+        click.echo("✔ Vite setup complete.")
 

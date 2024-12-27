@@ -40,11 +40,11 @@ def setup_uv_environment(dependencies: list[str] | None = None):
         click.echo("Syncing environment...")
         subprocess.run(["uv", "sync"], check=True)
 
-        click.echo("Environment set up successfully!")
+        click.echo("✔ Environment set up successfully!")
     except subprocess.CalledProcessError:
-        click.echo("Failed to set up environment. Please make sure uv is installed and try again.")
+        click.echo("🚩 Failed to set up environment. Please make sure uv is installed and try again.")
     except FileNotFoundError:
-        click.echo("uv not found. Please install uv and try again.")
+        click.echo("🚩 uv not found. Please install uv and try again.")
 
 
 def uv_add_dependency(package: str, dev: bool = False):
@@ -54,14 +54,14 @@ def uv_add_dependency(package: str, dev: bool = False):
             cmd.append("--dev")
         cmd.append(package)
         subprocess.run(cmd, check=True)
-        click.echo(f"Successfully added {package}")
+        click.echo(f"✔ Successfully added {package}")
     except subprocess.CalledProcessError:
-        click.echo(f"Failed to add dependency: {package}")
+        click.echo(f"🚩 Failed to add dependency: {package}")
 
 
 def uv_remove_dependency(package: str):
     try:
         subprocess.run(["uv", "remove", package], check=True)
-        click.echo(f"Successfully removed {package}")
+        click.echo(f"✔ Successfully removed {package}")
     except subprocess.CalledProcessError:
-        click.echo(f"Failed to remove dependency: {package}")
+        click.echo(f"🚩 Failed to remove dependency: {package}")
