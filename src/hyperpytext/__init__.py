@@ -76,6 +76,7 @@ def main(app_name:str) -> None:
     )
 
     ###### PYTHON + REACT APP SETUP ######
+
     if app_client == 'react':
 
         ### Server setup ###
@@ -305,18 +306,20 @@ def main(app_name:str) -> None:
                     setup_poetry_environment()
                     os.chdir(app_dir)
 
-        # Show available npm scripts
-        click.echo("\n📦 Available npm scripts:")
-        click.echo(click.style("+", fg="#5cf19e") + "  npm run start    - Start Vite development server")
-        click.echo(click.style("+", fg="#5cf19e") + "  npm run build    - Build Vite production bundle")
-        if tailwind:
-            click.echo(click.style("+", fg="#5cf19e") + "  npm run build-css - Build Tailwind CSS")
-            click.echo(click.style("+", fg="#5cf19e") + "  npm run watch-css - Watch and build Tailwind CSS changes")
-
         # Task complete message
-        click.echo(click.style("Success!", fg="#5cf19e") + f" App '{app_name}' has been created successfully!")
+        click.echo(click.style(f" App '{app_name}' has been created successfully!", fg=(89,255,209)))
+
+        click.echo("\n📦 Here is a list of available scripts:")
+        if project_manager == 'uv':
+            click.echo(click.style("+", fg=(89,255,209)) + " uv run run_server.py - Start Python server")
+        click.echo(click.style("+", fg=(89,255,209)) + " npm run start - Start Vite development server")
+        click.echo(click.style("+", fg=(89,255,209)) + " npm run build - Build Vite production bundle")
+        if tailwind:
+            click.echo(click.style("+", fg=(89,255,209)) + " npm run build-css - Build Tailwind CSS")
+            click.echo(click.style("+", fg=(89,255,209)) + " npm run watch-css - Watch and build Tailwind CSS changes")
 
     ###### PYTHON + VANILLA JS APP SETUP ######
+
     elif app_client == 'vanilla':
 
         templates_dir = get_template_path('vanilla')
@@ -535,7 +538,7 @@ def main(app_name:str) -> None:
                         create_file(filename, content)
 
         # Task complete message
-        click.echo(click.style("Success!", fg="#5cf19e") + f" App '{app_name}' has been created successfully!")
+        click.echo(click.style(f" App '{app_name}' has been created successfully!", fg=(89,255,209)))
 
         # Prompt to install environment
         if project_manager == 'poetry':
