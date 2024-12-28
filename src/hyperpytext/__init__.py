@@ -310,8 +310,17 @@ def main(app_name:str) -> None:
         click.echo(click.style(f" App '{app_name}' has been created successfully!", fg=(89,255,209)))
 
         click.echo("\n📦 Here is a list of available scripts:")
+
+        #Server scripts
+        click.echo(f"\n🐍 For the Python web server (run these from the backend folder, ./server):")
         if project_manager == 'uv':
             click.echo(click.style("+", fg=(89,255,209)) + " uv run run_server.py - Start Python server")
+            click.echo(click.style("+", fg=(89,255,209)) + " uv run run_server.py --reload - Start Python development server")
+        click.echo(click.style("+", fg=(89,255,209)) + " uvicorn src.app:app - Start Python server with Uvicorn")
+        click.echo(click.style("+", fg=(89,255,209)) + " uvicorn src.app:app --reload - Start Python development server with Uvicorn")
+
+        #Client scripts
+        click.echo(f"\n⚛️ For the Vite web server (run these from the client folder, ./client):")
         click.echo(click.style("+", fg=(89,255,209)) + " npm run start - Start Vite development server")
         click.echo(click.style("+", fg=(89,255,209)) + " npm run build - Build Vite production bundle")
         if tailwind:
