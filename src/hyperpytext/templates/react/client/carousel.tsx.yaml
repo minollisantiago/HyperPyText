@@ -46,8 +46,8 @@ content: |
     return (
       <div className="content-grid">
         <div className="content overflow-hidden relative z-10">
-          <div className="absolute left-0 top-0 h-24 w-32 bg-gradient-to-r from-neutral-100 to-transparent z-20"></div>
-          <div className="absolute right-0 top-0 h-24 w-32 bg-gradient-to-l from-neutral-100 to-transparent z-20"></div>
+          <div className="absolute left-0 top-0 h-full w-32 bg-gradient-to-r from-neutral-100 to-transparent z-20"></div>
+          <div className="absolute right-0 top-0 h-full w-32 bg-gradient-to-l from-neutral-100 to-transparent z-20"></div>
           <ul className="carousel-content flex flex-row w-max space-x-4 mt-6">
             {logoList}
             {logoList}
