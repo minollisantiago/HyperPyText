@@ -5,12 +5,13 @@ content: |
   import Carousel from '@/components/landing/Carousel'
   import Headline from '@/components/landing/Headline'
   import HyperPyLogo from '@/components/landing/HyperPyLogo'
+  import ServerStatus from '@/components/landing/ServerStatus'
 
   const Hero = () => {
     return (
       <div id="mainContainer" className="content-grid place-content-center h-screen w-screen relative bg-slate-100">
 
-        <div className="full grid grid-rows-[35%_15%_15%_35%] h-screen">
+        <div className="full grid grid-rows-[35%_15%_15%_30%_5%] h-screen">
 
           <div className="flex justify-center items-end z-10">
             <HyperPyLogo />
@@ -21,6 +22,8 @@ content: |
           <Carousel />
 
           <Links />
+
+          <ServerStatus />
 
           <Mask />
 
