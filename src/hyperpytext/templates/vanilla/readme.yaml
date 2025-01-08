@@ -1,6 +1,6 @@
 filename: ./README.md
 content: |
-  # {project_name}
+  # {app_name}
 
   This project was created using HyperPyText and Poetry.
 
