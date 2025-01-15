@@ -277,7 +277,17 @@ def main(app_name:str) -> None:
                                 create_file(filename, content)
                                 update_tailwind_config(filename, plugins, fonts)
 
-                            # Tailwind globals.css
+                            # Geist fonts
+                            if template_file == 'fonts.css.yaml':
+                                if fonts:
+                                    filename = templates['filename']
+                                    click.echo(f'✔ Created {filename}')
+                                    content = templates['content']
+                                    create_file(filename, content)
+                                else:
+                                    continue
+
+                            # All files
                             else:
                                 filename = templates['filename']
                                 click.echo(f'✔ Created {filename}')
