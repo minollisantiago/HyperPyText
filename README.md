@@ -15,7 +15,11 @@
 
 HyperPyText is a Python-based tool for creating fullstack applications. It streamlines the process of setting up a new project by automating the creation of directory structures, configuration files, and initial backend and frontend templates.
 
-The idea is to set up a dashboard/app project as fast as possible and get working quickly.
+### Goals
+- [x] Setting up a starter project: webapps with a client and server, or python CLI tools.
+- [ ] Integrating with AI coding tools via defined PRDs (project requirements documents) and rules for LLMs.
+- [ ] Custom agents with tool calling to setup the projects based on the PRDs (webapps or CLI python based tools).
+- [ ] Based on agentic tools like [claude-task-master](https://github.com/eyaltoledano/claude-task-master)
 
 Built on top of:
 
@@ -28,7 +32,6 @@ Built on top of:
 - [Shadcn](https://ui.shadcn.com/)
 - [Tailwindcss](https://tailwindcss.com/)
 - [Jinja Templates](https://jinja.palletsprojects.com/en/3.1.x/)
-- [HTMX](https://htmx.org/)
 
 ## Features
 
