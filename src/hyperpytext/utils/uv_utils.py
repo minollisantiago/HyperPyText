@@ -1,50 +1,51 @@
-import click
 import subprocess
+from rich.console import Console
 
+console = Console()
 
 def check_uv():
     try:
         result = subprocess.run(["uv", "--version"], check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
-        click.echo(f"uv is installed. Version: {result.stdout.strip()}")
+        console.print(f"uv is installed. Version: {result.stdout.strip()}")
         return True
     except subprocess.CalledProcessError as e:
-        click.echo(f"Error running uv: {e}")
-        click.echo(f"Stderr: {e.stderr}")
+        console.print(f"Error running uv: {e}")
+        console.print(f"Stderr: {e.stderr}")
         return False
     except FileNotFoundError:
-        click.echo("uv command not found in PATH.")
+        console.print("uv command not found in PATH.")
         return False
 
 
 def uv_install_instructions():
     """Display instructions for installing uv."""
-    click.echo("uv is not installed on your system.")
-    click.echo("Please install uv by following these steps:")
-    click.echo("1. Visit https://github.com/astral-sh/uv")
-    click.echo("2. Follow the installation instructions for your operating system")
-    click.echo("3. After installation, restart your terminal/command prompt")
-    click.echo("4. Verify the installation by running 'uv --version'")
+    console.print("uv is not installed on your system.")
+    console.print("Please install uv by following these steps:")
+    console.print("1. Visit https://github.com/astral-sh/uv")
+    console.print("2. Follow the installation instructions for your operating system")
+    console.print("3. After installation, restart your terminal/command prompt")
+    console.print("4. Verify the installation by running 'uv --version'")
 
 
 def setup_uv_environment(dependencies: list[str] | None = None):
-    click.echo("Setting up environment...")
+    console.print("Setting up environment...")
     try:
-        click.echo("Initializing project...")
+        console.print("Initializing project...")
         subprocess.run(["uv", "init"], check=True)
 
         if dependencies:
-            click.echo("Adding project dependencies...")
+            console.print("Adding project dependencies...")
             for package in dependencies:
                 uv_add_dependency(package)
 
-        click.echo("Syncing environment...")
+        console.print("Syncing environment...")
         subprocess.run(["uv", "sync"], check=True)
 
-        click.echo("✔ Environment set up successfully!")
+        console.print("✔ Environment set up successfully!")
     except subprocess.CalledProcessError:
-        click.echo("🚩 Failed to set up environment. Please make sure uv is installed and try again.")
+        console.print("🚩 Failed to set up environment. Please make sure uv is installed and try again.")
     except FileNotFoundError:
-        click.echo("🚩 uv not found. Please install uv and try again.")
+        console.print("🚩 uv not found. Please install uv and try again.")
 
 
 def uv_add_dependency(package: str, dev: bool = False):
@@ -54,14 +55,14 @@ def uv_add_dependency(package: str, dev: bool = False):
             cmd.append("--dev")
         cmd.append(package)
         subprocess.run(cmd, check=True)
-        click.echo(f"✔ Successfully added {package}")
+        console.print(f"✔ Successfully added {package}")
     except subprocess.CalledProcessError:
-        click.echo(f"🚩 Failed to add dependency: {package}")
+        console.print(f"🚩 Failed to add dependency: {package}")
 
 
 def uv_remove_dependency(package: str):
     try:
         subprocess.run(["uv", "remove", package], check=True)
-        click.echo(f"✔ Successfully removed {package}")
+        console.print(f"✔ Successfully removed {package}")
     except subprocess.CalledProcessError:
-        click.echo(f"🚩 Failed to remove dependency: {package}")
+        console.print(f"🚩 Failed to remove dependency: {package}")

@@ -1,9 +1,10 @@
 import os
 import sys
 import json
-import click
 import subprocess
+from rich.console import Console
 
+console = Console()
 
 def check_system():
     if sys.platform.startswith('win'):
@@ -19,28 +20,28 @@ def check_npm(verbose=False):
     try:
         result = subprocess.run([npm_, "--version"], check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         if verbose:
-            print(f"npm version: {result.stdout.strip()}")
+            console.print(f"npm version: {result.stdout.strip()}")
         return True
     except subprocess.CalledProcessError as e:
         if verbose:
-            print(f"Error running npm: {e}")
-            print(f"Stderr: {e.stderr}")
+            console.print(f"Error running npm: {e}")
+            console.print(f"Stderr: {e.stderr}")
         return False
     except FileNotFoundError:
         if verbose:
-            click.echo("🚩 npm command not found in PATH...")
+            console.print("🚩 npm command not found in PATH...")
         return False
 
 
 def npm_install_instructions():
-    click.echo("npm is not installed on your system.")
-    click.echo("Please install Node.js and npm by following these steps:")
-    click.echo("1. Visit https://nodejs.org/")
-    click.echo("2. Download the appropriate version for your operating system")
-    click.echo("3. Run the installer and follow the installation prompts")
-    click.echo("4. After installation, restart your terminal/command prompt")
-    click.echo("5. Verify the installation by running 'node --version' and 'npm --version'")
-    click.echo("Once npm is installed, please run this script again.")
+    console.print("npm is not installed on your system.")
+    console.print("Please install Node.js and npm by following these steps:")
+    console.print("1. Visit https://nodejs.org/")
+    console.print("2. Download the appropriate version for your operating system")
+    console.print("3. Run the installer and follow the installation prompts")
+    console.print("4. After installation, restart your terminal/command prompt")
+    console.print("5. Verify the installation by running 'node --version' and 'npm --version'")
+    console.print("Once npm is installed, please run this script again.")
 
 
 def check_npm_package(package):
@@ -81,6 +82,6 @@ def update_package_json(project_dir, updates, subdir=None):
         with open(package_path, 'w') as f:
             json.dump(package, f, indent=2)
 
-        click.echo(f"✔ Updated package.json in {target_dir}")
+        console.print(f"✔ Updated package.json in {target_dir}")
     else:
-        click.echo(f"🚩 package.json not found in {target_dir}. Skipping update.")
+        console.print(f"🚩 package.json not found in {target_dir}. Skipping update.")

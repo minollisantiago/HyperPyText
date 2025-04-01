@@ -7,9 +7,10 @@ Im looking to make several improvements, we will be working on them sequentially
 #### Main and most important improvements
 1. [x] Make uv the sole package manager, and remove poetry support.
 2. [x] Make react with vite the sole frontend framework, and remove vanilla js with htmx support.
-3. [ ] Move from click to typer/rich for the CLI. I want rich text output for the CLI.
-4. [ ] Simplify the @__init__.py file, and move as much logic outside of it and into separate files if possible (server and client setup, for example, also util functions).
-5. [ ] All template files for the client on the react folder (src/hyperpytext/templates/react/client) include their file extensions. I want to do the same for the server files (py files).
+3. [x] Move from click to typer/rich for the CLI. I want rich text output for the CLI.
+4. [x] Add bun as an option for frontend package manager as well as npm, create bun utils files, follow the patterns of the npm utils files, make bun the default package manager for the frontend.
+5. [ ] Simplify the @__init__.py file, and move as much logic outside of it and into separate files if possible (server and client setup, for example, also util functions).
+6. [ ] All template files for the client on the react folder (src/hyperpytext/templates/react/client) include their file extensions. I want to do the same for the server files (py files).
 
 #### Longer term improvements
 1. [ ] Add support for postgres (within the context of piccolo orm).

@@ -1,8 +1,13 @@
 import os
 import yaml
-import click
+import typer
 from datetime import datetime
 from importlib import resources
+from rich.console import Console
+from rich.panel import Panel
+from rich.progress import Progress, SpinnerColumn, TextColumn
+from rich.prompt import Confirm
+from rich import print as rprint
 from hyperpytext.utils.npm_tailwind_utils import (
     check_tailwind_standalone,
     setup_tailwind_npm,
@@ -14,6 +19,13 @@ from hyperpytext.utils.npm_shadcnui_utils import setup_shadcn_ui
 from hyperpytext.utils.npm_electron_utils import setup_electron_npm
 from hyperpytext.utils.uv_utils import check_uv, setup_uv_environment, uv_install_instructions
 from hyperpytext.utils.npm_utils import check_npm, npm_install_instructions, check_npm_package
+from hyperpytext.utils.bun_utils import (
+    check_bun,
+    bun_install_instructions,
+    setup_vite_bun,
+    setup_tailwind_bun,
+    setup_shadcn_bun,
+)
 
 #APP SETUP
 # TODO: Cleanup the code on this script, server first, then client, too much repeated code
@@ -28,19 +40,19 @@ from hyperpytext.utils.npm_utils import check_npm, npm_install_instructions, che
 # TODO: Update docs with auth setup (backend) including migrations
 # TODO: Update docs with all shortcut scripts created on package.json
 
+app = typer.Typer(help="Create a new HyperPy application")
+console = Console()
 
 def get_template_path(template_path: str) -> str:
     """Get the absolute path to a template directory."""
     with resources.path('hyperpytext.templates', template_path) as path:
         return str(path)
 
-
 def create_file(filename, content=''):
     """Writes the template file"""
     os.makedirs(os.path.dirname(filename), exist_ok=True)
     with open(filename, 'w') as f:
         f.write(content)
-
 
 server_dependencies = [
     "uvicorn~=0.32.0",
@@ -51,239 +63,296 @@ server_dependencies = [
     "yagmail~=0.15.293"
 ]
 
-@click.command()
-@click.argument('app_name')
-def main(app_name:str) -> None:
+@app.command()
+def main(app_name: str):
+    """Create a new HyperPy application with FastAPI backend and React frontend."""
+    with Progress(
+        SpinnerColumn(),
+        TextColumn("[progress.description]{task.description}"),
+        console=console,
+    ) as progress:
+        # Server setup
+        server_task = progress.add_task("🐍 Setting up the Python web server...", total=None)
+        
+        templates_dir = get_template_path('react/server')
 
-    ###### PYTHON + REACT APP SETUP ######
+        # Prompt for Piccolo auth
+        piccolo_auth = Confirm.ask("Would you like to include authentication with Piccolo?", default=False)
+        
+        # Prompt for Piccolo app example
+        piccolo_example = Confirm.ask("Would you like to include a Piccolo db app example for SQLite?", default=False)
 
-    ### Server setup ###
+        # Start populating the project folder
+        console.print(Panel(f"Creating a new HyperPy app in {os.path.join(os.getcwd(), app_name)}"))
+        console.print("⌛ This process might take a few minutes. Please be patient.")
 
-    click.echo(f"\n🐍 Setting up the python web server:")
+        # Project structure
+        os.makedirs(app_name, exist_ok=True)
+        app_dir = os.path.abspath(app_name)
+        server_dir = os.path.join(app_dir, 'server')
+        os.makedirs(server_dir, exist_ok=True)
 
-    templates_dir = get_template_path('react/server')
+        # Setup project
+        os.chdir(server_dir)
 
-    # Prompt for Piccolo auth
-    piccolo_auth = click.confirm('Would you like to include authentication with Piccolo?', default=False)
+        if piccolo_example:
+            server_dependencies.append('faker~=30.1.0')
 
-    # Prompt for Piccolo app example
-    piccolo_example = click.confirm('Would you like to include a Piccolo db app example for SQLite?', default=False)
+        if not check_uv():
+            uv_install_instructions()
+            return
+        else:
+            setup_uv_environment(dependencies=server_dependencies)
 
-    # Start populating the project folder
-    click.echo(f"\nCreating a new HyperPy app in {os.path.join(os.getcwd(), app_name)}")
-    click.echo("⌛ This process might take a few minutes. Please be patient.")
+        os.chdir(app_dir)
 
-    # Project structure
-    os.makedirs(app_name, exist_ok=True)
-    app_dir = os.path.abspath(app_name)
-    server_dir = os.path.join(app_dir, 'server')
-    os.makedirs(server_dir, exist_ok=True)
+        # Setup server folders
+        folders = {'server/src/app': ['api/routes', 'db', 'utils']}
+        for base, subdirs in folders.items():
+            for subdir in subdirs:
+                os.makedirs(os.path.join(base, subdir), exist_ok=True)
 
-    # Setup project
-    os.chdir(server_dir)
+        # Setup database
+        db_files = [f'db_{filename}.yaml' for filename in ['primary', 'cache', 'queues',]]
 
-    if piccolo_example:
-        server_dependencies.append('faker~=30.1.0')
+        # Database migrations timestamp
+        current_time = datetime.now()
+        migrations_timestamp = current_time.strftime("%Y-%m-%dT%H:%M:%S:%f")
 
-    if not check_uv():
-        uv_install_instructions()
-        return
-    else:
-        setup_uv_environment(dependencies=server_dependencies)
+        # Setup root files
+        root_files = [
+            f'{filename}.yaml' for filename in ['env', 'envrc', 'init', 'readme', 'uvicorn', 'gitignore']
+        ]
 
-    os.chdir(app_dir)
+        # Create files from templates
+        for template_file in os.listdir(templates_dir):
+            if template_file.endswith('.yaml'):
+                with open(os.path.join(templates_dir, template_file), 'r') as file:
+                    templates = yaml.safe_load(file)
 
-    # Setup server folders
-    folders = {'server/src/app': ['api/routes', 'db', 'utils']}
-    for base, subdirs in folders.items():
-        for subdir in subdirs:
-            os.makedirs(os.path.join(base, subdir), exist_ok=True)
+                    # App files
+                    if template_file == 'app.yaml':
+                        console.print("✔ Created app files")
+                        for template in templates:
+                            filename = template['filename']
+                            content = template['content']
+                            create_file(filename, content)
 
-    # Setup database
-    db_files = [f'db_{filename}.yaml' for filename in ['primary', 'cache', 'queues',]]
+                    # Api
+                    if template_file == 'api.yaml':
+                        console.print("✔ Created fastApi routes example")
+                        for template in templates:
+                            filename = template['filename']
+                            content = template['content']
+                            create_file(filename, content)
 
-    # Database migrations timestamp
-    current_time = datetime.now()
-    migrations_timestamp = current_time.strftime("%Y-%m-%dT%H:%M:%S:%f")
+                    # Db base
+                    if template_file in db_files:
+                        console.print("✔ Created piccolo database files")
+                        for template in templates:
+                            filename = template['filename']
+                            content = template['content']
+                            create_file(filename, content)
 
-    # Setup root files
-    root_files = [
-        f'{filename}.yaml' for filename in ['env', 'envrc', 'init', 'readme', 'uvicorn', 'gitignore']
-    ]
-
-    # Create files from templates
-    for template_file in os.listdir(templates_dir):
-        if template_file.endswith('.yaml'):
-            with open(os.path.join(templates_dir, template_file), 'r') as file:
-                templates = yaml.safe_load(file)
-
-                # App files
-                if template_file == 'app.yaml':
-                    click.echo('✔ Created app files')
-                    for template in templates:
-                        filename = template['filename']
-                        content = template['content']
-                        create_file(filename, content)
-
-                # Api
-                if template_file == 'api.yaml':
-                    click.echo(f'✔ Created fastApi routes example')
-                    for template in templates:
-                        filename = template['filename']
-                        content = template['content']
-                        create_file(filename, content)
-
-                # Db base
-                if template_file in db_files:
-                    click.echo('✔ Created piccolo database files')
-                    for template in templates:
-                        filename = template['filename']
-                        content = template['content']
-                        create_file(filename, content)
-
-                # Db example
-                if template_file == 'db_primary_example.yaml' and piccolo_example:
-                    click.echo('✔ Created a piccolo database example')
-                    migrations_file_name = f"primary_{current_time.strftime('%Y_%m_%dt%H_%M_%S_%f')}.py"
-                    for template in templates:
-                        filename = template['filename'].format(filename=migrations_file_name)
-                        content = template['content'].replace('{migrations_timestamp}', migrations_timestamp)
-                        create_file(filename, content)
-
-                # Authentication
-                if piccolo_auth:
-
-                    # Db
-                    if template_file == 'db_auth.yaml':
-                        click.echo('✔ Created piccolo_api database dependencies')
-                        migrations_file_name = f"auth_{current_time.strftime('%Y_%m_%dt%H_%M_%S_%f')}.py"
+                    # Db example
+                    if template_file == 'db_primary_example.yaml' and piccolo_example:
+                        console.print("✔ Created a piccolo database example")
+                        migrations_file_name = f"primary_{current_time.strftime('%Y_%m_%dt%H_%M_%S_%f')}.py"
                         for template in templates:
                             filename = template['filename'].format(filename=migrations_file_name)
                             content = template['content'].replace('{migrations_timestamp}', migrations_timestamp)
                             create_file(filename, content)
 
-                    # Routes
-                    if template_file == 'routes_auth.yaml':
-                        click.echo('✔ Created authentication routes.')
+                    # Authentication
+                    if piccolo_auth:
+                        # Db
+                        if template_file == 'db_auth.yaml':
+                            console.print("✔ Created piccolo_api database dependencies")
+                            migrations_file_name = f"auth_{current_time.strftime('%Y_%m_%dt%H_%M_%S_%f')}.py"
+                            for template in templates:
+                                filename = template['filename'].format(filename=migrations_file_name)
+                                content = template['content'].replace('{migrations_timestamp}', migrations_timestamp)
+                                create_file(filename, content)
+
+                        # Routes
+                        if template_file == 'routes_auth.yaml':
+                            console.print("✔ Created authentication routes.")
+                            for template in templates:
+                                filename = template['filename']
+                                content = template['content']
+                                create_file(filename, content)
+
+                        # Route Models (types)
+                        if template_file == 'routes_models.yaml':
+                            console.print("✔ Created route response models")
+                            for template in templates:
+                                filename = template['filename']
+                                content = template['content']
+                                create_file(filename, content)
+
+                    # Utils files
+                    if template_file == 'utils.yaml':
+                        console.print("✔ Created app files")
                         for template in templates:
                             filename = template['filename']
                             content = template['content']
                             create_file(filename, content)
 
-                    # Route Models (types)
-                    if template_file == 'routes_models.yaml':
-                        click.echo('✔ Created route response models')
-                        for template in templates:
-                            filename = template['filename']
-                            content = template['content']
-                            create_file(filename, content)
-
-                # Utils files
-                if template_file == 'utils.yaml':
-                    click.echo('✔ Created app files')
-                    for template in templates:
-                        filename = template['filename']
-                        content = template['content']
+                    # Root files
+                    if template_file in root_files:
+                        filename = templates['filename']
+                        console.print(f"✔ Created {filename}")
+                        content = templates['content']
                         create_file(filename, content)
 
-                # Root files
-                if template_file in root_files:
-                    filename = templates['filename']
-                    click.echo(f'✔ Created {filename}')
-                    content = templates['content']
-                    create_file(filename, content)
+        progress.update(server_task, completed=True)
 
-    ### Client setup ###
+        # Client setup
+        client_task = progress.add_task("⚛️ Setting up the React client app...", total=None)
+        
+        templates_dir = get_template_path('react/client')
+        client_dir = os.path.join(app_dir, 'client')
 
-    click.echo(f"⚛️ Setting up the react client app...")
-
-    templates_dir = get_template_path('react/client')
-    client_dir = os.path.join(app_dir, 'client')
-
-    # Prompt for Tailwind CSS and plugins
-    plugins = []
-    tailwind = click.confirm('Would you like to use Tailwind CSS?', default=False)
-    if tailwind:
-        for plugin in ['forms', 'typography', 'container-queries']:
-            if click.confirm(f'Would you like to install the Tailwind {plugin} plugin?', default=False):
-                plugins.append(plugin)
-
-    # Prompt for custom fonts
-    fonts = False
-    if check_npm() and tailwind != 'none':
-        fonts = click.confirm(f'Would you like to install Geist fonts?', default=False)
-
-    # Prompt for Shadcn UI
-    shadcn_ui = False
-    if check_npm() and tailwind != 'none':
-        shadcn_ui = click.confirm('Would you like to install Shadcn UI components?', default=False)
-
-    # Setup NPM dependencies
-    if not check_npm():
-        npm_install_instructions()
-        return
-    else:
-        # Setup Vite and the react client
-        setup_vite_npm(app_dir, template='react', use_typescript=True)
-
-        # Setup Tailwind if selected
+        # Prompt for Tailwind CSS and plugins
+        plugins = []
+        tailwind = Confirm.ask("Would you like to use Tailwind CSS?", default=False)
         if tailwind:
-            setup_tailwind_npm(client_dir, plugins, fonts)
+            for plugin in ['forms', 'typography', 'container-queries']:
+                if Confirm.ask(f"Would you like to install the Tailwind {plugin} plugin?", default=False):
+                    plugins.append(plugin)
 
-            for template_file in os.listdir(templates_dir):
-                if template_file.endswith('.yaml'):
-                    with open(os.path.join(templates_dir, template_file), 'r') as file:
-                        templates = yaml.safe_load(file)
+        # Prompt for custom fonts
+        fonts = False
+        if tailwind != 'none':
+            fonts = Confirm.ask("Would you like to install Geist fonts?", default=False)
 
-                        # Tailwind config update
-                        if template_file == 'tailwind.config.js.yaml':
-                            click.echo(f'✔ Updated tailwind.config.js')
-                            filename = templates['filename']
-                            content = templates['content']
-                            create_file(filename, content)
-                            update_tailwind_config(filename, plugins, fonts)
+        # Prompt for Shadcn UI
+        shadcn_ui = False
+        if tailwind != 'none':
+            shadcn_ui = Confirm.ask("Would you like to install Shadcn UI components?", default=False)
 
-                        # Geist fonts
-                        if template_file == 'fonts.css.yaml':
-                            if fonts:
+        # Try to use bun first, fall back to npm if not available
+        if not check_bun():
+            if not check_npm():
+                npm_install_instructions()
+                return
+            else:
+                # Setup Vite and the react client with npm
+                setup_vite_npm(app_dir, template='react', use_typescript=True)
+
+                # Setup Tailwind if selected
+                if tailwind:
+                    setup_tailwind_npm(client_dir, plugins, fonts)
+
+                    for template_file in os.listdir(templates_dir):
+                        if template_file.endswith('.yaml'):
+                            with open(os.path.join(templates_dir, template_file), 'r') as file:
+                                templates = yaml.safe_load(file)
+
+                                # Tailwind config update
+                                if template_file == 'tailwind.config.js.yaml':
+                                    console.print("✔ Updated tailwind.config.js")
+                                    filename = templates['filename']
+                                    content = templates['content']
+                                    create_file(filename, content)
+                                    update_tailwind_config(filename, plugins, fonts)
+
+                                # Geist fonts
+                                if template_file == 'fonts.css.yaml':
+                                    if fonts:
+                                        filename = templates['filename']
+                                        console.print(f"✔ Created {filename}")
+                                        content = templates['content']
+                                        create_file(filename, content)
+                                    else:
+                                        continue
+
+                                # All files
+                                else:
+                                    filename = templates['filename']
+                                    console.print(f"✔ Created {filename}")
+                                    content = templates['content']
+                                    create_file(filename, content)
+
+                    # Setup Shadcn UI if selected
+                    if shadcn_ui:
+                        setup_shadcn_ui(client_dir)
+
+                    os.chdir(app_dir)
+        else:
+            # Setup Vite and the react client with bun
+            setup_vite_bun(app_dir, template='react', use_typescript=True)
+
+            # Setup Tailwind if selected
+            if tailwind:
+                setup_tailwind_bun(client_dir, plugins, fonts)
+
+                for template_file in os.listdir(templates_dir):
+                    if template_file.endswith('.yaml'):
+                        with open(os.path.join(templates_dir, template_file), 'r') as file:
+                            templates = yaml.safe_load(file)
+
+                            # Tailwind config update
+                            if template_file == 'tailwind.config.js.yaml':
+                                console.print("✔ Updated tailwind.config.js")
                                 filename = templates['filename']
-                                click.echo(f'✔ Created {filename}')
                                 content = templates['content']
                                 create_file(filename, content)
+                                update_tailwind_config(filename, plugins, fonts)
+
+                            # Geist fonts
+                            if template_file == 'fonts.css.yaml':
+                                if fonts:
+                                    filename = templates['filename']
+                                    console.print(f"✔ Created {filename}")
+                                    content = templates['content']
+                                    create_file(filename, content)
+                                else:
+                                    continue
+
+                            # All files
                             else:
-                                continue
+                                filename = templates['filename']
+                                console.print(f"✔ Created {filename}")
+                                content = templates['content']
+                                create_file(filename, content)
 
-                        # All files
-                        else:
-                            filename = templates['filename']
-                            click.echo(f'✔ Created {filename}')
-                            content = templates['content']
-                            create_file(filename, content)
+                # Setup Shadcn UI if selected
+                if shadcn_ui:
+                    setup_shadcn_bun(client_dir)
 
-            # Setup Shadcn UI if selected
-            if shadcn_ui:
-                setup_shadcn_ui(client_dir)
+                os.chdir(app_dir)
 
-            os.chdir(app_dir)
+        progress.update(client_task, completed=True)
 
     # Task complete message
-    click.echo(click.style(f" App '{app_name}' has been created successfully!", fg=(89,255,209)))
+    console.print(Panel(f"App '{app_name}' has been created successfully!", style="bold green"))
 
-    click.echo("\n📦 Here is a list of available scripts:")
+    console.print("\n📦 Here is a list of available scripts:")
 
-    #Server scripts
-    click.echo(f"\n🐍 For the Python web server (run these from the backend folder, ./server):")
-    click.echo(click.style("+", fg=(89,255,209)) + " uv run run_server.py - Start Python server")
-    click.echo(click.style("+", fg=(89,255,209)) + " uv run run_server.py --reload - Start Python development server")
-    click.echo(click.style("+", fg=(89,255,209)) + " uvicorn src.app:app - Start Python server with Uvicorn")
-    click.echo(click.style("+", fg=(89,255,209)) + " uvicorn src.app:app --reload - Start Python development server with Uvicorn")
+    # Server scripts
+    console.print("\n🐍 For the Python web server (run these from the backend folder, ./server):")
+    console.print("[green]+[/green] uv run run_server.py - Start Python server")
+    console.print("[green]+[/green] uv run run_server.py --reload - Start Python development server")
+    console.print("[green]+[/green] uvicorn src.app:app - Start Python server with Uvicorn")
+    console.print("[green]+[/green] uvicorn src.app:app --reload - Start Python development server with Uvicorn")
 
-    #Client scripts
-    click.echo(f"\n⚛️ For the Vite web server (run these from the client folder, ./client):")
-    click.echo(click.style("+", fg=(89,255,209)) + " npm run start - Start Vite development server")
-    click.echo(click.style("+", fg=(89,255,209)) + " npm run build - Build Vite production bundle")
-    if tailwind:
-        click.echo(click.style("+", fg=(89,255,209)) + " npm run build-css - Build Tailwind CSS")
-        click.echo(click.style("+", fg=(89,255,209)) + " npm run watch-css - Watch and build Tailwind CSS changes")
+    # Client scripts
+    console.print("\n⚛️ For the Vite web server (run these from the client folder, ./client):")
+    if check_bun():
+        console.print("[green]+[/green] bun run start - Start Vite development server")
+        console.print("[green]+[/green] bun run build - Build Vite production bundle")
+        if tailwind:
+            console.print("[green]+[/green] bun run build-css - Build Tailwind CSS")
+            console.print("[green]+[/green] bun run watch-css - Watch and build Tailwind CSS changes")
+    else:
+        console.print("[green]+[/green] npm run start - Start Vite development server")
+        console.print("[green]+[/green] npm run build - Build Vite production bundle")
+        if tailwind:
+            console.print("[green]+[/green] npm run build-css - Build Tailwind CSS")
+            console.print("[green]+[/green] npm run watch-css - Watch and build Tailwind CSS changes")
 
-    click.echo(f"App '{app_name}' created successfully!")
+    console.print(Panel(f"App '{app_name}' created successfully!", style="bold green"))
+
+if __name__ == "__main__":
+    app()

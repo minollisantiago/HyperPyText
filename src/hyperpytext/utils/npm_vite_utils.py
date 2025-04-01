@@ -1,8 +1,9 @@
 import os
-import click
 import subprocess
+from rich.console import Console
 from .npm_utils import check_system, check_npm_package, update_package_json
 
+console = Console()
 
 def update_package_json_for_vite(project_dir):
     updates = {
@@ -47,9 +48,9 @@ def configure_vite_proxy(project_dir):
         with open(vite_config_path, 'w') as f:
             f.write(updated_config)
 
-        click.echo("✔ Updated Vite config with proxy settings.")
+        console.print("✔ Updated Vite config with proxy settings.")
     else:
-        click.echo("🚩 Vite config not found. Skipping proxy configuration.")
+        console.print("🚩 Vite config not found. Skipping proxy configuration.")
 
 
 def remove_default_styles(project_dir):
@@ -59,18 +60,18 @@ def remove_default_styles(project_dir):
 
     if os.path.exists(app_css_path):
         os.remove(app_css_path)
-        click.echo("✔ Removed default App.css file.")
+        console.print("✔ Removed default App.css file.")
 
     if os.path.exists(index_css_path):
         os.remove(index_css_path)
-        click.echo("✔ Removed default index.css file.")
+        console.print("✔ Removed default index.css file.")
 
 
 def setup_vite_npm(project_dir, template='react', use_typescript=True):
     os.chdir(project_dir)
     npm_ = "npm.cmd" if check_system() == "windows" else "npm"
     if not check_npm_package('vite'):
-        click.echo("Setting up Vite...")
+        console.print("Setting up Vite...")
         template_with_ts = f"{template}-ts" if use_typescript else template
         subprocess.run(
             [npm_, "create", "vite@latest", "client", "--", "--template", template_with_ts], 
@@ -78,7 +79,7 @@ def setup_vite_npm(project_dir, template='react', use_typescript=True):
         )
 
         os.chdir("client")
-        click.echo("Running npm install...")
+        console.print("Running npm install...")
         subprocess.run([npm_, "install"], check=True)
 
         update_package_json_for_vite(project_dir)
@@ -86,5 +87,5 @@ def setup_vite_npm(project_dir, template='react', use_typescript=True):
         remove_default_styles(project_dir)
 
         os.chdir("..")
-        click.echo("✔ Vite setup complete.")
+        console.print("✔ Vite setup complete.")
 

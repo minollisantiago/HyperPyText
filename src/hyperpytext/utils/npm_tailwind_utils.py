@@ -1,13 +1,14 @@
 import os
 import sys
-import click
 import subprocess
+from rich.console import Console
 from .npm_utils import check_system, check_npm_package, update_package_json
 
+console = Console()
 
 def check_tailwind_npm2():
     npx_ = "npx.cmd" if check_system() == "windows" else "npx"
-    print(npx_)
+    console.print(npx_)
     try:
         subprocess.run([npx_, "tailwindcss", "--help"], check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         return True
@@ -35,7 +36,7 @@ def setup_tailwind_npm(project_dir, plugins, fonts):
     npm_ = "npm.cmd" if check_system() == "windows" else "npm"
     npx_ = "npx.cmd" if check_system() == "windows" else "npx"
     if not check_npm_package('tailwindcss'):
-        click.echo("Installing Tailwind CSS...")
+        console.print("Installing Tailwind CSS...")
         subprocess.run([npm_, "init", "-y"], check=True)
         subprocess.run(
             [npm_, "install", "-D", "tailwindcss@latest", "autoprefixer@latest", "postcss@latest"],
@@ -45,11 +46,11 @@ def setup_tailwind_npm(project_dir, plugins, fonts):
     subprocess.run([npx_, "tailwindcss", "init", "-p"], check=True)
 
     for plugin in plugins:
-        click.echo(f"Installing Tailwind {plugin} plugin...")
+        console.print(f"Installing Tailwind {plugin} plugin...")
         subprocess.run([npm_, "install", "-D", f"@tailwindcss/{plugin}"], check=True)
 
     if fonts:
-        click.echo(f"Installing Geist Fonts...")
+        console.print(f"Installing Geist Fonts...")
         subprocess.run([npm_, "i", 'geist'], check=True)
 
     update_package_json_for_tailwind(project_dir)
@@ -58,7 +59,7 @@ def setup_tailwind_npm(project_dir, plugins, fonts):
 def setup_tailwind_standalone(project_dir):
     os.chdir(project_dir)
     if not check_tailwind_standalone():
-        click.echo("Downloading Tailwind CSS standalone CLI...")
+        console.print("Downloading Tailwind CSS standalone CLI...")
         output=""
         if sys.platform.startswith('win'):
             url = "https://github.com/tailwindlabs/tailwindcss/releases/latest/download/tailwindcss-windows-x64.exe"
@@ -69,7 +70,7 @@ def setup_tailwind_standalone(project_dir):
             url = "https://github.com/tailwindlabs/tailwindcss/releases/latest/download/tailwindcss-linux-x64"
             output = "tailwindcss-linux-x64"
         else:
-            click.echo("Unsupported operating system for Tailwind CSS standalone CLI.")
+            console.print("Unsupported operating system for Tailwind CSS standalone CLI.")
             return
         subprocess.run(["curl", "-sLO", url], check=True)
         if not sys.platform.startswith('win'):
