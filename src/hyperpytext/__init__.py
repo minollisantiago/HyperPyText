@@ -7,6 +7,7 @@ from rich.console import Console
 from rich.panel import Panel
 from rich.progress import Progress, SpinnerColumn, TextColumn
 from rich.prompt import Confirm
+from rich.table import Table
 from rich import print as rprint
 from hyperpytext.utils.npm_tailwind_utils import (
     check_tailwind_standalone,
@@ -36,9 +37,7 @@ from hyperpytext.utils.bun_utils import (
 # TODO: Move the root route to a new yaml file: routes_root.yaml
 
 #DOCS
-# TODO: Update docs with the new project structure (react app)
 # TODO: Update docs with auth setup (backend) including migrations
-# TODO: Update docs with all shortcut scripts created on package.json
 
 app = typer.Typer(help="Create a new HyperPy application")
 console = Console()
@@ -328,30 +327,88 @@ def main(app_name: str):
     # Task complete message
     console.print(Panel(f"App '{app_name}' has been created successfully!", style="bold green"))
 
-    console.print("\n📦 Here is a list of available scripts:")
+    # Create tables for scripts
+    server_table = Table(title="🐍 Python Server Scripts", show_header=True, header_style="bold magenta")
+    server_table.add_column("Command", style="cyan")
+    server_table.add_column("Description", style="green")
+    server_table.add_column("Directory", style="yellow")
 
-    # Server scripts
-    console.print("\n🐍 For the Python web server (run these from the backend folder, ./server):")
-    console.print("[green]+[/green] uv run run_server.py - Start Python server")
-    console.print("[green]+[/green] uv run run_server.py --reload - Start Python development server")
-    console.print("[green]+[/green] uvicorn src.app:app - Start Python server with Uvicorn")
-    console.print("[green]+[/green] uvicorn src.app:app --reload - Start Python development server with Uvicorn")
+    server_table.add_row(
+        "uv run run_server.py",
+        "Start Python server",
+        "./server"
+    )
+    server_table.add_row(
+        "uv run run_server.py --reload",
+        "Start Python development server",
+        "./server"
+    )
+    server_table.add_row(
+        "uvicorn src.app:app",
+        "Start Python server with Uvicorn",
+        "./server"
+    )
+    server_table.add_row(
+        "uvicorn src.app:app --reload",
+        "Start Python development server with Uvicorn",
+        "./server"
+    )
 
-    # Client scripts
-    console.print("\n⚛️ For the Vite web server (run these from the client folder, ./client):")
+    client_table = Table(title="⚛️ React Client Scripts", show_header=True, header_style="bold magenta")
+    client_table.add_column("Command", style="cyan")
+    client_table.add_column("Description", style="green")
+    client_table.add_column("Directory", style="yellow")
+
     if check_bun():
-        console.print("[green]+[/green] bun run start - Start Vite development server")
-        console.print("[green]+[/green] bun run build - Build Vite production bundle")
+        client_table.add_row(
+            "bun run start",
+            "Start Vite development server",
+            "./client"
+        )
+        client_table.add_row(
+            "bun run build",
+            "Build Vite production bundle",
+            "./client"
+        )
         if tailwind:
-            console.print("[green]+[/green] bun run build-css - Build Tailwind CSS")
-            console.print("[green]+[/green] bun run watch-css - Watch and build Tailwind CSS changes")
+            client_table.add_row(
+                "bun run build-css",
+                "Build Tailwind CSS",
+                "./client"
+            )
+            client_table.add_row(
+                "bun run watch-css",
+                "Watch and build Tailwind CSS changes",
+                "./client"
+            )
     else:
-        console.print("[green]+[/green] npm run start - Start Vite development server")
-        console.print("[green]+[/green] npm run build - Build Vite production bundle")
+        client_table.add_row(
+            "npm run start",
+            "Start Vite development server",
+            "./client"
+        )
+        client_table.add_row(
+            "npm run build",
+            "Build Vite production bundle",
+            "./client"
+        )
         if tailwind:
-            console.print("[green]+[/green] npm run build-css - Build Tailwind CSS")
-            console.print("[green]+[/green] npm run watch-css - Watch and build Tailwind CSS changes")
+            client_table.add_row(
+                "npm run build-css",
+                "Build Tailwind CSS",
+                "./client"
+            )
+            client_table.add_row(
+                "npm run watch-css",
+                "Watch and build Tailwind CSS changes",
+                "./client"
+            )
 
+    console.print("\n")
+    console.print(server_table)
+    console.print("\n")
+    console.print(client_table)
+    console.print("\n")
     console.print(Panel(f"App '{app_name}' created successfully!", style="bold green"))
 
 if __name__ == "__main__":
