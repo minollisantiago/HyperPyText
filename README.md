@@ -40,8 +40,8 @@ Built on top of:
 - FastAPI application setup
 - [Piccolo ORM](https://piccolo-orm.readthedocs.io/en/latest/) setup with [SQLite](https://www.sqlite.org/index.html): example main database, cache database and queues database
 - Authentication with [Piccolo API](https://piccolo-api.readthedocs.io/en/latest/), [fastapi](https://fastapi.tiangolo.com/) routes and tables
-- [Uv](https://docs.astral.sh/uv/) or [Poetry](https://python-poetry.org/) for python dependency management
-- Automatic project env with uv (prefered)
+- [Uv](https://docs.astral.sh/uv/) for python dependency management
+- Automatic project env with uv
 - Environment default variable configuration
 
 **Frontend (react):**

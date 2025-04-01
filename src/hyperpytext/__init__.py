@@ -9,17 +9,15 @@ from hyperpytext.utils.npm_tailwind_utils import (
     setup_tailwind_standalone,
     update_tailwind_config,
 )
-from hyperpytext.utils.npm_shadcnui_utils import setup_shadcn_ui
-from hyperpytext.utils.npm_utils import check_npm, npm_install_instructions, check_npm_package
-from hyperpytext.utils.npm_electron_utils import setup_electron_npm
-from hyperpytext.utils.poetry_utils import check_poetry, setup_poetry_environment, poetry_install_instructions
-from hyperpytext.utils.uv_utils import check_uv, setup_uv_environment, uv_install_instructions
 from hyperpytext.utils.npm_vite_utils import setup_vite_npm
+from hyperpytext.utils.npm_shadcnui_utils import setup_shadcn_ui
+from hyperpytext.utils.npm_electron_utils import setup_electron_npm
+from hyperpytext.utils.uv_utils import check_uv, setup_uv_environment, uv_install_instructions
+from hyperpytext.utils.npm_utils import check_npm, npm_install_instructions, check_npm_package
 
 #APP SETUP
 # TODO: Cleanup the code on this script, server first, then client, too much repeated code
 # TODO: Make the server template more precise: app / library
-# TODO: I might remove poetry alltogether and focus on uv for package and project management
 # TODO: Add some default shadcn components, at least examples
 # TODO: Make a reference to the host and port on this file to reference on the vite server proxy and .env file
 # TODO: Handle all authentication redirects, at least to specific endpoints, use piccolo docs for reference (all their auth endpoints have redirects)
@@ -45,8 +43,6 @@ def create_file(filename, content=''):
 
 
 server_dependencies = [
-    "jinja2~=3.1.2",
-    "ipython~=8.28.0",
     "uvicorn~=0.32.0",
     "fastapi~=0.115.0",
     "python-dotenv~=1.0.0",
@@ -58,14 +54,6 @@ server_dependencies = [
 @click.command()
 @click.argument('app_name')
 def main(app_name:str) -> None:
-
-    # Prompt for App backend project manager
-    project_manager = click.prompt(
-        'Select a python project manager',
-        type=click.Choice(['poetry', 'uv']),
-        default='uv',
-        show_default=True,
-    )
 
     # Prompt for App frontend
     app_client = click.prompt(
@@ -107,12 +95,11 @@ def main(app_name:str) -> None:
         if piccolo_example:
             server_dependencies.append('faker~=30.1.0')
 
-        if project_manager == 'uv':
-            if not check_uv():
-                uv_install_instructions()
-                return
-            else:
-                setup_uv_environment(dependencies=server_dependencies)
+        if not check_uv():
+            uv_install_instructions()
+            return
+        else:
+            setup_uv_environment(dependencies=server_dependencies)
 
         os.chdir(app_dir)
 
@@ -216,17 +203,6 @@ def main(app_name:str) -> None:
                         content = templates['content']
                         create_file(filename, content)
 
-                    # Poetry config update
-                    if template_file == 'pyproject.yaml' and project_manager == 'poetry':
-                        filename = templates['filename']
-                        content = templates['content']
-                        db_example_dependencies = 'faker = "^30.1.0"' if piccolo_example else ''
-                        content = content.format(
-                            app_name=app_name,
-                            db_example_dependencies=db_example_dependencies
-                        )
-                        create_file(filename, content)
-
         ### Client setup ###
 
         click.echo(f"⚛️ Setting up the react client app...")
@@ -300,22 +276,6 @@ def main(app_name:str) -> None:
 
                 os.chdir(app_dir)
 
-        # Prompt to install environment
-        if project_manager == 'poetry':
-            install_env = click.confirm(
-                'Would you like to install python dependencies? (poetry required)',
-                default=False
-            )
-            if install_env:
-                if not check_poetry():
-                    poetry_install_instructions()
-                    return
-                else:
-                    server_dir = os.path.join(os.getcwd(), 'server')
-                    os.chdir(server_dir)
-                    setup_poetry_environment()
-                    os.chdir(app_dir)
-
         # Task complete message
         click.echo(click.style(f" App '{app_name}' has been created successfully!", fg=(89,255,209)))
 
@@ -323,9 +283,8 @@ def main(app_name:str) -> None:
 
         #Server scripts
         click.echo(f"\n🐍 For the Python web server (run these from the backend folder, ./server):")
-        if project_manager == 'uv':
-            click.echo(click.style("+", fg=(89,255,209)) + " uv run run_server.py - Start Python server")
-            click.echo(click.style("+", fg=(89,255,209)) + " uv run run_server.py --reload - Start Python development server")
+        click.echo(click.style("+", fg=(89,255,209)) + " uv run run_server.py - Start Python server")
+        click.echo(click.style("+", fg=(89,255,209)) + " uv run run_server.py --reload - Start Python development server")
         click.echo(click.style("+", fg=(89,255,209)) + " uvicorn src.app:app - Start Python server with Uvicorn")
         click.echo(click.style("+", fg=(89,255,209)) + " uvicorn src.app:app --reload - Start Python development server with Uvicorn")
 
@@ -387,12 +346,11 @@ def main(app_name:str) -> None:
         if piccolo_example:
             server_dependencies.append('faker~=30.1.0')
 
-        if project_manager == 'uv':
-            if not check_uv():
-                uv_install_instructions()
-                return
-            else:
-                setup_uv_environment(dependencies=server_dependencies)
+        if not check_uv():
+            uv_install_instructions()
+            return
+        else:
+            setup_uv_environment(dependencies=server_dependencies)
 
         # Setup server folders
         folders = {
@@ -527,17 +485,6 @@ def main(app_name:str) -> None:
                         content = templates['content']
                         create_file(filename, content)
 
-                    # Poetry config update
-                    if template_file == 'pyproject.yaml' and project_manager == 'poetry':
-                        filename = templates['filename']
-                        content = templates['content']
-                        db_example_dependencies = 'faker = "^30.1.0"' if piccolo_example else ''
-                        content = content.format(
-                            app_name=app_name,
-                            db_example_dependencies=db_example_dependencies
-                        )
-                        create_file(filename, content)
-
                     # Tailwind config update
                     if template_file == 'tailwind_config.yaml':
                         if tailwind != 'none':
@@ -559,15 +506,3 @@ def main(app_name:str) -> None:
         # Task complete message
         click.echo(click.style(f" App '{app_name}' has been created successfully!", fg=(89,255,209)))
 
-        # Prompt to install environment
-        if project_manager == 'poetry':
-            install_env = click.confirm(
-                'Would you like to install python dependencies? (poetry required)',
-                default=False
-            )
-            if install_env:
-                if not check_poetry():
-                    poetry_install_instructions()
-                    return
-                else:
-                    setup_poetry_environment()

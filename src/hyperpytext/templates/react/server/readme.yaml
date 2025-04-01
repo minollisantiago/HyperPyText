@@ -1,28 +1,42 @@
-filename: ./README.md
+filename: README.md
 content: |
   # {app_name}
 
-  This project was created using HyperPyText and Poetry.
+  This project was created using HyperPyText.
 
   ## Setup
 
-  1. Install Poetry if you haven't already:
-     ````
-     curl -sSL https://install.python-poetry.org | python3 -
-     ```
+  1. Make sure you have uv installed:
+  ```bash
+  curl -LsSf https://astral.sh/uv/install.sh | sh
+  ```
 
   2. Install dependencies:
-     ````
-     poetry install
-     ```
+  ```bash
+  uv pip install -r requirements.txt
+  ```
 
   3. Activate the virtual environment:
-     ````
-     poetry shell
-     ```
+  ```bash
+  source .venv/bin/activate  # On Unix/macOS
+  .venv\Scripts\activate    # On Windows
+  ```
 
-  4. Run the application:
-     ````
-     uvicorn app:app --reload
-     ```
+  4. Run the server:
+  ```bash
+  uv run run_server.py
+  ```
+
+  ## Development
+
+  For development, you can use the following command to run the server with auto-reload:
+  ```bash
+  uv run run_server.py --reload
+  ```
+
+  ## API Documentation
+
+  Once the server is running, you can access the API documentation at:
+  - Swagger UI: http://localhost:8000/docs
+  - ReDoc: http://localhost:8000/redoc
 
