@@ -5,8 +5,8 @@ This is a tool that creates boilerplate web applications with a python fast api 
 Im looking to make several improvements, we will be working on them sequentially, i want  mark them as done as we finish with each one:
 
 #### Main and most important improvements
-1. [ ] Make uv the sole package manager, and remove poetry support.
-2. [ ] Make react with vite the sole frontend framework, and remove vanilla js with htmx support.
+1. [x] Make uv the sole package manager, and remove poetry support.
+2. [x] Make react with vite the sole frontend framework, and remove vanilla js with htmx support.
 3. [ ] Move from click to typer/rich for the CLI. I want rich text output for the CLI.
 4. [ ] Simplify the @__init__.py file, and move as much logic outside of it and into separate files if possible (server and client setup, for example, also util functions).
 5. [ ] All template files for the client on the react folder (src/hyperpytext/templates/react/client) include their file extensions. I want to do the same for the server files (py files).

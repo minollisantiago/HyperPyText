@@ -1,6 +1,6 @@
 # HyperPyText
 
-#### Python and react/vanilla javascript apps boilerplate to get your project started fast:fire: :rocket: :fire:
+#### Python and React apps boilerplate to get your project started fast:fire: :rocket: :fire:
 
 > [!NOTE]
 > This is a work in progress, more documentation will be added as it improves, also undergoing iterations, so expect changes and outdated documentation.
@@ -31,7 +31,6 @@ Built on top of:
 - [React](https://react.dev/)
 - [Shadcn](https://ui.shadcn.com/)
 - [Tailwindcss](https://tailwindcss.com/)
-- [Jinja Templates](https://jinja.palletsprojects.com/en/3.1.x/)
 
 ## Features
 
@@ -44,23 +43,13 @@ Built on top of:
 - Automatic project env with uv
 - Environment default variable configuration
 
-**Frontend (react):**
+**Frontend:**
 
-- React + typescript setup with [vite](https://vitejs.dev/)
+- React + TypeScript setup with [Vite](https://vitejs.dev/)
 - [Shadcn](https://ui.shadcn.com/) setup with (in the future) custom components
-
-**Frontend (Vanilla with htmx):**
-- [htmx](https://htmx.org/) setup
-- [Jinja2](https://jinja.palletsprojects.com/en/3.1.x/) templating
-- Customizable HTML templates
-- Asset management structure
-
-**Frontend (general):**
-
 - Tailwind CSS integration + [plugins](https://tailwindcss.com/docs/plugins)
 - Optional [Electron](https://www.electronjs.org/) setup for desktop applications
 - Vercel [Geist](https://vercel.com/font) font (sans and mono)
-
 
 ## Installation
 
