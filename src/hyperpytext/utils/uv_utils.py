@@ -1,6 +1,15 @@
 import subprocess
 from rich.console import Console
 
+SERVER_DEPENDENCIES = [
+    "uvicorn~=0.32.0",
+    "fastapi~=0.115.0",
+    "python-dotenv~=1.0.0",
+    "piccolo[all]~=1.22.0",
+    "piccolo-api~=1.5.2",
+    "yagmail~=0.15.293"
+]
+
 console = Console()
 
 def check_uv():

@@ -111,7 +111,7 @@ def setup_vite_bun(app_dir, template='react', use_typescript=True):
 
     os.chdir(app_dir)
 
-def setup_tailwind_bun(client_dir, plugins=None, fonts=False):
+def setup_tailwind_bun(client_dir, plugins:list[str | None] | None = None, fonts:bool=False):
     """Setup Tailwind CSS using bun."""
     os.chdir(client_dir)
 

@@ -1,25 +1,9 @@
 import os
-import sys
 import subprocess
 from rich.console import Console
 from .npm_utils import check_system, check_npm_package, update_package_json
 
 console = Console()
-
-def check_tailwind_npm2():
-    npx_ = "npx.cmd" if check_system() == "windows" else "npx"
-    console.print(npx_)
-    try:
-        subprocess.run([npx_, "tailwindcss", "--help"], check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        return True
-    except (subprocess.CalledProcessError, FileNotFoundError):
-        return False
-
-
-def check_tailwind_standalone():
-    tailwind_exe = "tailwindcss.exe" if sys.platform.startswith('win') else "tailwindcss"
-    return os.path.exists(tailwind_exe)
-
 
 def update_package_json_for_tailwind(project_dir):
     updates = {
@@ -31,7 +15,7 @@ def update_package_json_for_tailwind(project_dir):
     update_package_json(project_dir, updates)
 
 
-def setup_tailwind_npm(project_dir, plugins, fonts):
+def setup_tailwind_npm(project_dir, plugins:list[str | None] | None = None, fonts:bool = False):
     os.chdir(project_dir)
     npm_ = "npm.cmd" if check_system() == "windows" else "npm"
     npx_ = "npx.cmd" if check_system() == "windows" else "npx"
@@ -45,39 +29,16 @@ def setup_tailwind_npm(project_dir, plugins, fonts):
 
     subprocess.run([npx_, "tailwindcss", "init", "-p"], check=True)
 
-    for plugin in plugins:
-        console.print(f"Installing Tailwind {plugin} plugin...")
-        subprocess.run([npm_, "install", "-D", f"@tailwindcss/{plugin}"], check=True)
+    if plugins:
+        for plugin in plugins:
+            console.print(f"Installing Tailwind {plugin} plugin...")
+            subprocess.run([npm_, "install", "-D", f"@tailwindcss/{plugin}"], check=True)
 
     if fonts:
         console.print(f"Installing Geist Fonts...")
         subprocess.run([npm_, "i", 'geist'], check=True)
 
     update_package_json_for_tailwind(project_dir)
-
-
-def setup_tailwind_standalone(project_dir):
-    os.chdir(project_dir)
-    if not check_tailwind_standalone():
-        console.print("Downloading Tailwind CSS standalone CLI...")
-        output=""
-        if sys.platform.startswith('win'):
-            url = "https://github.com/tailwindlabs/tailwindcss/releases/latest/download/tailwindcss-windows-x64.exe"
-        elif sys.platform.startswith('darwin'):
-            url = "https://github.com/tailwindlabs/tailwindcss/releases/latest/download/tailwindcss-macos-arm64"
-            output = "tailwindcss-macos-arm64"
-        elif sys.platform.startswith('linux'):
-            url = "https://github.com/tailwindlabs/tailwindcss/releases/latest/download/tailwindcss-linux-x64"
-            output = "tailwindcss-linux-x64"
-        else:
-            console.print("Unsupported operating system for Tailwind CSS standalone CLI.")
-            return
-        subprocess.run(["curl", "-sLO", url], check=True)
-        if not sys.platform.startswith('win'):
-            subprocess.run(["chmod", "+x", output], check=True)
-            subprocess.run(["mv", output, "tailwindcss"], check=True)
-    subprocess.run([f"./tailwindcss", "init"], check=True)
-
 
 def update_tailwind_config(filename, plugins, fonts):
     with open(filename, 'r') as f:

@@ -1,6 +1,6 @@
-filename: README.md
+filename: ./server/README.md
 content: |
-  # {app_name}
+  # HyperPyApp
 
   This project was created using HyperPyText.
 

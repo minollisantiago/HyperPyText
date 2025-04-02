@@ -9,10 +9,9 @@ Im looking to make several improvements, we will be working on them sequentially
 2. [x] Make react with vite the sole frontend framework, and remove vanilla js with htmx support.
 3. [x] Move from click to typer/rich for the CLI. I want rich text output for the CLI.
 4. [x] Add bun as an option for frontend package manager as well as npm, create bun utils files, follow the patterns of the npm utils files, make bun the default package manager for the frontend.
-5. [ ] Replace the last section of the @__init__.py file with a table describing the scripts available both for the server and client.
-6. [ ] All template files for the client on the react folder (src/hyperpytext/templates/react/client) include their file extensions. I want to do the same for the server files (py files).
-7. [ ] Update the README.md file with the react app structure for the client, make a distinction between the client + server webapp and the python CLI tool.
-8. [ ] Simplify the @__init__.py file, and move as much logic outside of it and into separate files if possible (server and client setup, for example, also util functions).
+5. [x] Replace the last section of the @__init__.py file with a table describing the scripts available both for the server and client.
+6. [ ] Update the README.md file with the react app structure for the client, make a distinction between the client + server webapp and the python CLI tool.
+7. [ ] Simplify the @__init__.py file, and move as much logic outside of it and into separate files if possible (server and client setup, for example, also util functions).
 
 #### Longer term improvements
 1. [ ] Add support for postgres (within the context of piccolo orm).
