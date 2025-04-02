@@ -196,7 +196,7 @@ def main(app_name: str):
         return
 
     # Setup Vite and the react client
-    setup_vite_npm(client_dir, template='react', use_typescript=True)
+    setup_vite_npm(app_dir, template='react', use_typescript=True)
 
     # Setup Tailwind if selected
     setup_tailwind_npm(client_dir, fonts)
