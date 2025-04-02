@@ -6,7 +6,7 @@ from rich.panel import Panel
 from rich.table import Table
 from rich.prompt import Confirm
 from rich.console import Console
-from rich.progress import Progress, SpinnerColumn, TextColumn
+#from rich.progress import Progress, SpinnerColumn, TextColumn
 from hyperpytext.utils.npm_shadcnui_utils import setup_shadcn_ui
 from hyperpytext.utils.npm_tailwind_utils import setup_tailwind_npm
 from hyperpytext.utils.npm_vite_utils import setup_vite_npm, configure_vite
@@ -49,12 +49,6 @@ def main(app_name: str):
     # Piccolo (db) setup
     piccolo_auth = Confirm.ask("Would you like to include authentication with Piccolo?", default=False)
     piccolo_example = Confirm.ask("Would you like to include a Piccolo db app example for SQLite?", default=False)
-
-    # Prompt for Tailwind CSS plugins
-    plugins = []
-    for plugin in ['forms', 'typography', 'container-queries']:
-        if Confirm.ask(f"Would you like to install the Tailwind {plugin} plugin?", default=False):
-            plugins.append(plugin)
 
     # Prompt for custom fonts: geist
     fonts = Confirm.ask("Would you like to install Geist fonts?", default=False)
@@ -205,7 +199,7 @@ def main(app_name: str):
     setup_vite_npm(client_dir, template='react', use_typescript=True)
 
     # Setup Tailwind if selected
-    setup_tailwind_npm(client_dir, plugins, fonts)
+    setup_tailwind_npm(client_dir, fonts)
 
     # Setup Shadcn UI if selected
     if shadcn_ui:
@@ -215,7 +209,7 @@ def main(app_name: str):
     configure_vite(client_dir, use_shadcn=shadcn_ui)
 
     # Create client files
-    create_client_files(plugins=plugins, fonts=fonts)
+    create_client_files(fonts=fonts)
 
     os.chdir(app_dir)
     #progress.update(client_task, completed=100)

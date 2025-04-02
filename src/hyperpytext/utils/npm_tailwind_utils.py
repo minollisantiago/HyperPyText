@@ -1,7 +1,7 @@
 import os
 import subprocess
 from rich.console import Console
-from .npm_utils import check_system, check_npm_package, update_package_json
+from .npm_utils import check_system, update_package_json
 
 console = Console()
 
@@ -15,30 +15,21 @@ def update_package_json_for_tailwind(project_dir):
     }
     update_package_json(project_dir, updates)
 
-def setup_tailwind_npm(project_dir, plugins:list[str | None] | None = None, fonts:bool = False):
+def setup_tailwind_npm(project_dir, fonts:bool = False):
     os.chdir(project_dir)
     npm_ = "npm.cmd" if check_system() == "windows" else "npm"
-    npx_ = "npx.cmd" if check_system() == "windows" else "npx"
-    if not check_npm_package('tailwindcss'):
-        console.print("Installing Tailwind CSS and Vite plugin...")
-        subprocess.run([npm_, "init", "-y"], check=True)
-        subprocess.run(
-            [npm_, "install", "tailwindcss", "@tailwindcss/vite"],
-            check=True
-        )
 
-    subprocess.run([npx_, "tailwindcss", "init", "-p"], check=True)
-
-    # Install plugins if specified
-    if plugins:
-        for plugin in plugins:
-            console.print(f"Installing Tailwind {plugin} plugin...")
-            subprocess.run([npm_, "install", "-D", f"@tailwindcss/{plugin}"], check=True)
+    # Install tailwind and vite plugin
+    console.print("Installing Tailwind CSS and Vite plugin...")
+    subprocess.run(
+        [npm_, "install", "tailwindcss", "@tailwindcss/vite"],
+        check=True
+    )
 
     # Install Geist fonts if specified
     if fonts:
         console.print(f"Installing Geist Fonts...")
-        subprocess.run([npm_, "i", 'geist'], check=True)
+        subprocess.run([npm_, "install", "-D", "geist"], check=True)
 
     update_package_json_for_tailwind(project_dir)
 
