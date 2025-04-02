@@ -64,159 +64,161 @@ def main(app_name: str):
 
     console.print("⌛ This process might take a bit. Please be patient.")
 
-    with Progress(SpinnerColumn(), TextColumn("[progress.description]{task.description}"), console=console) as progress:
+    #Progress instance
+    #progress = Progress(SpinnerColumn(), TextColumn("[progress.description]{task.description}"), console=console)
+    #with progress:
 
-        ## STEP1: Server setup
-        server_task = progress.add_task("🐍 Setting up the Python web server...", total=None)
+    ## STEP1: Server setup
+    #server_task = progress.add_task("🐍 Setting up the Python web server...", total=None)
 
-        # Create server directory
-        server_dir = os.path.join(app_dir, 'server')
-        os.makedirs(server_dir, exist_ok=True)
+    # Create server directory
+    server_dir = os.path.join(app_dir, 'server')
+    os.makedirs(server_dir, exist_ok=True)
 
-        # Uv package manager setup
-        os.chdir(server_dir)
-        if not check_uv():
-            uv_install_instructions()
-            return
-        setup_uv_environment(dependencies=SERVER_DEPENDENCIES)
-        os.chdir(app_dir)
+    # Uv package manager setup
+    os.chdir(server_dir)
+    if not check_uv():
+        uv_install_instructions()
+        return
+    setup_uv_environment(dependencies=SERVER_DEPENDENCIES)
+    os.chdir(app_dir)
 
-        # Setup server folders
-        folders = {'server/src/app': ['api/routes', 'db', 'utils']}
-        for base, subdirs in folders.items():
-            for subdir in subdirs:
-                os.makedirs(os.path.join(base, subdir), exist_ok=True)
+    # Setup server folders
+    folders = {'server/src/app': ['api/routes', 'db', 'utils']}
+    for base, subdirs in folders.items():
+        for subdir in subdirs:
+            os.makedirs(os.path.join(base, subdir), exist_ok=True)
 
-        # Setup root files
-        root_files = [
-            f'{filename}.yaml' for filename in [
-                'env', 'envrc', 'init', 'readme', 'uvicorn', 'gitignore'
-            ]
+    # Setup root files
+    root_files = [
+        f'{filename}.yaml' for filename in [
+            'env', 'envrc', 'init', 'readme', 'uvicorn', 'gitignore'
         ]
+    ]
 
-        # Setup database
-        db_files = [f'db_{filename}.yaml' for filename in ['primary', 'cache', 'queues',]]
+    # Setup database
+    db_files = [f'db_{filename}.yaml' for filename in ['primary', 'cache', 'queues',]]
 
-        if piccolo_example:
-            SERVER_DEPENDENCIES.append('faker~=30.1.0')
+    if piccolo_example:
+        SERVER_DEPENDENCIES.append('faker~=30.1.0')
 
-        # Database migrations timestamp
-        current_time = datetime.now()
-        migrations_timestamp = current_time.strftime("%Y-%m-%dT%H:%M:%S:%f")
+    # Database migrations timestamp
+    current_time = datetime.now()
+    migrations_timestamp = current_time.strftime("%Y-%m-%dT%H:%M:%S:%f")
 
-        # Create files from templates
-        for template_file in os.listdir(SERVER_TEMPLATES_PATH):
-            if template_file.endswith('.yaml'):
-                with open(os.path.join(SERVER_TEMPLATES_PATH, template_file), 'r') as file:
-                    templates = yaml.safe_load(file)
+    # Create files from templates
+    for template_file in os.listdir(SERVER_TEMPLATES_PATH):
+        if template_file.endswith('.yaml'):
+            with open(os.path.join(SERVER_TEMPLATES_PATH, template_file), 'r') as file:
+                templates = yaml.safe_load(file)
 
-                    # App files
-                    if template_file == 'app.yaml':
-                        for template in templates:
-                            filename = template['filename']
-                            content = template['content']
-                            create_file(filename, content)
-                        console.print("✔ Created app files")
+                # App files
+                if template_file == 'app.yaml':
+                    for template in templates:
+                        filename = template['filename']
+                        content = template['content']
+                        create_file(filename, content)
+                    console.print("✔ Created app files")
 
-                    # Api
-                    if template_file == 'api.yaml':
-                        for template in templates:
-                            filename = template['filename']
-                            content = template['content']
-                            create_file(filename, content)
-                        console.print("✔ Created fastApi routes example")
+                # Api
+                if template_file == 'api.yaml':
+                    for template in templates:
+                        filename = template['filename']
+                        content = template['content']
+                        create_file(filename, content)
+                    console.print("✔ Created fastApi routes example")
 
-                    # Db base
-                    if template_file in db_files:
-                        for template in templates:
-                            filename = template['filename']
-                            content = template['content']
-                            create_file(filename, content)
-                        console.print("✔ Created piccolo database files")
+                # Db base
+                if template_file in db_files:
+                    for template in templates:
+                        filename = template['filename']
+                        content = template['content']
+                        create_file(filename, content)
+                    console.print("✔ Created piccolo database files")
 
-                    # Db example
-                    if template_file == 'db_primary_example.yaml' and piccolo_example:
-                        migrations_file_name = f"primary_{current_time.strftime('%Y_%m_%dt%H_%M_%S_%f')}.py"
+                # Db example
+                if template_file == 'db_primary_example.yaml' and piccolo_example:
+                    migrations_file_name = f"primary_{current_time.strftime('%Y_%m_%dt%H_%M_%S_%f')}.py"
+                    for template in templates:
+                        filename = template['filename'].format(filename=migrations_file_name)
+                        content = template['content'].replace('{migrations_timestamp}', migrations_timestamp)
+                        create_file(filename, content)
+                    console.print("✔ Created a piccolo database example")
+
+                # Authentication
+                if piccolo_auth:
+                    # Db
+                    if template_file == 'db_auth.yaml':
+                        migrations_file_name = f"auth_{current_time.strftime('%Y_%m_%dt%H_%M_%S_%f')}.py"
                         for template in templates:
                             filename = template['filename'].format(filename=migrations_file_name)
                             content = template['content'].replace('{migrations_timestamp}', migrations_timestamp)
                             create_file(filename, content)
-                        console.print("✔ Created a piccolo database example")
+                        console.print("✔ Created piccolo_api database dependencies")
 
-                    # Authentication
-                    if piccolo_auth:
-                        # Db
-                        if template_file == 'db_auth.yaml':
-                            migrations_file_name = f"auth_{current_time.strftime('%Y_%m_%dt%H_%M_%S_%f')}.py"
-                            for template in templates:
-                                filename = template['filename'].format(filename=migrations_file_name)
-                                content = template['content'].replace('{migrations_timestamp}', migrations_timestamp)
-                                create_file(filename, content)
-                            console.print("✔ Created piccolo_api database dependencies")
-
-                        # Routes
-                        if template_file == 'routes_auth.yaml':
-                            for template in templates:
-                                filename = template['filename']
-                                content = template['content']
-                                create_file(filename, content)
-                            console.print("✔ Created authentication routes.")
-
-                        # Route Models (types)
-                        if template_file == 'routes_models.yaml':
-                            for template in templates:
-                                filename = template['filename']
-                                content = template['content']
-                                create_file(filename, content)
-                            console.print("✔ Created route response models")
-
-                    # Utils files
-                    if template_file == 'utils.yaml':
+                    # Routes
+                    if template_file == 'routes_auth.yaml':
                         for template in templates:
                             filename = template['filename']
                             content = template['content']
                             create_file(filename, content)
-                        console.print("✔ Created utils files")
+                        console.print("✔ Created authentication routes.")
 
-                    # Root files
-                    if template_file in root_files:
-                        filename = templates['filename']
-                        content = templates['content']
+                    # Route Models (types)
+                    if template_file == 'routes_models.yaml':
+                        for template in templates:
+                            filename = template['filename']
+                            content = template['content']
+                            create_file(filename, content)
+                        console.print("✔ Created route response models")
+
+                # Utils files
+                if template_file == 'utils.yaml':
+                    for template in templates:
+                        filename = template['filename']
+                        content = template['content']
                         create_file(filename, content)
-                        console.print(f"✔ Created {filename}")
+                    console.print("✔ Created utils files")
 
-        progress.update(server_task, completed=100)
+                # Root files
+                if template_file in root_files:
+                    filename = templates['filename']
+                    content = templates['content']
+                    create_file(filename, content)
+                    console.print(f"✔ Created {filename}")
 
-        ## STEP2: Client setup
-        client_task = progress.add_task("⚛️ Setting up the React client app...", total=None)
+    #progress.update(server_task, completed=100)
 
-        # Create client directory
-        client_dir = os.path.join(app_dir, 'client')
-        os.makedirs(client_dir, exist_ok=True)
+    ## STEP2: Client setup
+    #client_task = progress.add_task("⚛️ Setting up the React client app...", total=None)
 
-        # Check for npm and setup client
-        if not check_npm():
-            npm_install_instructions()
-            return
+    # Create client directory
+    client_dir = os.path.join(app_dir, 'client')
+    os.makedirs(client_dir, exist_ok=True)
 
-        # Setup Vite and the react client
-        setup_vite_npm(client_dir, template='react', use_typescript=True)
+    # Check for npm and setup client
+    if not check_npm():
+        npm_install_instructions()
+        return
 
-        # Setup Tailwind if selected
-        setup_tailwind_npm(client_dir, plugins, fonts)
+    # Setup Vite and the react client
+    setup_vite_npm(client_dir, template='react', use_typescript=True)
 
-        # Setup Shadcn UI if selected
-        if shadcn_ui:
-            setup_shadcn_ui(client_dir)
+    # Setup Tailwind if selected
+    setup_tailwind_npm(client_dir, plugins, fonts)
 
-        # Configure Vite with all selected features
-        configure_vite(client_dir, use_shadcn=shadcn_ui)
+    # Setup Shadcn UI if selected
+    if shadcn_ui:
+        setup_shadcn_ui(client_dir)
 
-        # Create client files
-        create_client_files(plugins=plugins, fonts=fonts)
+    # Configure Vite with all selected features
+    configure_vite(client_dir, use_shadcn=shadcn_ui)
 
-        os.chdir(app_dir)
-        progress.update(client_task, completed=100)
+    # Create client files
+    create_client_files(plugins=plugins, fonts=fonts)
+
+    os.chdir(app_dir)
+    #progress.update(client_task, completed=100)
 
     # Task complete message
     console.print(Panel(f"App '{app_name}' has been created successfully!", style="bold green"))

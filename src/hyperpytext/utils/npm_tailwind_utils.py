@@ -23,7 +23,7 @@ def setup_tailwind_npm(project_dir, plugins:list[str | None] | None = None, font
         console.print("Installing Tailwind CSS and Vite plugin...")
         subprocess.run([npm_, "init", "-y"], check=True)
         subprocess.run(
-            [npm_, "install", "-D", "tailwindcss", "@tailwindcss/vite", "autoprefixer", "postcss"],
+            [npm_, "install", "tailwindcss", "@tailwindcss/vite"],
             check=True
         )
 
