@@ -18,12 +18,8 @@ def get_template_path(template_path: str) -> Path:
     with resources.path('hyperpytext.templates', template_path) as path:
         return path
 
-#SERVER_TEMPLATES_PATH = get_template_path('react/server')
-#CLIENT_TEMPLATES_PATH = get_template_path('react/client')
-
-BASE_DIR = Path(__file__).parent
-SERVER_TEMPLATES_PATH = BASE_DIR / "templates/react/server"
-CLIENT_TEMPLATES_PATH = BASE_DIR / "templates/react/client"
+SERVER_TEMPLATES_PATH = get_template_path('react/server')
+CLIENT_TEMPLATES_PATH = get_template_path('react/client')
 
 def create_client_files(plugins:list[str | None] | None = None, fonts:bool = False):
     for template_file in os.listdir(CLIENT_TEMPLATES_PATH):
@@ -43,15 +39,15 @@ def create_client_files(plugins:list[str | None] | None = None, fonts:bool = Fal
                 if template_file == 'fonts.css.yaml':
                     if fonts:
                         filename = templates['filename']
-                        console.print(f"✔ Created {filename}")
                         content = templates['content']
                         create_file(filename, content)
+                        console.print(f"✔ Created {filename}")
                     else:
                         continue
 
                 # All files
                 else:
                     filename = templates['filename']
-                    console.print(f"✔ Created {filename}")
                     content = templates['content']
                     create_file(filename, content)
+                    console.print(f"✔ Created {filename}")

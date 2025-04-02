@@ -7,13 +7,12 @@ from rich.table import Table
 from rich.prompt import Confirm
 from rich.console import Console
 from rich.progress import Progress, SpinnerColumn, TextColumn
-from hyperpytext.utils.npm_vite_utils import setup_vite_npm
 from hyperpytext.utils.npm_shadcnui_utils import setup_shadcn_ui
+from hyperpytext.utils.npm_tailwind_utils import setup_tailwind_npm
+from hyperpytext.utils.npm_vite_utils import setup_vite_npm, configure_vite
 from hyperpytext.utils.npm_utils import check_npm, npm_install_instructions
-from hyperpytext.utils.npm_tailwind_utils import setup_tailwind_npm, update_tailwind_config
-from hyperpytext.utils.templates_utils import create_file, SERVER_TEMPLATES_PATH, CLIENT_TEMPLATES_PATH, create_client_files
+from hyperpytext.utils.templates_utils import create_file, SERVER_TEMPLATES_PATH, create_client_files
 from hyperpytext.utils.uv_utils import SERVER_DEPENDENCIES, check_uv, setup_uv_environment, uv_install_instructions
-from hyperpytext.utils.bun_utils import check_bun, setup_vite_bun, setup_tailwind_bun, setup_shadcn_bun, bun_install_instructions
 
 #APP SETUP
 # TODO: Make the server template more precise: app / library
@@ -25,14 +24,45 @@ from hyperpytext.utils.bun_utils import check_bun, setup_vite_bun, setup_tailwin
 app = typer.Typer(help="Create a new HyperPy application")
 console = Console()
 
+HEADER = """[bold cyan]
+██╗  ██╗██╗   ██╗██████╗ ███████╗██████╗ ██████╗ ██╗   ██╗████████╗███████╗██╗  ██╗████████╗
+██║  ██║╚██╗ ██╔╝██╔══██╗██╔════╝██╔══██╗██╔══██╗╚██╗ ██╔╝╚══██╔══╝██╔════╝╚██╗██╔╝╚══██╔══╝
+███████║ ╚████╔╝ ██████╔╝█████╗  ██████╔╝██████╔╝ ╚████╔╝    ██║   █████╗   ╚███╔╝    ██║
+██╔══██║  ╚██╔╝  ██╔═══╝ ██╔══╝  ██╔══██╗██╔═══╝   ╚██╔╝     ██║   ██╔══╝   ██╔██╗    ██║
+██║  ██║   ██║   ██║     ███████╗██║  ██║██║        ██║      ██║   ███████╗██╔╝ ██╗   ██║
+╚═╝  ╚═╝   ╚═╝   ╚═╝     ╚══════╝╚═╝  ╚═╝╚═╝        ╚═╝      ╚═╝   ╚══════╝╚═╝  ╚═╝   ╚═╝   [/bold cyan]
+
+[bold blue]🚀 Create modern web applications with Python and React[/bold blue]
+[bold green]🔗 Project repo: https://github.com/minollisantiago/hyperpytext[/bold green]
+"""
+
 @app.command()
 def main(app_name: str):
+    """Create a new HyperPy application with FastAPI backend and React frontend."""
+    console.print(HEADER)
     console.print(Panel(f"Creating a new HyperPy app in {os.path.join(os.getcwd(), app_name)}"))
-    console.print("⌛ This process might take a bit. Please be patient.")
 
     #Create app directory
     os.makedirs(app_name, exist_ok=True)
     app_dir = os.path.abspath(app_name)
+
+    # Piccolo (db) setup
+    piccolo_auth = Confirm.ask("Would you like to include authentication with Piccolo?", default=False)
+    piccolo_example = Confirm.ask("Would you like to include a Piccolo db app example for SQLite?", default=False)
+
+    # Prompt for Tailwind CSS plugins
+    plugins = []
+    for plugin in ['forms', 'typography', 'container-queries']:
+        if Confirm.ask(f"Would you like to install the Tailwind {plugin} plugin?", default=False):
+            plugins.append(plugin)
+
+    # Prompt for custom fonts: geist
+    fonts = Confirm.ask("Would you like to install Geist fonts?", default=False)
+
+    # Prompt for Shadcn UI
+    shadcn_ui = Confirm.ask("Would you like to install Shadcn UI components?", default=False)
+
+    console.print("⌛ This process might take a bit. Please be patient.")
 
     with Progress(SpinnerColumn(), TextColumn("[progress.description]{task.description}"), console=console) as progress:
 
@@ -64,15 +94,11 @@ def main(app_name: str):
             ]
         ]
 
-        # Piccolo (db) setup
-        piccolo_auth = Confirm.ask("Would you like to include authentication with Piccolo?", default=False)
-        piccolo_example = Confirm.ask("Would you like to include a Piccolo db app example for SQLite?", default=False)
+        # Setup database
+        db_files = [f'db_{filename}.yaml' for filename in ['primary', 'cache', 'queues',]]
 
         if piccolo_example:
             SERVER_DEPENDENCIES.append('faker~=30.1.0')
-
-        # Setup database
-        db_files = [f'db_{filename}.yaml' for filename in ['primary', 'cache', 'queues',]]
 
         # Database migrations timestamp
         current_time = datetime.now()
@@ -168,63 +194,36 @@ def main(app_name: str):
         client_dir = os.path.join(app_dir, 'client')
         os.makedirs(client_dir, exist_ok=True)
 
-        # Prompt for Tailwind CSS and plugins
-        plugins = []
-        for plugin in ['forms', 'typography', 'container-queries']:
-            if Confirm.ask(f"Would you like to install the Tailwind {plugin} plugin?", default=False):
-                plugins.append(plugin)
+        # Check for npm and setup client
+        if not check_npm():
+            npm_install_instructions()
+            return
 
-        # Prompt for custom fonts
-        fonts = Confirm.ask("Would you like to install Geist fonts?", default=False)
+        # Setup Vite and the react client
+        setup_vite_npm(client_dir, template='react', use_typescript=True)
 
-        # Prompt for Shadcn UI
-        shadcn_ui = Confirm.ask("Would you like to install Shadcn UI components?", default=False)
+        # Setup Tailwind if selected
+        setup_tailwind_npm(client_dir, plugins, fonts)
 
-        # Try to use bun first, fall back to npm if not available
-        if not check_bun():
-            bun_install_instructions()
-            console.print("Retrying with npm...")
-            if not check_npm():
-                npm_install_instructions()
-                return
-            else:
-                # Setup Vite and the react client with npm
-                setup_vite_npm(app_dir, template='react', use_typescript=True)
+        # Setup Shadcn UI if selected
+        if shadcn_ui:
+            setup_shadcn_ui(client_dir)
 
-                # Setup Tailwind if selected
-                setup_tailwind_npm(client_dir, plugins, fonts)
+        # Configure Vite with all selected features
+        configure_vite(client_dir, use_shadcn=shadcn_ui)
 
-                # Setup Shadcn UI if selected
-                if shadcn_ui:
-                    setup_shadcn_ui(client_dir)
+        # Create client files
+        create_client_files(plugins=plugins, fonts=fonts)
 
-                # Create client files
-                create_client_files(plugins=plugins, fonts=fonts)
-
-                os.chdir(app_dir)
-        else:
-            # Setup Vite and the react client with bun
-            setup_vite_bun(app_dir, template='react', use_typescript=True)
-
-            # Setup Tailwind if selected
-            setup_tailwind_bun(client_dir, plugins, fonts)
-
-            # Setup Shadcn UI if selected
-            if shadcn_ui:
-                setup_shadcn_bun(client_dir)
-
-            # Create client files
-            create_client_files(plugins=plugins, fonts=fonts)
-
-            os.chdir(app_dir)
-
+        os.chdir(app_dir)
         progress.update(client_task, completed=100)
 
     # Task complete message
     console.print(Panel(f"App '{app_name}' has been created successfully!", style="bold green"))
 
     # Create tables for scripts
-    server_table = Table(title="🐍 Python Server Scripts", show_header=True, header_style="bold magenta")
+    console.print("🐍 Python Server Scripts")
+    server_table = Table(show_header=True, header_style="bold magenta")
     server_table.add_column("Command", style="cyan")
     server_table.add_column("Description", style="green")
     server_table.add_column("Directory", style="yellow")
@@ -250,60 +249,38 @@ def main(app_name: str):
         "./server"
     )
 
-    client_table = Table(title="⚛️ React Client Scripts", show_header=True, header_style="bold magenta")
+    console.print("⚛️ React Client Scripts")
+    client_table = Table(show_header=True, header_style="bold magenta")
     client_table.add_column("Command", style="cyan")
     client_table.add_column("Description", style="green")
     client_table.add_column("Directory", style="yellow")
 
-    if check_bun():
-        client_table.add_row(
-            "bun run start",
-            "Start Vite development server",
-            "./client"
-        )
-        client_table.add_row(
-            "bun run build",
-            "Build Vite production bundle",
-            "./client"
-        )
-        client_table.add_row(
-            "bun run build-css",
-            "Build Tailwind CSS",
-            "./client"
-        )
-        client_table.add_row(
-            "bun run watch-css",
-            "Watch and build Tailwind CSS changes",
-            "./client"
-        )
-    else:
-        client_table.add_row(
-            "npm run start",
-            "Start Vite development server",
-            "./client"
-        )
-        client_table.add_row(
-            "npm run build",
-            "Build Vite production bundle",
-            "./client"
-        )
-        client_table.add_row(
-            "npm run build-css",
-            "Build Tailwind CSS",
-            "./client"
-        )
-        client_table.add_row(
-            "npm run watch-css",
-            "Watch and build Tailwind CSS changes",
-            "./client"
-        )
+    client_table.add_row(
+        "npm run start",
+        "Start Vite development server",
+        "./client"
+    )
+    client_table.add_row(
+        "npm run build",
+        "Build Vite production bundle",
+        "./client"
+    )
+    client_table.add_row(
+        "npm run build-css",
+        "Build Tailwind CSS",
+        "./client"
+    )
+    client_table.add_row(
+        "npm run watch-css",
+        "Watch and build Tailwind CSS changes",
+        "./client"
+    )
 
     console.print("\n")
     console.print(server_table)
     console.print("\n")
     console.print(client_table)
     console.print("\n")
-    console.print(Panel(f"App '{app_name}' created successfully!", style="bold green"))
 
 if __name__ == "__main__":
     app()

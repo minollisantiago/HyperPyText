@@ -74,42 +74,10 @@ def install_types_node(project_dir):
         click.echo("🚩 Failed to install @types/node. Please check your npm installation.")
 
 
-def update_vite_config(project_dir):
-    vite_config_path = os.path.join(project_dir, 'vite.config.ts')
-    if os.path.exists(vite_config_path):
-        new_config = (
-"""
-import path from "path"
-import react from "@vitejs/plugin-react"
-import { defineConfig } from "vite"
-
-export default defineConfig({
-plugins: [react()],
-resolve: {
-    alias: {
-    "@": path.resolve(__dirname, "./src"),
-    },
-},
-server: {
-    proxy: {
-        '/api': 'http://localhost:8000',
-    },
-},
-})
-"""
-        )
-        with open(vite_config_path, 'w') as f:
-            f.write(new_config)
-        click.echo("✔ Updated vite.config.ts for Shadcn UI.")
-    else:
-        click.echo("🚩 vite.config.ts not found. Skipping update.")
-
-
 def setup_shadcn_ui(project_dir):
     update_tsconfig_json(project_dir)
     update_tsconfig_app_json(project_dir)
     install_types_node(project_dir)
-    update_vite_config(project_dir)
 
     os.chdir(project_dir)
     npx_ = "npx.cmd" if check_system() == "windows" else "npx"

@@ -8,55 +8,85 @@ console = Console()
 def update_package_json_for_vite(project_dir):
     updates = {
         'scripts': {
-            'start': 'vite',
-            'build': 'vite build'
+            'dev': 'vite',
+            'build': 'vite build',
+            'preview': 'vite preview'
         }
     }
-    update_package_json(project_dir, updates, subdir='client')
+    update_package_json(project_dir, updates)
 
-
-def configure_vite_proxy(project_dir):
+def configure_vite(project_dir: str, *, use_shadcn: bool = False):
     """
-    Configure Vite's development server proxy settings to forward API requests to the FastAPI backend.
+    Configure Vite with all necessary plugins and settings.
 
-    This function updates the Vite config to proxy all /api/* requests to the FastAPI server running on 
-    localhost:8000. This allows the React frontend to make API calls to relative URLs like '/api/...' 
+    Args:
+        project_dir: The project directory where vite.config.ts should be created/updated
+        use_shadcn: Whether to include Shadcn UI configuration (includes path aliases)
+
+    Notes on the last step:
+    We configure Vite's development server proxy settings to forward API requests to the FastAPI backend.
+
+    This function updates the Vite config to proxy all /api/* requests to the FastAPI server running on
+    localhost:8000. This allows the React frontend to make API calls to relative URLs like '/api/...'
     which will be automatically forwarded to the backend server.
 
-    The FastAPI backend has routes defined under /api prefix, including the root route at /api/ which 
+    The FastAPI backend has routes defined under /api prefix, including the root route at /api/ which
     returns a "Hello World" message.
     """
-    vite_config_path = os.path.join(project_dir, 'client', 'vite.config.ts')
-    if os.path.exists(vite_config_path):
-        with open(vite_config_path, 'r') as f:
-            config_content = f.read()
+    vite_config_path = os.path.join(project_dir, 'vite.config.ts')
 
-        updated_config = config_content.replace(
-            "export default defineConfig({",
-            (
-            """
-            export default defineConfig({
-                server: {
-                    proxy: {
-                        '/api': 'http://localhost:8000',
-                    },
-                },
-            """
-            )
-        )
+    # Build imports section
+    imports = [
+        'import react from "@vitejs/plugin-react"',
+        'import { defineConfig } from "vite"',
+        'import tailwindcss from "@tailwindcss/vite"'
+    ]
 
-        with open(vite_config_path, 'w') as f:
-            f.write(updated_config)
+    if use_shadcn:
+        imports.append('import path from "path"')
 
-        console.print("✔ Updated Vite config with proxy settings.")
-    else:
-        console.print("🚩 Vite config not found. Skipping proxy configuration.")
+    # Build plugins section - Tailwind is always included
+    plugins = ['react()', 'tailwindcss()']
 
+    # Build config object
+    config_parts = []
+
+    # Add plugins
+    config_parts.append(f"  plugins: [{', '.join(plugins)}],")
+
+    # Add path aliases if using Shadcn
+    if use_shadcn:
+        config_parts.append("""  resolve: {
+    alias: {
+      "@": path.resolve(__dirname, "./src"),
+    },
+  },""")
+
+    # Add API proxy configuration
+    config_parts.append("""  server: {
+    proxy: {
+      '/api': 'http://localhost:8000',
+    },
+  },""")
+
+    # Combine everything into the final config
+    vite_config = f"""
+{chr(10).join(imports)}
+
+export default defineConfig({{
+{chr(10).join(config_parts)}
+}})
+"""
+
+    with open(vite_config_path, 'w') as f:
+        f.write(vite_config)
+
+    console.print("✔ Updated Vite configuration.")
 
 def remove_default_styles(project_dir):
     """Remove default style files created by Vite."""
-    app_css_path = os.path.join(project_dir, 'client', 'src', 'App.css')
-    index_css_path = os.path.join(project_dir, 'client', 'src', 'index.css')
+    app_css_path = os.path.join(project_dir, 'src', 'App.css')
+    index_css_path = os.path.join(project_dir, 'src', 'index.css')
 
     if os.path.exists(app_css_path):
         os.remove(app_css_path)
@@ -66,7 +96,6 @@ def remove_default_styles(project_dir):
         os.remove(index_css_path)
         console.print("✔ Removed default index.css file.")
 
-
 def setup_vite_npm(project_dir, template='react', use_typescript=True):
     os.chdir(project_dir)
     npm_ = "npm.cmd" if check_system() == "windows" else "npm"
@@ -74,7 +103,7 @@ def setup_vite_npm(project_dir, template='react', use_typescript=True):
         console.print("Setting up Vite...")
         template_with_ts = f"{template}-ts" if use_typescript else template
         subprocess.run(
-            [npm_, "create", "vite@latest", "client", "--", "--template", template_with_ts], 
+            [npm_, "create", "vite@latest", "client", "--", "--template", template_with_ts],
             check=True
         )
 
@@ -83,7 +112,7 @@ def setup_vite_npm(project_dir, template='react', use_typescript=True):
         subprocess.run([npm_, "install"], check=True)
 
         update_package_json_for_vite(project_dir)
-        configure_vite_proxy(project_dir)
+        configure_vite(project_dir)  # Initial configuration with React and Tailwind
         remove_default_styles(project_dir)
 
         os.chdir("..")

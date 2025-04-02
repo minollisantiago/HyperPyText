@@ -92,7 +92,7 @@ def setup_vite_bun(app_dir, template='react', use_typescript=True):
     os.chdir(client_dir)
 
     # Create a new Vite project
-    cmd = ["bun", "create", "vite", ".", "--template", "react-ts" if use_typescript else "react"]
+    cmd = ["bun", "create", "vite", ".", "--template", f"{template}-ts" if use_typescript else template]
     subprocess.run(cmd, check=True)
 
     # Install dependencies
@@ -115,23 +115,40 @@ def setup_tailwind_bun(client_dir, plugins:list[str | None] | None = None, fonts
     """Setup Tailwind CSS using bun."""
     os.chdir(client_dir)
 
-    # Install Tailwind and its dependencies
-    cmd = ["bun", "add", "-d", "tailwindcss", "postcss", "autoprefixer"]
-    subprocess.run(cmd, check=True)
+    try:
+        # Install Tailwind and its dependencies
+        cmd = ["bun", "add", "-d", "tailwindcss", "postcss", "autoprefixer"]
+        subprocess.run(cmd, check=True)
+        console.print("✔ Installed Tailwind CSS and its dependencies")
 
-    # Install plugins if specified
-    if plugins:
-        for plugin in plugins:
-            subprocess.run(["bun", "add", "-d", f"@tailwindcss/{plugin}"], check=True)
+        # Install plugins if specified
+        if plugins:
+            for plugin in plugins:
+                try:
+                    subprocess.run(["bun", "add", "-d", f"@tailwindcss/{plugin}"], check=True)
+                    console.print(f"✔ Installed Tailwind {plugin} plugin")
+                except subprocess.CalledProcessError as e:
+                    console.print(f"🚩 Failed to install Tailwind {plugin} plugin. Error: {e}")
 
-    # Install Geist fonts if specified
-    if fonts:
-        subprocess.run(["bun", "add", "@vercel/fonts"], check=True)
+        # Install Geist fonts if specified
+        if fonts:
+            try:
+                subprocess.run(["bun", "add", "geist"], check=True)
+                console.print("✔ Installed Geist fonts")
+            except subprocess.CalledProcessError as e:
+                console.print("🚩 Failed to install Geist fonts. Falling back to system fonts.")
+                console.print(f"Error: {e}")
 
-    # Initialize Tailwind
-    subprocess.run(["bunx", "tailwindcss", "init", "-p"], check=True)
+        # Initialize Tailwind
+        subprocess.run(["bunx", "tailwindcss", "init", "-p"], check=True)
+        console.print("✔ Initialized Tailwind configuration")
 
-    os.chdir(os.path.dirname(client_dir))
+    except subprocess.CalledProcessError as e:
+        console.print(f"🚩 Error setting up Tailwind: {e}")
+    except Exception as e:
+        console.print(f"🚩 Unexpected error: {e}")
+    finally:
+        os.chdir(os.path.dirname(client_dir))
 
 def setup_shadcn_bun(client_dir):
     """Setup Shadcn UI using bun."""
