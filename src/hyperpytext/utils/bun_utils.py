@@ -3,6 +3,7 @@ import sys
 import json
 import subprocess
 from rich.console import Console
+from hyperpytext.utils.npm_utils import update_package_json
 
 console = Console()
 
@@ -13,6 +14,7 @@ def check_system():
         return "mac"
     elif sys.platform.startswith('linux'):
         return "linux"
+
 
 def check_bun(verbose=False):
     """Check if bun is installed and available in the system."""
@@ -30,6 +32,7 @@ def check_bun(verbose=False):
         if verbose:
             console.print("🚩 bun command not found in PATH...")
         return False
+
 
 def bun_install_instructions():
     """Display instructions for installing bun."""
@@ -55,47 +58,57 @@ def check_bun_package(package):
                 return True
     return False
 
-def update_package_json(project_dir, updates, subdir=None):
-    """
-    Universal package.json updater for bun projects
 
-    Args:
-        project_dir: Base project directory
-        updates: Dict containing updates to merge into package.json
-        subdir: Optional subdirectory (from root) where package.json is located (e.g., 'client')
-    """
-    target_dir = os.path.join(project_dir, subdir) if subdir else project_dir
-    package_path = os.path.join(target_dir, 'package.json')
-
-    if os.path.exists(package_path):
-        with open(package_path, 'r') as f:
-            package = json.load(f)
-
-        # Deep merge the updates
-        for key, value in updates.items():
-            if isinstance(value, dict) and key in package:
-                package[key].update(value)
-            else:
-                package[key] = value
-
-        with open(package_path, 'w') as f:
-            json.dump(package, f, indent=2)
-
-        console.print(f"✔ Updated package.json in {target_dir}")
-    else:
-        console.print(f"🚩 package.json not found in {target_dir}. Skipping update.")
-
-def setup_vite_bun(app_dir, template='react', use_typescript=True):
-    """Setup a new Vite project using bun."""
-    client_dir = os.path.join(app_dir, 'client')
-    os.makedirs(client_dir, exist_ok=True)
+def setup_tailwind_bun(client_dir, fonts:bool=False):
+    """Setup Tailwind CSS using bun."""
     os.chdir(client_dir)
 
-    # Create a new Vite project
-    cmd = ["bun", "create", "vite", ".", "--template", f"{template}-ts" if use_typescript else template]
-    subprocess.run(cmd, check=True)
+    try:
+        # Install Tailwind and its dependencies
+        cmd = ["bun", "add", "tailwindcss", "@tailwindcss/vite"]
+        subprocess.run(cmd, check=True)
+        console.print("✔ Installed Tailwind CSS and its dependencies")
+
+        # Install Geist fonts if specified
+        if fonts:
+            try:
+                subprocess.run(["bun", "add", "geist"], check=True)
+                console.print("✔ Installed Geist fonts")
+            except subprocess.CalledProcessError as e:
+                console.print("🚩 Failed to install Geist fonts. Falling back to system fonts.")
+                console.print(f"Error: {e}")
+
+    except subprocess.CalledProcessError as e:
+        console.print(f"🚩 Error setting up Tailwind: {e}")
+    except Exception as e:
+        console.print(f"🚩 Unexpected error: {e}")
+    finally:
+        os.chdir(os.path.dirname(client_dir))
+
+
+def setup_shadcn_bun(client_dir):
+    """Setup Shadcn UI using bun."""
+    os.chdir(client_dir)
+
+    subprocess.run(["bun", "add", "-d", "shadcn-ui"], check=True)
+    subprocess.run(["bunx", "shadcn-ui@latest", "init"], check=True)
+
+    os.chdir(os.path.dirname(client_dir))
+
+
+def setup_vite_bun(project_dir, template='react', use_typescript=True):
+    """Setup a new Vite project using bun."""
+    os.chdir(project_dir)
+    console.print("Setting up Vite...")
+    template_with_ts = f"{template}-ts" if use_typescript else template
+    subprocess.run(
+        ["bun", "create", "vite@latest", "client", "--template", template_with_ts],
+        check=True
+    )
 
     # Install dependencies
+    os.chdir("client")
+    console.print("Running bun install...")
     subprocess.run(["bun", "install"], check=True)
 
     # Update package.json with bun-specific scripts
@@ -107,57 +120,13 @@ def setup_vite_bun(app_dir, template='react', use_typescript=True):
             "preview": "bun run preview"
         }
     }
-    update_package_json(client_dir, updates)
+    update_package_json(project_dir, updates)
 
-    os.chdir(app_dir)
+    #Types
+    subprocess.run(
+        ["bun", "add", "-D", "@types/node"],
+        check=True
+    )
+    os.chdir("..")
+    console.print("✔ Vite setup complete.")
 
-def setup_tailwind_bun(client_dir, plugins:list[str | None] | None = None, fonts:bool=False):
-    """Setup Tailwind CSS using bun."""
-    os.chdir(client_dir)
-
-    try:
-        # Install Tailwind and its dependencies
-        cmd = ["bun", "add", "-d", "tailwindcss", "postcss", "autoprefixer"]
-        subprocess.run(cmd, check=True)
-        console.print("✔ Installed Tailwind CSS and its dependencies")
-
-        # Install plugins if specified
-        if plugins:
-            for plugin in plugins:
-                try:
-                    subprocess.run(["bun", "add", "-d", f"@tailwindcss/{plugin}"], check=True)
-                    console.print(f"✔ Installed Tailwind {plugin} plugin")
-                except subprocess.CalledProcessError as e:
-                    console.print(f"🚩 Failed to install Tailwind {plugin} plugin. Error: {e}")
-
-        # Install Geist fonts if specified
-        if fonts:
-            try:
-                subprocess.run(["bun", "add", "geist"], check=True)
-                console.print("✔ Installed Geist fonts")
-            except subprocess.CalledProcessError as e:
-                console.print("🚩 Failed to install Geist fonts. Falling back to system fonts.")
-                console.print(f"Error: {e}")
-
-        # Initialize Tailwind
-        subprocess.run(["bunx", "tailwindcss", "init", "-p"], check=True)
-        console.print("✔ Initialized Tailwind configuration")
-
-    except subprocess.CalledProcessError as e:
-        console.print(f"🚩 Error setting up Tailwind: {e}")
-    except Exception as e:
-        console.print(f"🚩 Unexpected error: {e}")
-    finally:
-        os.chdir(os.path.dirname(client_dir))
-
-def setup_shadcn_bun(client_dir):
-    """Setup Shadcn UI using bun."""
-    os.chdir(client_dir)
-
-    # Install shadcn-ui CLI
-    subprocess.run(["bun", "add", "-d", "shadcn-ui"], check=True)
-
-    # Initialize shadcn-ui
-    subprocess.run(["bunx", "shadcn-ui@latest", "init"], check=True)
-
-    os.chdir(os.path.dirname(client_dir)) 

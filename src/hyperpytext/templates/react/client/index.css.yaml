@@ -1,0 +1,3 @@
+filename: ./src/index.css
+content: |
+  @import "tailwindcss";

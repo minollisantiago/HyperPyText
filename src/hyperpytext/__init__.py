@@ -4,13 +4,14 @@ import typer
 from datetime import datetime
 from rich.panel import Panel
 from rich.table import Table
-from rich.prompt import Confirm
+from rich.prompt import Confirm, Prompt
 from rich.console import Console
 #from rich.progress import Progress, SpinnerColumn, TextColumn
 from hyperpytext.utils.npm_shadcnui_utils import setup_shadcn_ui
 from hyperpytext.utils.npm_tailwind_utils import setup_tailwind_npm
 from hyperpytext.utils.npm_vite_utils import setup_vite_npm, configure_vite
 from hyperpytext.utils.npm_utils import check_npm, npm_install_instructions
+from hyperpytext.utils.bun_utils import check_bun, bun_install_instructions, setup_vite_bun, setup_tailwind_bun, setup_shadcn_bun
 from hyperpytext.utils.templates_utils import create_file, SERVER_TEMPLATES_PATH, create_client_files
 from hyperpytext.utils.uv_utils import SERVER_DEPENDENCIES, check_uv, setup_uv_environment, uv_install_instructions
 
@@ -46,14 +47,13 @@ def main(app_name: str):
     os.makedirs(app_name, exist_ok=True)
     app_dir = os.path.abspath(app_name)
 
-    # Piccolo (db) setup
+    # Server prompts
     piccolo_auth = Confirm.ask("Would you like to include authentication with Piccolo?", default=False)
     piccolo_example = Confirm.ask("Would you like to include a Piccolo db app example for SQLite?", default=False)
 
-    # Prompt for custom fonts: geist
+    # Client prompts
+    package_manager = Prompt.ask("Which package manager would you like to use?", choices=["bun", "npm"], default="bun")
     fonts = Confirm.ask("Would you like to install Geist fonts?", default=False)
-
-    # Prompt for Shadcn UI
     shadcn_ui = Confirm.ask("Would you like to install Shadcn UI components?", default=False)
 
     console.print("⌛ This process might take a bit. Please be patient.")
@@ -190,20 +190,34 @@ def main(app_name: str):
     client_dir = os.path.join(app_dir, 'client')
     os.makedirs(client_dir, exist_ok=True)
 
-    # Check for npm and setup client
-    if not check_npm():
-        npm_install_instructions()
-        return
+    # Check for package manager and setup client
+    if package_manager == "bun":
+        if not check_bun():
+            bun_install_instructions()
+            return
+        # Setup Vite and the react client
+        setup_vite_bun(app_dir, template='react', use_typescript=True)
 
-    # Setup Vite and the react client
-    setup_vite_npm(app_dir, template='react', use_typescript=True)
+        # Setup Tailwind if selected
+        setup_tailwind_bun(client_dir, fonts)
 
-    # Setup Tailwind if selected
-    setup_tailwind_npm(client_dir, fonts)
+        # Setup Shadcn UI if selected
+        if shadcn_ui:
+            setup_shadcn_bun(client_dir)
 
-    # Setup Shadcn UI if selected
-    if shadcn_ui:
-        setup_shadcn_ui(client_dir)
+    else:  # npm
+        if not check_npm():
+            npm_install_instructions()
+            return
+        # Setup Vite and the react client
+        setup_vite_npm(app_dir, template='react', use_typescript=True)
+
+        # Setup Tailwind if selected
+        setup_tailwind_npm(client_dir, fonts)
+
+        # Setup Shadcn UI if selected
+        if shadcn_ui:
+            setup_shadcn_ui(client_dir)
 
     # Configure Vite with all selected features
     configure_vite(client_dir, use_shadcn=shadcn_ui)
@@ -251,26 +265,49 @@ def main(app_name: str):
     client_table.add_column("Description", style="green")
     client_table.add_column("Directory", style="yellow")
 
-    client_table.add_row(
-        "npm run start",
-        "Start Vite development server",
-        "./client"
-    )
-    client_table.add_row(
-        "npm run build",
-        "Build Vite production bundle",
-        "./client"
-    )
-    client_table.add_row(
-        "npm run build-css",
-        "Build Tailwind CSS",
-        "./client"
-    )
-    client_table.add_row(
-        "npm run watch-css",
-        "Watch and build Tailwind CSS changes",
-        "./client"
-    )
+    # Add package manager specific commands
+    if package_manager == "bun":
+        client_table.add_row(
+            "bun run dev",
+            "Start Vite development server",
+            "./client"
+        )
+        client_table.add_row(
+            "bun run build",
+            "Build Vite production bundle",
+            "./client"
+        )
+        client_table.add_row(
+            "bun run build-css",
+            "Build Tailwind CSS",
+            "./client"
+        )
+        client_table.add_row(
+            "bun run watch-css",
+            "Watch and build Tailwind CSS changes",
+            "./client"
+        )
+    else:  # npm
+        client_table.add_row(
+            "npm run start",
+            "Start Vite development server",
+            "./client"
+        )
+        client_table.add_row(
+            "npm run build",
+            "Build Vite production bundle",
+            "./client"
+        )
+        client_table.add_row(
+            "npm run build-css",
+            "Build Tailwind CSS",
+            "./client"
+        )
+        client_table.add_row(
+            "npm run watch-css",
+            "Watch and build Tailwind CSS changes",
+            "./client"
+        )
 
     console.print("\n")
     console.print(server_table)
