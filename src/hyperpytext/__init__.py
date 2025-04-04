@@ -54,7 +54,7 @@ def main(app_name: str):
     # Client prompts
     package_manager = Prompt.ask("Which package manager would you like to use?", choices=["bun", "npm"], default="bun")
     fonts = Confirm.ask("Would you like to install Geist fonts?", default=False)
-    shadcn = Confirm.ask("Would you like to install Shadcn UI components?", default=False)
+    shadcn = Confirm.ask("Would you like to install Shadcn UI?", default=False)
 
     console.print("⌛ This process might take a bit. Please be patient.")
 
