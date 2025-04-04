@@ -1,7 +1,7 @@
 filename: ./src/App.tsx
 content: |
   import Hero from '@/components/landing/Hero'
-  import './styles/style.css'
+  import './index.css'
 
   function App() {
 
