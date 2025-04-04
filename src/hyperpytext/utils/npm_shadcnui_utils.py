@@ -32,6 +32,7 @@ def update_tsconfig_app_json(project_dir):
     if os.path.exists(tsconfig_app_path):
         new_config = {
             "compilerOptions": {
+                "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.app.tsbuildinfo",
                 "target": "ES2020",
                 "useDefineForClassFields": True,
                 "lib": ["ES2020", "DOM", "DOM.Iterable"],
@@ -74,11 +75,10 @@ def install_types_node(project_dir):
         click.echo("🚩 Failed to install @types/node. Please check your npm installation.")
 
 
-def setup_shadcn_ui(project_dir):
+def setup_shadcn_npm(project_dir):
     update_tsconfig_json(project_dir)
     update_tsconfig_app_json(project_dir)
     install_types_node(project_dir)
-
     os.chdir(project_dir)
     npx_ = "npx.cmd" if check_system() == "windows" else "npx"
     click.echo("Initializing Shadcn UI...")

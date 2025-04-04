@@ -37,7 +37,7 @@ def create_client_files(client_dir:str, fonts:bool = False):
                     else:
                         continue
 
-                # All files
+                # All other files
                 else:
                     filename = templates['filename']
                     content = templates['content']

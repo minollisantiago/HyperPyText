@@ -86,17 +86,12 @@ export default defineConfig({{
 def remove_default_styles(project_dir):
     """Remove default style files created by Vite."""
     app_css_path = os.path.join(project_dir, 'src', 'App.css')
-    index_css_path = os.path.join(project_dir, 'src', 'index.css')
 
     if os.path.exists(app_css_path):
         os.remove(app_css_path)
         console.print("✔ Removed default App.css file.")
 
-    if os.path.exists(index_css_path):
-        os.remove(index_css_path)
-        console.print("✔ Removed default index.css file.")
-
-def setup_vite_npm(project_dir, app_name = 'client', template='react', use_typescript=True):
+def setup_vite_npm(project_dir, app_name = 'client', template='react', use_typescript=True, shadcn=False):
     """Setup a new Vite project using npm."""
     os.chdir(project_dir)
     npm_ = "npm.cmd" if check_system() == "windows" else "npm"
@@ -122,7 +117,7 @@ def setup_vite_npm(project_dir, app_name = 'client', template='react', use_types
             }
         }
         update_package_json(project_dir, updates, subdir=app_name)
-        configure_vite(project_dir)
+        configure_vite(project_dir, use_shadcn=shadcn)
         remove_default_styles(project_dir)
 
         os.chdir("..")

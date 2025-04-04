@@ -4,6 +4,8 @@ import json
 import subprocess
 from rich.console import Console
 from hyperpytext.utils.npm_utils import update_package_json
+from hyperpytext.utils.npm_vite_utils import configure_vite, remove_default_styles
+from hyperpytext.utils.npm_shadcnui_utils import update_tsconfig_json, update_tsconfig_app_json
 
 console = Console()
 
@@ -62,7 +64,6 @@ def check_bun_package(package):
 def setup_tailwind_bun(client_dir, fonts:bool=False):
     """Setup Tailwind CSS using bun."""
     os.chdir(client_dir)
-
     try:
         # Install Tailwind and its dependencies
         cmd = ["bun", "add", "tailwindcss", "@tailwindcss/vite"]
@@ -86,15 +87,28 @@ def setup_tailwind_bun(client_dir, fonts:bool=False):
         os.chdir(os.path.dirname(client_dir))
 
 
-def setup_shadcn_bun(client_dir):
+def install_types_bun(project_dir):
+    os.chdir(project_dir)
+    try:
+        subprocess.run(["bun", "add", "-D", "@types/node"], check=True)
+        console.print("✔ Installed @types/node successfully.")
+    except subprocess.CalledProcessError:
+        console.print("🚩 Failed to install @types/node.")
+
+
+def setup_shadcn_bun(project_dir):
     """Setup Shadcn UI using bun."""
-    os.chdir(client_dir)
-    #subprocess.run(["bun", "add", "-d", "shadcn"], check=True)
+    update_tsconfig_json(project_dir)
+    update_tsconfig_app_json(project_dir)
+    install_types_bun(project_dir)
+    os.chdir(project_dir)
+    console.print("Initializing Shadcn UI...")
+    subprocess.run(["bun", "add", "-d", "shadcn"], check=True)
     subprocess.run(["bunx", "--bun", "shadcn@latest", "init"], check=True)
-    os.chdir(client_dir)
+    os.chdir(project_dir)
 
 
-def setup_vite_bun(project_dir, app_name='client', template='react', use_typescript=True):
+def setup_vite_bun(project_dir, app_name='client', template='react', use_typescript=True, shadcn=False):
     """Setup a new Vite project using bun."""
     os.chdir(project_dir)
     console.print("Setting up Vite...")
@@ -119,12 +133,9 @@ def setup_vite_bun(project_dir, app_name='client', template='react', use_typescr
         }
     }
     update_package_json(project_dir, updates, subdir=app_name)
+    configure_vite(project_dir, use_shadcn=shadcn)
+    remove_default_styles(project_dir)
 
-    #Types
-    subprocess.run(
-        ["bun", "add", "-D", "@types/node"],
-        check=True
-    )
     os.chdir("..")
     console.print("✔ Vite setup complete.")
 

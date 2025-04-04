@@ -7,7 +7,7 @@ from rich.table import Table
 from rich.console import Console
 from rich.prompt import Confirm, Prompt
 #from rich.progress import Progress, SpinnerColumn, TextColumn
-from hyperpytext.utils.npm_shadcnui_utils import setup_shadcn_ui
+from hyperpytext.utils.npm_shadcnui_utils import setup_shadcn_npm
 from hyperpytext.utils.npm_tailwind_utils import setup_tailwind_npm
 from hyperpytext.utils.npm_vite_utils import setup_vite_npm, configure_vite
 from hyperpytext.utils.npm_utils import check_npm, npm_install_instructions
@@ -54,7 +54,7 @@ def main(app_name: str):
     # Client prompts
     package_manager = Prompt.ask("Which package manager would you like to use?", choices=["bun", "npm"], default="bun")
     fonts = Confirm.ask("Would you like to install Geist fonts?", default=False)
-    shadcn_ui = Confirm.ask("Would you like to install Shadcn UI components?", default=False)
+    shadcn = Confirm.ask("Would you like to install Shadcn UI components?", default=False)
 
     console.print("⌛ This process might take a bit. Please be patient.")
 
@@ -195,35 +195,19 @@ def main(app_name: str):
         if not check_bun():
             bun_install_instructions()
             return
-        # Setup Vite and the react client
-        setup_vite_bun(app_dir, app_name="client", template="react", use_typescript=True)
-
-        # Setup Tailwind if selected
+        setup_vite_bun(app_dir, app_name="client", template="react", use_typescript=True, shadcn=shadcn)
         setup_tailwind_bun(client_dir, fonts)
+        create_client_files(client_dir=client_dir, fonts=fonts)
+        if shadcn: setup_shadcn_bun(client_dir)
 
-        # Setup Shadcn UI if selected
-        if shadcn_ui:
-            setup_shadcn_bun(client_dir)
-
-    else:  # npm
+    elif package_manager == "npm":
         if not check_npm():
             npm_install_instructions()
             return
-        # Setup Vite and the react client
-        setup_vite_npm(app_dir, app_name="client", template="react", use_typescript=True)
-
-        # Setup Tailwind if selected
+        setup_vite_npm(app_dir, app_name="client", template="react", use_typescript=True, shadcn=shadcn)
         setup_tailwind_npm(client_dir, fonts)
-
-        # Setup Shadcn UI if selected
-        if shadcn_ui:
-            setup_shadcn_ui(client_dir)
-
-    # Configure Vite with all selected features
-    configure_vite(client_dir, use_shadcn=shadcn_ui)
-
-    # Create client files
-    create_client_files(client_dir=client_dir, fonts=fonts)
+        create_client_files(client_dir=client_dir, fonts=fonts)
+        if shadcn: setup_shadcn_npm(client_dir)
 
     os.chdir(app_dir)
     #progress.update(client_task, completed=100)
