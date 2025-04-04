@@ -15,12 +15,18 @@ from hyperpytext.utils.bun_utils import check_bun, bun_install_instructions, set
 from hyperpytext.utils.templates_utils import create_file, SERVER_TEMPLATES_PATH, create_client_files
 from hyperpytext.utils.uv_utils import SERVER_DEPENDENCIES, check_uv, setup_uv_environment, uv_install_instructions
 
-#APP SETUP
+# SERVER
 # TODO: Make the server template more precise: app / library
-# TODO: Add some default shadcn components, at least examples
 # TODO: Make a reference to the host and port on this file to reference on the vite server proxy and .env file
 # TODO: Handle all authentication redirects, at least to specific endpoints, use piccolo docs for reference (all their auth endpoints have redirects)
 # TODO: Move the root route to a new yaml file: routes_root.yaml
+
+# CLIENT
+# TODO: Need to test installation with npm to see that everything is set up correctly, bun is working perfectly
+# TODO: I want to add some agent tooling to add shadcn components perhaps, need to brainstorm a bit
+
+# APP
+# TODO: Need to create LLM md files for quick setup, a complete PRD with the project information for quick LLM digestion and setup
 
 app = typer.Typer(help="Create a new HyperPy application")
 console = Console()
