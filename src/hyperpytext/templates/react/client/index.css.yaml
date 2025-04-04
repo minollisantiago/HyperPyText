@@ -64,7 +64,7 @@ content: |
 
     .mask {
       background: #F23568;
-      mask-image: url(../assets/mask.svg);
+      mask-image: url(./assets/mask.svg);
       mask-repeat: no-repeat;
       mask-size: 42px;
     }
