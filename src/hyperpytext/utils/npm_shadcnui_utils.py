@@ -1,9 +1,10 @@
 import os
 import json
-import click
 import subprocess
+from rich.console import Console
 from .npm_utils import check_system
 
+console = Console()
 
 def update_tsconfig_json(project_dir):
     tsconfig_path = os.path.join(project_dir, 'tsconfig.json')
@@ -22,9 +23,9 @@ def update_tsconfig_json(project_dir):
         with open(tsconfig_path, 'w') as f:
             json.dump(tsconfig, f, indent=2)
 
-        click.echo("✔ Updated tsconfig.json with baseUrl and paths for Shadcn UI.")
+        console.print("✔ Updated tsconfig.json with baseUrl and paths for Shadcn UI.")
     else:
-        click.echo("🚩 tsconfig.json not found. Skipping update.")
+        console.print("🚩 tsconfig.json not found. Skipping update.")
 
 
 def update_tsconfig_app_json(project_dir):
@@ -60,9 +61,9 @@ def update_tsconfig_app_json(project_dir):
         with open(tsconfig_app_path, 'w') as f:
             json.dump(new_config, f, indent=2)
 
-        click.echo("✔ Updated tsconfig.app.json with baseUrl and paths for Shadcn UI.")
+        console.print("✔ Updated tsconfig.app.json with baseUrl and paths for Shadcn UI.")
     else:
-        click.echo("🚩 tsconfig.app.json not found. Skipping update.")
+        console.print("🚩 tsconfig.app.json not found. Skipping update.")
 
 
 def install_types_node(project_dir):
@@ -70,9 +71,9 @@ def install_types_node(project_dir):
     npm_ = "npm.cmd" if check_system() == "windows" else "npm"
     try:
         subprocess.run([npm_, "install", "-D", "@types/node"], check=True)
-        click.echo("✔ Installed @types/node successfully.")
+        console.print("✔ Installed @types/node successfully.")
     except subprocess.CalledProcessError:
-        click.echo("🚩 Failed to install @types/node. Please check your npm installation.")
+        console.print("🚩 Failed to install @types/node. Please check your npm installation.")
 
 
 def setup_shadcn_npm(project_dir):
@@ -81,10 +82,10 @@ def setup_shadcn_npm(project_dir):
     install_types_node(project_dir)
     os.chdir(project_dir)
     npx_ = "npx.cmd" if check_system() == "windows" else "npx"
-    click.echo("Initializing Shadcn UI...")
+    console.print("Initializing Shadcn UI...")
     try:
         subprocess.run([npx_, "shadcn@latest", "init"], check=True)
     except subprocess.CalledProcessError:
-        click.echo(
+        console.print(
             "🚩 Failed to initialize Shadcn UI. Please check your npm installation and try again."
         )
