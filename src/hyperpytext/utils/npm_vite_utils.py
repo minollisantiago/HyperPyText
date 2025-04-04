@@ -1,4 +1,5 @@
 import os
+from re import sub
 import subprocess
 from rich.console import Console
 from .npm_utils import check_system, check_npm_package, update_package_json
@@ -15,12 +16,13 @@ def update_package_json_for_vite(project_dir):
     }
     update_package_json(project_dir, updates)
 
-def configure_vite(project_dir: str, *, use_shadcn: bool = False):
+def configure_vite(project_dir: str, *, subdir: str | None = None, use_shadcn: bool = False):
     """
     Configure Vite with all necessary plugins and settings.
 
     Args:
-        project_dir: The project directory where vite.config.ts should be created/updated
+        project_dir: The project directory
+        subdir: The frontend directory, where vite.config.ts should be created/updated
         use_shadcn: Whether to include Shadcn UI configuration (includes path aliases)
 
     Notes on the last step:
@@ -33,7 +35,8 @@ def configure_vite(project_dir: str, *, use_shadcn: bool = False):
     The FastAPI backend has routes defined under /api prefix, including the root route at /api/ which
     returns a "Hello World" message.
     """
-    vite_config_path = os.path.join(project_dir, 'vite.config.ts')
+    target_dir = os.path.join(project_dir, subdir) if subdir else project_dir
+    vite_config_path = os.path.join(target_dir, 'vite.config.ts')
 
     # Build imports section
     imports = [
@@ -83,13 +86,15 @@ export default defineConfig({{
 
     console.print("✔ Updated Vite configuration.")
 
-def remove_default_styles(client_dir):
+def remove_default_styles(project_dir, subdir: str | None):
     """Remove default style files created by Vite."""
-    app_css_path = os.path.join(client_dir, 'src', 'App.css')
+    target_dir = os.path.join(project_dir, subdir) if subdir else project_dir
+    app_css_path = os.path.join(target_dir, 'src', 'App.css')
 
     if os.path.exists(app_css_path):
         os.remove(app_css_path)
         console.print("✔ Removed default App.css file.")
+
 
 def setup_vite_npm(project_dir, app_name = 'client', template='react', use_typescript=True, shadcn=False):
     """Setup a new Vite project using npm."""
@@ -117,8 +122,8 @@ def setup_vite_npm(project_dir, app_name = 'client', template='react', use_types
             }
         }
         update_package_json(project_dir, updates, subdir=app_name)
-        configure_vite(project_dir, use_shadcn=shadcn)
-        remove_default_styles(app_name)
+        configure_vite(project_dir, subdir=app_name, use_shadcn=shadcn)
+        remove_default_styles(project_dir, subdir=app_name)
 
         os.chdir("..")
         console.print("✔ Vite setup complete.")

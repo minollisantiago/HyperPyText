@@ -133,8 +133,8 @@ def setup_vite_bun(project_dir, app_name='client', template='react', use_typescr
         }
     }
     update_package_json(project_dir, updates, subdir=app_name)
-    configure_vite(project_dir, use_shadcn=shadcn)
-    remove_default_styles(app_name)
+    configure_vite(project_dir, subdir=app_name, use_shadcn=shadcn)
+    remove_default_styles(project_dir, subdir=app_name)
 
     os.chdir("..")
     console.print("✔ Vite setup complete.")
