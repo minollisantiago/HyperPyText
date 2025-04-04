@@ -4,8 +4,8 @@ import typer
 from datetime import datetime
 from rich.panel import Panel
 from rich.table import Table
-from rich.prompt import Confirm, Prompt
 from rich.console import Console
+from rich.prompt import Confirm, Prompt
 #from rich.progress import Progress, SpinnerColumn, TextColumn
 from hyperpytext.utils.npm_shadcnui_utils import setup_shadcn_ui
 from hyperpytext.utils.npm_tailwind_utils import setup_tailwind_npm
@@ -223,7 +223,7 @@ def main(app_name: str):
     configure_vite(client_dir, use_shadcn=shadcn_ui)
 
     # Create client files
-    create_client_files(fonts=fonts)
+    create_client_files(client_dir=client_dir, fonts=fonts)
 
     os.chdir(app_dir)
     #progress.update(client_task, completed=100)

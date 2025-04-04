@@ -20,21 +20,12 @@ def get_template_path(template_path: str) -> Path:
 SERVER_TEMPLATES_PATH = get_template_path('react/server')
 CLIENT_TEMPLATES_PATH = get_template_path('react/client')
 
-def create_client_files(fonts:bool = False):
+def create_client_files(client_dir:str, fonts:bool = False):
+    os.chdir(client_dir)
     for template_file in os.listdir(CLIENT_TEMPLATES_PATH):
         if template_file.endswith('.yaml'):
             with open(os.path.join(CLIENT_TEMPLATES_PATH, template_file), 'r') as file:
                 templates = yaml.safe_load(file)
-
-                # Tailwind config update
-                if template_file == 'tailwind.config.js.yaml':
-                    continue
-                    #We are now using tailwind 4.0
-                    #filename = templates['filename']
-                    #content = templates['content']
-                    #create_file(filename, content)
-                    #update_tailwind_config(filename, plugins, fonts)
-                    #console.print("✔ Updated tailwind.config.js")
 
                 # Geist fonts
                 if template_file == 'fonts.css.yaml':
