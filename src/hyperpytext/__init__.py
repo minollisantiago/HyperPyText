@@ -187,7 +187,7 @@ def main(app_name: str):
     #client_task = progress.add_task("⚛️ Setting up the React client app...", total=None)
 
     # Create client directory
-    client_dir = os.path.join(app_dir, 'client')
+    client_dir = os.path.join(app_dir, "client")
     os.makedirs(client_dir, exist_ok=True)
 
     # Check for package manager and setup client
@@ -196,7 +196,7 @@ def main(app_name: str):
             bun_install_instructions()
             return
         # Setup Vite and the react client
-        setup_vite_bun(app_dir, template='react', use_typescript=True)
+        setup_vite_bun(app_dir, app_name="client", template="react", use_typescript=True)
 
         # Setup Tailwind if selected
         setup_tailwind_bun(client_dir, fonts)
@@ -210,7 +210,7 @@ def main(app_name: str):
             npm_install_instructions()
             return
         # Setup Vite and the react client
-        setup_vite_npm(app_dir, template='react', use_typescript=True)
+        setup_vite_npm(app_dir, app_name="client", template="react", use_typescript=True)
 
         # Setup Tailwind if selected
         setup_tailwind_npm(client_dir, fonts)

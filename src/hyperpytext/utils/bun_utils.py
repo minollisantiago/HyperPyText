@@ -89,25 +89,23 @@ def setup_tailwind_bun(client_dir, fonts:bool=False):
 def setup_shadcn_bun(client_dir):
     """Setup Shadcn UI using bun."""
     os.chdir(client_dir)
-
-    subprocess.run(["bun", "add", "-d", "shadcn-ui"], check=True)
-    subprocess.run(["bunx", "shadcn-ui@latest", "init"], check=True)
-
-    os.chdir(os.path.dirname(client_dir))
+    #subprocess.run(["bun", "add", "-d", "shadcn"], check=True)
+    subprocess.run(["bunx", "--bun", "shadcn@latest", "init"], check=True)
+    os.chdir(client_dir)
 
 
-def setup_vite_bun(project_dir, template='react', use_typescript=True):
+def setup_vite_bun(project_dir, app_name='client', template='react', use_typescript=True):
     """Setup a new Vite project using bun."""
     os.chdir(project_dir)
     console.print("Setting up Vite...")
     template_with_ts = f"{template}-ts" if use_typescript else template
     subprocess.run(
-        ["bun", "create", "vite@latest", "client", "--template", template_with_ts],
+        ["bun", "create", "vite@latest", app_name, "--template", template_with_ts],
         check=True
     )
 
     # Install dependencies
-    os.chdir("client")
+    os.chdir(app_name)
     console.print("Running bun install...")
     subprocess.run(["bun", "install"], check=True)
 
@@ -120,7 +118,7 @@ def setup_vite_bun(project_dir, template='react', use_typescript=True):
             "preview": "bun run preview"
         }
     }
-    update_package_json(project_dir, updates)
+    update_package_json(project_dir, updates, subdir=app_name)
 
     #Types
     subprocess.run(

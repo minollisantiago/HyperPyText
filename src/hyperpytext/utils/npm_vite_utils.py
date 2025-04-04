@@ -96,7 +96,7 @@ def remove_default_styles(project_dir):
         os.remove(index_css_path)
         console.print("✔ Removed default index.css file.")
 
-def setup_vite_npm(project_dir, template='react', use_typescript=True):
+def setup_vite_npm(project_dir, app_name = 'client', template='react', use_typescript=True):
     """Setup a new Vite project using npm."""
     os.chdir(project_dir)
     npm_ = "npm.cmd" if check_system() == "windows" else "npm"
@@ -104,12 +104,12 @@ def setup_vite_npm(project_dir, template='react', use_typescript=True):
         console.print("Setting up Vite...")
         template_with_ts = f"{template}-ts" if use_typescript else template
         subprocess.run(
-            [npm_, "create", "vite@latest", "client", "--", "--template", template_with_ts],
+            [npm_, "create", "vite@latest", app_name, "--", "--template", template_with_ts],
             check=True
         )
 
         # Install dependencies
-        os.chdir("client")
+        os.chdir(app_name)
         console.print("Running npm install...")
         subprocess.run([npm_, "install"], check=True)
 
@@ -121,7 +121,7 @@ def setup_vite_npm(project_dir, template='react', use_typescript=True):
                 'preview': 'vite preview'
             }
         }
-        update_package_json(project_dir, updates)
+        update_package_json(project_dir, updates, subdir=app_name)
         configure_vite(project_dir)
         remove_default_styles(project_dir)
 
